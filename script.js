@@ -4,6 +4,8 @@
     const elements = {};
     const controls = {};
 
+    let currentLoadedPoints = '';
+
     fabric.Canvas.prototype.orderObjects = function (compare) {
         this._objects.sort(compare);
         this.renderAll();
@@ -165,6 +167,13 @@
                 repeat: 'repeat'
             }, controls.fabricCanvas.renderAll.bind(controls.fabricCanvas))
 
+            const eCanvas = document.createElement("canvas");
+            controls.exportCanvas = new fabric.Canvas(eCanvas, {
+                scale: 1,
+                width: 1920,
+                height: 1920
+            })
+
             elements.sectorA = new fabric.Rect({
                 zIndex: 4,
                 opacity: 0.20,
@@ -174,6 +183,7 @@
                 visible: false
             });
             controls.fabricCanvas.add(elements.sectorA);
+            controls.exportCanvas.add(elements.sectorA);
             elements.sectorB = new fabric.Rect({
                 zIndex: 4,
                 opacity: 0.20,
@@ -183,25 +193,18 @@
                 visible: false
             });
             controls.fabricCanvas.add(elements.sectorB);
-
-            // const exampleGarrison = new fabric.Circle({
-            //     radius: 190,
-            //     fill: '#2dff00',
-            //     opacity: 0.25,
-            //     hasBorders: false,
-            //     hasControls: false,
-            //     hasRotatingPoint: false,
-            //     zIndex: 10
-            // });
-            // canvas.add(exampleGarrison);
+            controls.exportCanvas.add(elements.sectorB);
 
             fabric.Image.fromURL('', function (img) {
                 elements.map = img;
 
                 img.selectable = false;
                 img.zIndex = 0;
+
                 controls.fabricCanvas.add(img);
                 controls.fabricCanvas.orderByZindex();
+                controls.exportCanvas.add(img);
+                controls.exportCanvas.orderByZindex();
             });
             fabric.Image.fromURL('./maps/plain-grid.png', function (img) {
                 elements.grid = img;
@@ -210,6 +213,8 @@
                 img.zIndex = 1;
                 controls.fabricCanvas.add(img);
                 controls.fabricCanvas.orderByZindex();
+                controls.exportCanvas.add(img);
+                controls.exportCanvas.orderByZindex();
             });
             elements.strongpoints = [[], [], [], [], []]
             for (let x = 0; x < 5; x++) {
@@ -217,8 +222,11 @@
                     fabric.Image.fromURL('', function (img) {
                         img.selectable = false;
                         img.zIndex = 3;
+
                         controls.fabricCanvas.add(img);
                         controls.fabricCanvas.orderByZindex();
+                        controls.exportCanvas.add(img);
+                        controls.exportCanvas.orderByZindex();
 
                         elements.strongpoints[x].push(img);
                     });
@@ -231,6 +239,8 @@
                 img.visible = $("#dg-visible").is("checked");
                 controls.fabricCanvas.add(img);
                 controls.fabricCanvas.orderByZindex();
+                controls.exportCanvas.add(img);
+                controls.exportCanvas.orderByZindex();
             });
 
             internal.setupPage();
@@ -424,8 +434,20 @@
                 internal.updateStatesAndRender();
             })
 
+            controls.btnSave.click(function () {
+                $('<a>').attr({
+                    href: controls.exportCanvas.toDataURL(),
+                    download: controls.comboMapSelect.val() + "_Custom_MLL.png"
+                })[0].click();
+            });
+
+            let lastRangeVal = controls.sectorRange.val();
             controls.sectorRange.on('input', function () {
-                internal.updateStatesAndRender();
+                if (controls.sectorRange.val() !== lastRangeVal) {
+                    lastRangeVal = controls.sectorRange.val();
+
+                    internal.updateStatesAndRender();
+                }
             })
 
             new ResizeObserver(() => {
@@ -471,13 +493,12 @@
             }
 
             if (controls.checkSectorSwap.is(":checked")) {
-                elements.sectorA.set({fill: '#7AE6EA'});
-                elements.sectorB.set({fill: '#FF9686'});
+                elements.sectorA.set({fill: '#08FFFF'});
+                elements.sectorB.set({fill: '#FF6B43'});
             } else {
-                elements.sectorA.set({fill: '#FF9686'});
-                elements.sectorB.set({fill: '#7AE6EA'});
+                elements.sectorA.set({fill: '#FF6B43'});
+                elements.sectorB.set({fill: '#08FFFF'});
             }
-
 
             for (let x = 0; x < 5; x++) {
                 for (let y = 0; y < 5; y++) {
@@ -489,23 +510,31 @@
                         continue;
                     }
 
-                    const pointData = pointCutoutData[filePrefix]['' + x + y];
-                    if (pointData.visible) {
-                        spObject.setSrc(pointData.dataUrl, internal.render);
-                        spObject.set(pointData.position);
-                    } else {
-                        elements.strongpoints[x][y].visible = false;
+                    if (currentLoadedPoints !== filePrefix) {
+                        const pointData = pointCutoutData[filePrefix]['' + x + y];
+                        if (pointData.visible) {
+                            spObject.setSrc(pointData.dataUrl, internal.render);
+                            spObject.set(pointData.position);
+                        } else {
+                            elements.strongpoints[x][y].visible = false;
+                        }
                     }
                 }
             }
 
+            if (currentLoadedPoints !== filePrefix) {
+                currentLoadedPoints = filePrefix;
+            }
+
             controls.fabricCanvas.renderAll();
+            controls.exportCanvas.renderAll();
         },
 
         render: function () {
             console.log("render()");
 
             controls.fabricCanvas.renderAll();
+            controls.exportCanvas.renderAll();
         }
     }
 
