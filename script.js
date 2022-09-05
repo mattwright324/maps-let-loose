@@ -139,7 +139,7 @@
                 elements.defaultgarries = img;
                 img.selectable = false;
                 img.zIndex = 3;
-                img.visible = false
+                img.visible = $("#dg-visible").is("checked");
                 canvas.add(img);
                 canvas.orderByZindex();
             });
@@ -368,9 +368,6 @@
 
 
             mapSelect.change(function () {
-                elements.map.setSrc('', renderAll);
-                spImage.src = '';
-
                 const filePrefix = mapSelect.val();
                 elements.map.setSrc('./maps/no-grid/' + filePrefix + '_NoGrid.png', renderAll);
                 elements.defaultgarries.setSrc('./maps/defaultgarries/' + filePrefix + '_defaultgarries.png', renderAll)
