@@ -14,7 +14,7 @@
             const spGrid = $("#sp-grid");
             for (let x = 0; x < 5; x++) {
                 for (let y = 0; y < 5; y++) {
-                    spGrid.append(`<div class='sp-toggle sp-toggle-${x}${y}' data-x='${x}' data-y='${y}'></div>`)
+                    spGrid.append(`<div class='sp-toggle sp-toggle-${x}${y} unavailable' data-x='${x}' data-y='${y}'></div>`)
                 }
             }
 
@@ -33,7 +33,7 @@
                 const x = toggle.data("x");
                 const y = toggle.data("y");
 
-                elements.strongpoints[x][y].visible = toggle.hasClass("selected");
+                elements.strongpoints[x][y].visible = $("#sp-visible").is(":checked") && toggle.hasClass("selected");
 
                 renderAll();
             });
@@ -43,7 +43,7 @@
 
                 for (let x = 0; x < 5; x++) {
                     for (let y = 0; y < 5; y++) {
-                        elements.strongpoints[x][y].visible = true
+                        elements.strongpoints[x][y].visible = $("#sp-visible").is(":checked") && true
                     }
                 }
 
@@ -55,7 +55,7 @@
 
                 for (let x = 0; x < 5; x++) {
                     for (let y = 0; y < 5; y++) {
-                        elements.strongpoints[x][y].visible = false
+                        elements.strongpoints[x][y].visible = $("#sp-visible").is(":checked") && false
                     }
                 }
 
@@ -69,7 +69,7 @@
                 scale: 1,
                 moveCursor: 'default',
                 hoverCursor: 'default',
-                viewportTransform: [0.5, 0, 0, 0.5, 0, 0]
+                viewportTransform: [0.40, 0, 0, 0.40, 0, 0]
             });
             canvas.setHeight(800);
             canvas.setBackgroundColor({
@@ -90,7 +90,6 @@
             });
             canvas.on('mouse:move', function (e) {
                 if (panning && e && e.e) {
-                    var units = 10;
                     var delta = new fabric.Point(e.e.movementX, e.e.movementY);
                     canvas.relativePan(delta);
                 }
@@ -100,7 +99,7 @@
                 var delta = opt.e.deltaY;
                 var zoom = canvas.getZoom();
                 zoom *= 0.999 ** delta;
-                if (zoom > 20) zoom = 20;
+                if (zoom > 10) zoom = 10;
                 if (zoom < 0.01) zoom = 0.01;
                 canvas.zoomToPoint({x: opt.e.offsetX, y: opt.e.offsetY}, zoom);
                 opt.e.preventDefault();
@@ -136,6 +135,14 @@
                     });
                 }
             }
+            fabric.Image.fromURL('', function (img) {
+                elements.defaultgarries = img;
+                img.selectable = false;
+                img.zIndex = 3;
+                img.visible = false
+                canvas.add(img);
+                canvas.orderByZindex();
+            });
 
             const spImage = new Image();
             spImage.onload = cutImageUp;
@@ -157,7 +164,7 @@
                 Carentan: [
                     [null, null, null, null, null],
                     [[[238, 467, 189, 167]], [[498, 561, 235, 168]], [[909, 467, 219, 170]], [[1227, 516, 255, 170]], [[1482, 593, 252, 170]]],
-                    [[[206, 889, 185, 171]], [[665, 890, 111, 128]], [[862, 837, 220, 170]], [[1296, 784, 188, 172]], [[1581, 901, 221, 171]]],
+                    [[[206, 889, 185, 171]], [[653, 890, 111, 128]], [[862, 837, 220, 170]], [[1296, 784, 188, 172]], [[1581, 901, 221, 171]]],
                     [[[213, 1207, 172, 171]], [[449, 1124, 268, 170]], [[878, 1111, 169, 171]], [[1166, 1349, 251, 152]], [[1511, 1214, 263, 172]]],
                     [null, null, null, null, null]
                 ],
@@ -205,37 +212,37 @@
                 ],
                 Remagen: [
                     [null, [[449, 183, 252, 156]], [[818, 184, 254, 157]], [[1245, 186, 234, 163]], null],
-                    [null, [[]], [[]], [[]], null],
-                    [null, [[]], [[]], [[]], null],
-                    [null, [[]], [[]], [[]], null],
-                    [null, [[]], [[]], [[]], null],
+                    [null, [[477, 454, 219, 157]], [[928, 440, 250, 155]], [[1201, 454, 260, 160]], null],
+                    [null, [[457, 722, 268, 154]], [[884, 801, 203, 237]], [[1200, 990, 268, 164]], null],
+                    [null, [[510, 1218, 213, 156]], [[842, 1223, 227, 178]], [[1213, 1208, 237, 161]], null],
+                    [null, [[429, 1603, 270, 158]], [[881, 1527, 213, 158]], [[1192, 1501, 252, 155]], null],
                 ],
                 SMDMV2: [
-                    [null, [[]], [[]], [[]], null],
-                    [null, [[]], [[]], [[]], null],
-                    [null, [[]], [[]], [[]], null],
-                    [null, [[]], [[]], [[]], null],
-                    [null, [[]], [[]], [[]], null],
+                    [null, [[433, 80, 307, 192]], [[815, 109, 256, 166]], [[1313, 119, 149, 196]], null],
+                    [null, [[469, 453, 234, 191]], [[880, 438, 220, 187]], [[1170, 452, 264, 194]], null],
+                    [null, [[514, 828, 185, 195]], [[888, 850, 174, 205]], [[1215, 851, 206, 179]], null],
+                    [null, [[504, 1198, 199, 194]], [[863, 1260, 171, 164]], [[1281, 1317, 251, 194]], null],
+                    [null, [[538, 1501, 190, 182]], [[888, 1580, 145, 173]], [[1229, 1594, 217, 170]], null],
                 ],
                 SME: [
                     [null, null, null, null, null],
-                    [[[]], [[]], [[]], [[]], [[]]],
-                    [[[]], [[]], [[]], [[]], [[]]],
-                    [[[]], [[]], [[]], [[]], [[]]],
+                    [[[187, 473, 188, 131]], [[450, 502, 238, 130]], [[876, 423, 147, 129]], [[1211, 535, 256, 132]], [[1507, 590, 257, 130]]],
+                    [[[259, 836, 187, 120]], [[461, 739, 270, 131]], [[907, 795, 222, 139]], [[1143, 933, 188, 124]], [[1572, 829, 173, 122]]],
+                    [[[226, 1203, 172, 139]], [[489, 1280, 269, 128]], [[882, 1192, 171, 126]], [[1086, 1159, 250, 141]], [[1527, 1242, 262, 136]]],
                     [null, null, null, null, null],
                 ],
                 Stalingrad: [
                     [null, null, null, null, null],
-                    [[[]], [[]], [[]], [[]], [[]]],
-                    [[[]], [[]], [[]], [[]], [[]]],
-                    [[[]], [[]], [[]], [[]], [[]]],
+                    [[[175, 360, 308, 194]], [[517, 317, 251, 168]], [[822, 433, 244, 173]], [[1110, 415, 305, 171]], [[1507, 498, 219, 174]]],
+                    [[[182, 919, 263, 215]], [[469, 852, 188, 193]], [[908, 816, 221, 213]], [[1349, 830, 187, 164]], [[1547, 831, 179, 158]]],
+                    [[[227, 1296, 177, 215]], [[432, 1216, 250, 214]], [[847, 1148, 191, 210]], [[1290, 1258, 165, 161]], [[1522, 1253, 219, 176]]],
                     [null, null, null, null, null],
                 ],
                 Utah: [
                     [null, null, null, null, null],
-                    [[[]], [[]], [[]], [[]], [[]]],
-                    [[[]], [[]], [[]], [[]], [[]]],
-                    [[[]], [[]], [[]], [[]], [[]]],
+                    [[[234, 368, 187, 124]], [[547, 399, 234, 124]], [[934, 446, 150, 148]], [[1179, 433, 258, 152]], [[1517, 425, 127, 117]]],
+                    [[[221, 833, 188, 128]], [[547, 870, 269, 127]], [[957, 794, 219, 119]], [[1211, 851, 189, 122]], [[1499, 903, 176, 119]]],
+                    [[[186, 1378, 290, 123]], [[487, 1253, 270, 155]], [[877, 1335, 170, 155]], [[1362, 1295, 140, 120]], [[1512, 1300, 189, 124]]],
                     [null, null, null, null, null],
                 ],
             }
@@ -366,6 +373,7 @@
 
                 const filePrefix = mapSelect.val();
                 elements.map.setSrc('./maps/no-grid/' + filePrefix + '_NoGrid.png', renderAll);
+                elements.defaultgarries.setSrc('./maps/defaultgarries/' + filePrefix + '_defaultgarries.png', renderAll)
                 spImage.src = './maps/points/' + filePrefix + '_SP_NoMap2.png';
             });
             mapSelect.trigger('change');
@@ -380,9 +388,15 @@
             spVisible.change(function () {
                 for (let x = 0; x < rowCol; x++) {
                     for (let y = 0; y < rowCol; y++) {
-                        elements.strongpoints[x][y].visible = spVisible.is(":checked");
+                        elements.strongpoints[x][y].visible = spVisible.is(":checked") && $(".sp-toggle-" + x + y).hasClass("selected");
                     }
                 }
+                renderAll();
+            })
+
+            const dgVisible = $("#dg-visible");
+            dgVisible.change(function () {
+                elements.defaultgarries.visible = dgVisible.is(":checked");
                 renderAll();
             })
 
