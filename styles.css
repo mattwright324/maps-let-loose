@@ -1,0 +1,85 @@
+body {
+    background-repeat: repeat;
+    font-weight: 350 !important;
+}
+
+a[href] {
+    text-decoration: none;
+}
+
+#canvas-container {
+    width: 100% !important;
+    resize: vertical !important;
+    overflow: auto !important;
+}
+
+canvas {
+    cursor: grab !important;
+    /*border: 2px rgba(127,127,127,0.25) dashed;*/
+    border-radius: 5px;
+}
+
+#sp-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 40px);
+    grid-template-rows: repeat(5, 40px);
+    column-gap: 5px;
+    row-gap: 5px;
+}
+
+.sp-toggle {
+    background: rgba(127, 127, 127, 0.5);
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.sp-toggle.selected {
+    background: rgba(0, 255, 0, 0.5);
+}
+
+.sp-toggle.unavailable {
+    background: repeating-linear-gradient(
+            -45deg,
+            transparent,
+            transparent 5px,
+            rgba(127, 127, 127, 0.5) 5px,
+            rgba(127, 127, 127, 0.5) 10px
+    );;
+    user-input: none;
+    cursor: default;
+}
+
+ul {
+    line-height: 20px;
+}
+
+.navbar-brand {
+    font-size: 1.75rem!important;
+}
+
+.navbar {
+    font-size: 1.5rem!important;
+}
+
+.navbar-brand img {
+    width: 40px !important;
+    height: 40px !important;
+}
+
+/* Dark mode tweaks */
+html.dark .tag {
+    background-color: royalblue;
+}
+
+html.dark .btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+html.dark a {
+    color: lightskyblue;
+}
+
+html.dark .progress-bar {
+    color: #fff;
+}
