@@ -4,6 +4,8 @@
     const elements = {};
     const controls = {};
 
+    let currentLoadedPoints = '';
+
     fabric.Canvas.prototype.orderObjects = function (compare) {
         this._objects.sort(compare);
         this.renderAll();
@@ -183,17 +185,6 @@
                 visible: false
             });
             controls.fabricCanvas.add(elements.sectorB);
-
-            // const exampleGarrison = new fabric.Circle({
-            //     radius: 190,
-            //     fill: '#2dff00',
-            //     opacity: 0.25,
-            //     hasBorders: false,
-            //     hasControls: false,
-            //     hasRotatingPoint: false,
-            //     zIndex: 10
-            // });
-            // canvas.add(exampleGarrison);
 
             fabric.Image.fromURL('', function (img) {
                 elements.map = img;
@@ -424,8 +415,13 @@
                 internal.updateStatesAndRender();
             })
 
+            let lastRangeVal = controls.sectorRange.val();
             controls.sectorRange.on('input', function () {
-                internal.updateStatesAndRender();
+                if (controls.sectorRange.val() !== lastRangeVal) {
+                    lastRangeVal = controls.sectorRange.val();
+
+                    internal.updateStatesAndRender();
+                }
             })
 
             new ResizeObserver(() => {
@@ -471,32 +467,35 @@
             }
 
             if (controls.checkSectorSwap.is(":checked")) {
-                elements.sectorA.set({fill: '#7AE6EA'});
-                elements.sectorB.set({fill: '#FF9686'});
+                elements.sectorA.set({fill: '#08FFFF'});
+                elements.sectorB.set({fill: '#FF6B43'});
             } else {
-                elements.sectorA.set({fill: '#FF9686'});
-                elements.sectorB.set({fill: '#7AE6EA'});
+                elements.sectorA.set({fill: '#FF6B43'});
+                elements.sectorB.set({fill: '#08FFFF'});
             }
 
+            if (currentLoadedPoints !== filePrefix) {
+                for (let x = 0; x < 5; x++) {
+                    for (let y = 0; y < 5; y++) {
+                        const spObject = elements.strongpoints[x][y];
 
-            for (let x = 0; x < 5; x++) {
-                for (let y = 0; y < 5; y++) {
-                    const spObject = elements.strongpoints[x][y];
+                        spObject.visible = controls.checkStrongpoints.is(":checked") && $(".sp-toggle-" + x + y).hasClass("selected");
 
-                    spObject.visible = controls.checkStrongpoints.is(":checked") && $(".sp-toggle-" + x + y).hasClass("selected");
+                        if (!pointCutoutData.hasOwnProperty(filePrefix)) {
+                            continue;
+                        }
 
-                    if (!pointCutoutData.hasOwnProperty(filePrefix)) {
-                        continue;
-                    }
-
-                    const pointData = pointCutoutData[filePrefix]['' + x + y];
-                    if (pointData.visible) {
-                        spObject.setSrc(pointData.dataUrl, internal.render);
-                        spObject.set(pointData.position);
-                    } else {
-                        elements.strongpoints[x][y].visible = false;
+                        const pointData = pointCutoutData[filePrefix]['' + x + y];
+                        if (pointData.visible) {
+                            spObject.setSrc(pointData.dataUrl, internal.render);
+                            spObject.set(pointData.position);
+                        } else {
+                            elements.strongpoints[x][y].visible = false;
+                        }
                     }
                 }
+
+                currentLoadedPoints = filePrefix;
             }
 
             controls.fabricCanvas.renderAll();
