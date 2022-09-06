@@ -5,6 +5,7 @@
     const controls = {};
 
     let currentLoadedPoints = '';
+    const garrisons = [];
 
     fabric.Canvas.prototype.orderObjects = function (compare) {
         this._objects.sort(compare);
@@ -142,9 +143,13 @@
         init: function () {
             controls.comboMapSelect = $("#map-select");
             controls.checkGrid = $("#grid-visible");
+            controls.checkArty = $("#arty-visible");
+            controls.checkArtyFlip = $("#flip-arty");
             controls.checkStrongpoints = $("#sp-visible");
             elements.strongpointGrid = $("#sp-grid");
             controls.checkDefaultGarries = $("#dg-visible");
+            controls.checkPlacedGarries = $("#garry-visible");
+            controls.btnRemoveGarries = $("#removePlacedGarrisons")
             controls.btnEnableAll = $("#enableAll");
             controls.btnDisableAll = $("#disableAll");
             controls.btnSave = $("#save");
@@ -156,6 +161,10 @@
 
             controls.fabricCanvas = new fabric.Canvas(elements.canvas.get(0), {
                 selection: false,
+                fireRightClick: true,
+                stopContextMenu: true,
+                preserveObjectStacking: true,
+                perPixelTargetFind: true,
                 scale: 1,
                 moveCursor: 'default',
                 hoverCursor: 'default',
@@ -211,6 +220,17 @@
 
                 img.selectable = false;
                 img.zIndex = 1;
+                controls.fabricCanvas.add(img);
+                controls.fabricCanvas.orderByZindex();
+                controls.exportCanvas.add(img);
+                controls.exportCanvas.orderByZindex();
+            });
+            fabric.Image.fromURL('', function (img) {
+                elements.arty = img;
+
+                img.selectable = false;
+                img.visible = false;
+                img.zIndex = 4;
                 controls.fabricCanvas.add(img);
                 controls.fabricCanvas.orderByZindex();
                 controls.exportCanvas.add(img);
@@ -297,6 +317,47 @@
                     controls.fabricCanvas.relativePan(delta);
                 }
             });
+            // Look into https://stackoverflow.com/a/45131912/2650847
+
+            controls.fabricCanvas.on('mouse:dblclick', function (e) {
+                console.log(e);
+
+                if (e.target && e.target.width === 380 && e.target.height === 380) {
+                    // TODO: Not working
+                    controls.fabricCanvas.remove(e.target)
+                    controls.fabricCanvas.orderByZindex();
+                    controls.exportCanvas.remove(e.target)
+                    controls.exportCanvas.orderByZindex();
+                } else {
+                    fabric.Image.fromURL('./maps/garry radius.png', function (img) {
+                        img.selectable = false;
+                        img.zIndex = 100;
+                        img.top = e.absolutePointer.y - 380/2;
+                        img.left = e.absolutePointer.x - 380/2;
+                        img.width = 380;
+                        img.height = 380;
+
+                        garrisons.push(img);
+
+                        controls.fabricCanvas.add(img);
+                        controls.fabricCanvas.orderByZindex();
+                        controls.exportCanvas.add(img);
+                        controls.exportCanvas.orderByZindex();
+                    });
+                }
+            });
+
+            controls.btnRemoveGarries.on('click', function () {
+                console.log('Remove all garries')
+                for (let i = 0; i < garrisons.length; i++) {
+                    const garry = garrisons[i];
+
+                    controls.fabricCanvas.remove(garry)
+                    controls.fabricCanvas.orderByZindex();
+                    controls.exportCanvas.remove(garry)
+                    controls.exportCanvas.orderByZindex();
+                }
+            })
 
             controls.fabricCanvas.on('mouse:wheel', function (opt) {
                 var delta = opt.e.deltaY;
@@ -410,11 +471,17 @@
 
                 elements.map.setSrc('./maps/no-grid/' + filePrefix + '_NoGrid.png', internal.render);
                 elements.defaultgarries.setSrc('./maps/defaultgarries/' + filePrefix + '_defaultgarries.png', internal.render)
+                let artySuffix = controls.checkArtyFlip.is(":checked") ? 2 : 1;
+                elements.arty.setSrc('./maps/arty/' + filePrefix + '_Arty' + artySuffix + '.png', internal.render)
                 spImage.src = './maps/points/' + filePrefix + '_SP_NoMap2.png';
             });
             controls.comboMapSelect.trigger('change');
 
             controls.checkGrid.change(function () {
+                internal.updateStatesAndRender();
+            })
+
+            controls.checkArty.change(function () {
                 internal.updateStatesAndRender();
             })
 
@@ -432,6 +499,18 @@
 
             controls.checkSectorSwap.change(function () {
                 internal.updateStatesAndRender();
+            })
+
+            controls.checkPlacedGarries.change(function () {
+                internal.updateStatesAndRender();
+            })
+
+            controls.checkArtyFlip.change(function () {
+                const filePrefix = controls.comboMapSelect.val();
+                let artySuffix = controls.checkArtyFlip.is(":checked") ? 2 : 1;
+                elements.arty.setSrc('./maps/arty/' + filePrefix + '_Arty' + artySuffix + '.png', internal.render);
+
+                internal.render();
             })
 
             controls.btnSave.click(function () {
@@ -466,6 +545,12 @@
             }
             if (elements.defaultgarries) {
                 elements.defaultgarries.visible = controls.checkDefaultGarries.is(":checked");
+            }
+            if (elements.arty) {
+                elements.arty.visible = controls.checkArty.is(":checked");
+            }
+            for (let i = 0; i < garrisons.length; i++) {
+                garrisons[i].visible = controls.checkPlacedGarries.is(":checked");
             }
 
             const mapVertical = pointCoords[filePrefix][0][1] != null;

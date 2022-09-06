@@ -37,6 +37,10 @@ canvas {
     background: rgba(0, 255, 0, 0.5);
 }
 
+label a {
+    line-height: 16px !important;
+}
+
 .sp-toggle.unavailable {
     background: repeating-linear-gradient(
             -45deg,
