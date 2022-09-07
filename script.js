@@ -5,7 +5,7 @@
     const controls = {};
 
     let currentLoadedPoints = '';
-    const garrisons = [];
+    let garrisons = [];
 
     fabric.Canvas.prototype.orderObjects = function (compare) {
         this._objects.sort(compare);
@@ -322,35 +322,28 @@
             controls.fabricCanvas.on('mouse:dblclick', function (e) {
                 console.log(e);
 
-                if (e.target && e.target.width === 380 && e.target.height === 380) {
-                    // TODO: Not working
-                    controls.fabricCanvas.remove(e.target)
+                fabric.Image.fromURL('./maps/garry radius.png', function (img) {
+                    img.selectable = false;
+                    img.zIndex = 7;
+                    img.top = e.absolutePointer.y - 380/2;
+                    img.left = e.absolutePointer.x - 380/2;
+                    img.width = 380;
+                    img.height = 380;
+
+                    garrisons.push(img);
+
+                    controls.fabricCanvas.add(img);
                     controls.fabricCanvas.orderByZindex();
-                    controls.exportCanvas.remove(e.target)
+                    controls.exportCanvas.add(img);
                     controls.exportCanvas.orderByZindex();
-                } else {
-                    fabric.Image.fromURL('./maps/garry radius.png', function (img) {
-                        img.selectable = false;
-                        img.zIndex = 100;
-                        img.top = e.absolutePointer.y - 380/2;
-                        img.left = e.absolutePointer.x - 380/2;
-                        img.width = 380;
-                        img.height = 380;
-
-                        garrisons.push(img);
-
-                        controls.fabricCanvas.add(img);
-                        controls.fabricCanvas.orderByZindex();
-                        controls.exportCanvas.add(img);
-                        controls.exportCanvas.orderByZindex();
-                    });
-                }
+                });
             });
 
             controls.btnRemoveGarries.on('click', function () {
                 console.log('Remove all garries')
-                for (let i = 0; i < garrisons.length; i++) {
-                    const garry = garrisons[i];
+
+                while (garrisons.length > 0) {
+                    const garry = garrisons.pop();
 
                     controls.fabricCanvas.remove(garry)
                     controls.fabricCanvas.orderByZindex();
