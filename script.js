@@ -150,6 +150,7 @@
             controls.checkDefaultGarries = $("#dg-visible");
             controls.checkPlacedGarries = $("#garry-visible");
             controls.btnRemoveGarries = $("#removePlacedGarrisons")
+            controls.btnUndoLastGarry = $("#undoLastGarrison");
             controls.btnEnableAll = $("#enableAll");
             controls.btnDisableAll = $("#disableAll");
             controls.btnSave = $("#save");
@@ -345,6 +346,19 @@
                 while (garrisons.length > 0) {
                     const garry = garrisons.pop();
 
+                    controls.fabricCanvas.remove(garry)
+                    controls.fabricCanvas.orderByZindex();
+                    controls.exportCanvas.remove(garry)
+                    controls.exportCanvas.orderByZindex();
+                }
+            })
+
+            controls.btnUndoLastGarry.on('click', function () {
+                console.log('Undo last garry')
+
+                const garry = garrisons.pop();
+
+                if (garry) {
                     controls.fabricCanvas.remove(garry)
                     controls.fabricCanvas.orderByZindex();
                     controls.exportCanvas.remove(garry)

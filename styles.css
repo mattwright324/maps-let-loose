@@ -38,7 +38,8 @@ canvas {
 }
 
 label a {
-    line-height: 16px !important;
+    margin-left: 3px;
+    padding-left: 3px;
 }
 
 .sp-toggle.unavailable {
