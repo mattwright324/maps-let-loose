@@ -347,10 +347,11 @@
                     const garry = garrisons.pop();
 
                     controls.fabricCanvas.remove(garry)
-                    controls.fabricCanvas.orderByZindex();
                     controls.exportCanvas.remove(garry)
-                    controls.exportCanvas.orderByZindex();
                 }
+
+                controls.fabricCanvas.orderByZindex();
+                controls.exportCanvas.orderByZindex();
             })
 
             controls.btnUndoLastGarry.on('click', function () {
