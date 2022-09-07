@@ -347,10 +347,11 @@
                     const garry = garrisons.pop();
 
                     controls.fabricCanvas.remove(garry)
-                    controls.fabricCanvas.orderByZindex();
                     controls.exportCanvas.remove(garry)
-                    controls.exportCanvas.orderByZindex();
                 }
+
+                controls.fabricCanvas.orderByZindex();
+                controls.exportCanvas.orderByZindex();
             })
 
             controls.btnUndoLastGarry.on('click', function () {
@@ -592,6 +593,7 @@
                 elements.sectorB.set({fill: '#08FFFF'});
             }
 
+            const pointPromises = [];
             for (let x = 0; x < 5; x++) {
                 for (let y = 0; y < 5; y++) {
                     const spObject = elements.strongpoints[x][y];
@@ -605,7 +607,9 @@
                     if (currentLoadedPoints !== filePrefix) {
                         const pointData = pointCutoutData[filePrefix]['' + x + y];
                         if (pointData.visible) {
-                            spObject.setSrc(pointData.dataUrl, internal.render);
+                            pointPromises.push(new Promise(function (resolve) {
+                                spObject.setSrc(pointData.dataUrl, resolve);
+                            }))
                             spObject.set(pointData.position);
                         } else {
                             elements.strongpoints[x][y].visible = false;
@@ -620,6 +624,8 @@
 
             controls.fabricCanvas.renderAll();
             controls.exportCanvas.renderAll();
+
+            Promise.all(pointPromises).then(internal.render);
         },
 
         render: function () {
@@ -627,6 +633,14 @@
 
             controls.fabricCanvas.renderAll();
             controls.exportCanvas.renderAll();
+        },
+
+        pointRender: function () {
+            pointRender++;
+
+            if (pointRender >= 15) {
+                internal.render();
+            }
         }
     }
 
