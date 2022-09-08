@@ -168,7 +168,8 @@
             elements.strongpointGrid = $("#sp-grid");
             controls.checkDefaultGarries = $("#dg-visible");
             controls.checkPlacedGarries = $("#garry-visible");
-            controls.btnRemoveGarries = $("#removePlacedGarrisons")
+            controls.checkGarryRadius = $("#garry-radius-visible");
+            controls.btnRemoveGarries = $("#removePlacedGarrisons");
             controls.btnUndoLastGarry = $("#undoLastGarrison");
             controls.btnEnableAll = $("#enableAll");
             controls.btnDisableAll = $("#disableAll");
@@ -342,7 +343,7 @@
             controls.fabricCanvas.on('mouse:dblclick', function (e) {
                 console.log(e);
 
-                fabric.Image.fromURL('./maps/garry-blue-zone.png', function (img) {
+                fabric.Image.fromURL('./maps/garry-plain.png', function (img) {
                     img.selectable = false;
                     img.zIndex = zIndex.garrisons;
                     img.top = e.absolutePointer.y - 380 / 2;
@@ -506,32 +507,12 @@
             });
             controls.comboMapSelect.trigger('change');
 
-            controls.checkGrid.change(function () {
-                internal.updateStatesAndRender();
-            })
-
-            controls.checkArty.change(function () {
-                internal.updateStatesAndRender();
-            })
-
-            controls.checkStrongpoints.change(function () {
-                internal.updateStatesAndRender();
-            })
-
-            controls.checkDefaultGarries.change(function () {
-                internal.updateStatesAndRender();
-            })
-
-            controls.checkSectors.change(function () {
-                internal.updateStatesAndRender();
-            })
-
-            controls.checkSectorSwap.change(function () {
-                internal.updateStatesAndRender();
-            })
-
-            controls.checkPlacedGarries.change(function () {
-                internal.updateStatesAndRender();
+            [controls.checkGrid, controls.checkArty, controls.checkStrongpoints, controls.checkDefaultGarries,
+                controls.checkSectors, controls.checkSectorSwap, controls.checkPlacedGarries, controls.checkGarryRadius
+            ].forEach(function (control) {
+                control.change(function () {
+                    internal.updateStatesAndRender()
+                });
             })
 
             controls.checkArtyFlip.change(function () {
@@ -620,12 +601,15 @@
             }
 
             const sectorsVisible = controls.checkSectors.is(":checked");
+            const radiusHidden = controls.checkGarryRadius.is(":checked");
             for (let i = 0; i < garrisons.length; i++) {
                 const garry = garrisons[i];
                 const garryX = garry.left + garry.width / 2;
                 const garryY = garry.top + garry.height / 2;
                 promises.push(new Promise(function (resolve) {
-                    if (sectorsVisible &&
+                    if (radiusHidden) {
+                        garry.setSrc('./maps/garry-plain.png', resolve);
+                    } else if (sectorsVisible &&
                         (!sectorBred && rectContainsPoint(elements.sectorA, garryX, garryY) ||
                             sectorBred && rectContainsPoint(elements.sectorB, garryX, garryY))) {
                         garry.setSrc('./maps/garry-red-zone.png', resolve);
