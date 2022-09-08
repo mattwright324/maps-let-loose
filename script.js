@@ -7,6 +7,16 @@
     let currentLoadedPoints = '';
     let garrisons = [];
 
+    const zIndex = {
+        map: 0,
+        grid: 1,
+        points: 2,
+        sectors: 3,
+        arty_range: 5,
+        default_garrisons: 6,
+        garrisons: 7,
+    }
+
     fabric.Canvas.prototype.orderObjects = function (compare) {
         this._objects.sort(compare);
         this.renderAll();
@@ -194,7 +204,7 @@
             })
 
             elements.sectorA = new fabric.Rect({
-                zIndex: 4,
+                zIndex: zIndex.sectors,
                 opacity: 0.20,
                 hasBorders: false,
                 hasControls: false,
@@ -204,7 +214,7 @@
             controls.fabricCanvas.add(elements.sectorA);
             controls.exportCanvas.add(elements.sectorA);
             elements.sectorB = new fabric.Rect({
-                zIndex: 4,
+                zIndex: zIndex.sectors,
                 opacity: 0.20,
                 hasBorders: false,
                 hasControls: false,
@@ -218,7 +228,7 @@
                 elements.map = img;
 
                 img.selectable = false;
-                img.zIndex = 0;
+                img.zIndex = zIndex.map;
 
                 controls.fabricCanvas.add(img);
                 controls.fabricCanvas.orderByZindex();
@@ -229,7 +239,7 @@
                 elements.grid = img;
 
                 img.selectable = false;
-                img.zIndex = 1;
+                img.zIndex = zIndex.grid;
                 controls.fabricCanvas.add(img);
                 controls.fabricCanvas.orderByZindex();
                 controls.exportCanvas.add(img);
@@ -240,7 +250,7 @@
 
                 img.selectable = false;
                 img.visible = false;
-                img.zIndex = 4;
+                img.zIndex = zIndex.arty_range;
                 controls.fabricCanvas.add(img);
                 controls.fabricCanvas.orderByZindex();
                 controls.exportCanvas.add(img);
@@ -251,7 +261,7 @@
                 for (let y = 0; y < 5; y++) {
                     fabric.Image.fromURL('', function (img) {
                         img.selectable = false;
-                        img.zIndex = 3;
+                        img.zIndex = zIndex.points;
 
                         controls.fabricCanvas.add(img);
                         controls.fabricCanvas.orderByZindex();
@@ -265,7 +275,7 @@
             fabric.Image.fromURL('', function (img) {
                 elements.defaultgarries = img;
                 img.selectable = false;
-                img.zIndex = 5;
+                img.zIndex = zIndex.default_garrisons;
                 img.visible = $("#dg-visible").is("checked");
                 controls.fabricCanvas.add(img);
                 controls.fabricCanvas.orderByZindex();
@@ -332,9 +342,9 @@
             controls.fabricCanvas.on('mouse:dblclick', function (e) {
                 console.log(e);
 
-                fabric.Image.fromURL('./maps/garry radius.png', function (img) {
+                fabric.Image.fromURL('./maps/garry-blue-zone.png', function (img) {
                     img.selectable = false;
-                    img.zIndex = 7;
+                    img.zIndex = zIndex.garrisons;
                     img.top = e.absolutePointer.y - 380 / 2;
                     img.left = e.absolutePointer.x - 380 / 2;
                     img.width = 380;
