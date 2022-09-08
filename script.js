@@ -137,7 +137,16 @@
             a: {top: 383, left: 0, width: 1920, height: 1151, visible: true},
             b: {top: 383, left: 0, width: 0, height: 0, visible: false}
         }
-    ]
+    ];
+
+    function rectContainsPoint(rect, x, y) {
+        const rx = rect.left;
+        const ry = rect.top;
+        const rx2 = rect.left + rect.width;
+        const ry2 = rect.top + rect.height;
+
+        return rx <= x && rx2 >= x && ry <= y && ry2 >= y;
+    }
 
     const internal = {
         init: function () {
@@ -326,8 +335,8 @@
                 fabric.Image.fromURL('./maps/garry radius.png', function (img) {
                     img.selectable = false;
                     img.zIndex = 7;
-                    img.top = e.absolutePointer.y - 380/2;
-                    img.left = e.absolutePointer.x - 380/2;
+                    img.top = e.absolutePointer.y - 380 / 2;
+                    img.left = e.absolutePointer.x - 380 / 2;
                     img.width = 380;
                     img.height = 380;
 
@@ -337,6 +346,8 @@
                     controls.fabricCanvas.orderByZindex();
                     controls.exportCanvas.add(img);
                     controls.exportCanvas.orderByZindex();
+
+                    internal.updateStatesAndRender();
                 });
             });
 
@@ -545,8 +556,9 @@
 
         // Update fabricjs element states and re-render
         updateStatesAndRender: function () {
-            console.log("updateStatesAndRender()")
+            console.log("updateStatesAndRender()");
             const filePrefix = controls.comboMapSelect.val();
+            const promises = [];
 
             if (elements.grid) {
                 elements.grid.visible = controls.checkGrid.is(":checked");
@@ -585,15 +597,40 @@
                 elements.sectorB.visible = false;
             }
 
-            if (controls.checkSectorSwap.is(":checked")) {
-                elements.sectorA.set({fill: '#08FFFF'});
-                elements.sectorB.set({fill: '#FF6B43'});
+            const sectorRed = '#FF6B43';
+            const sectorBlue = '#08FFFF';
+
+            const sectorBred = controls.checkSectorSwap.is(":checked");
+            if (sectorBred) {
+                elements.sectorA.set({fill: sectorBlue});
+                elements.sectorB.set({fill: sectorRed});
             } else {
-                elements.sectorA.set({fill: '#FF6B43'});
-                elements.sectorB.set({fill: '#08FFFF'});
+                elements.sectorA.set({fill: sectorRed});
+                elements.sectorB.set({fill: sectorBlue});
             }
 
-            const pointPromises = [];
+            const sectorsVisible = controls.checkSectors.is(":checked");
+            for (let i = 0; i < garrisons.length; i++) {
+                const garry = garrisons[i];
+                const garryX = garry.left + garry.width / 2;
+                const garryY = garry.top + garry.height / 2;
+                promises.push(new Promise(function (resolve) {
+                    if (sectorsVisible &&
+                        (!sectorBred && rectContainsPoint(elements.sectorA, garryX, garryY) ||
+                            sectorBred && rectContainsPoint(elements.sectorB, garryX, garryY))) {
+                        garry.setSrc('./maps/garry-red-zone.png', resolve);
+                    } else if (sectorsVisible &&
+                        (sectorBred && rectContainsPoint(elements.sectorA, garryX, garryY) ||
+                            !sectorBred && rectContainsPoint(elements.sectorB, garryX, garryY))) {
+                        garry.setSrc('./maps/garry-blue-zone.png', resolve);
+                    } else if (sectorsVisible) {
+                        garry.setSrc('./maps/garry-invalid.png', resolve);
+                    } else {
+                        garry.setSrc('./maps/garry-blue-zone.png', resolve);
+                    }
+                }));
+            }
+
             for (let x = 0; x < 5; x++) {
                 for (let y = 0; y < 5; y++) {
                     const spObject = elements.strongpoints[x][y];
@@ -607,7 +644,7 @@
                     if (currentLoadedPoints !== filePrefix) {
                         const pointData = pointCutoutData[filePrefix]['' + x + y];
                         if (pointData.visible) {
-                            pointPromises.push(new Promise(function (resolve) {
+                            promises.push(new Promise(function (resolve) {
                                 spObject.setSrc(pointData.dataUrl, resolve);
                             }))
                             spObject.set(pointData.position);
@@ -622,10 +659,12 @@
                 currentLoadedPoints = filePrefix;
             }
 
-            controls.fabricCanvas.renderAll();
-            controls.exportCanvas.renderAll();
-
-            Promise.all(pointPromises).then(internal.render);
+            if (promises.length) {
+                Promise.all(promises).then(internal.render);
+            } else {
+                controls.fabricCanvas.renderAll();
+                controls.exportCanvas.renderAll();
+            }
         },
 
         render: function () {
