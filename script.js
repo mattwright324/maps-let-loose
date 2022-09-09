@@ -17,6 +17,12 @@
         garrisons: 7,
     }
 
+    function fixGarrySelectBox() {
+        const sel = new fabric.ActiveSelection(garrisons, { canvas: controls.fabricCanvas });
+        controls.fabricCanvas.setActiveObject(sel).requestRenderAll();
+        controls.fabricCanvas.discardActiveObject(sel).requestRenderAll();
+    }
+
     fabric.Canvas.prototype.orderObjects = function (compare) {
         this._objects.sort(compare);
         this.renderAll();
@@ -185,7 +191,6 @@
                 fireRightClick: true,
                 stopContextMenu: true,
                 preserveObjectStacking: true,
-                perPixelTargetFind: true,
                 scale: 1,
                 moveCursor: 'default',
                 hoverCursor: 'default',
@@ -204,8 +209,17 @@
                 height: 1920
             })
 
+            function addAndOrder(object) {
+                controls.fabricCanvas.add(object);
+                controls.fabricCanvas.orderByZindex();
+                controls.exportCanvas.add(object);
+                controls.exportCanvas.orderByZindex();
+            }
+
             elements.sectorA = new fabric.Rect({
                 zIndex: zIndex.sectors,
+                selectable: false,
+                evented: false,
                 opacity: 0.20,
                 hasBorders: false,
                 hasControls: false,
@@ -216,6 +230,8 @@
             controls.exportCanvas.add(elements.sectorA);
             elements.sectorB = new fabric.Rect({
                 zIndex: zIndex.sectors,
+                selectable: false,
+                evented: false,
                 opacity: 0.20,
                 hasBorders: false,
                 hasControls: false,
@@ -228,46 +244,47 @@
             fabric.Image.fromURL('', function (img) {
                 elements.map = img;
 
-                img.selectable = false;
-                img.zIndex = zIndex.map;
+                img.set({
+                    selectable: false,
+                    evented: false,
+                    zIndex: zIndex.map
+                });
 
-                controls.fabricCanvas.add(img);
-                controls.fabricCanvas.orderByZindex();
-                controls.exportCanvas.add(img);
-                controls.exportCanvas.orderByZindex();
+                addAndOrder(img);
             });
             fabric.Image.fromURL('./maps/plain-grid.png', function (img) {
                 elements.grid = img;
-
-                img.selectable = false;
-                img.zIndex = zIndex.grid;
-                controls.fabricCanvas.add(img);
-                controls.fabricCanvas.orderByZindex();
-                controls.exportCanvas.add(img);
-                controls.exportCanvas.orderByZindex();
+                img.set({
+                    selectable: false,
+                    evented: false,
+                    visible: false,
+                    zIndex: zIndex.grid
+                });
+                addAndOrder(img);
             });
             fabric.Image.fromURL('', function (img) {
                 elements.arty = img;
 
-                img.selectable = false;
-                img.visible = false;
-                img.zIndex = zIndex.arty_range;
-                controls.fabricCanvas.add(img);
-                controls.fabricCanvas.orderByZindex();
-                controls.exportCanvas.add(img);
-                controls.exportCanvas.orderByZindex();
+                img.set({
+                    selectable: false,
+                    evented: false,
+                    visible: false,
+                    zIndex: zIndex.arty_range
+                });
+
+                addAndOrder(img);
             });
             elements.strongpoints = [[], [], [], [], []]
             for (let x = 0; x < 5; x++) {
                 for (let y = 0; y < 5; y++) {
                     fabric.Image.fromURL('', function (img) {
-                        img.selectable = false;
-                        img.zIndex = zIndex.points;
+                        img.set({
+                            selectable: false,
+                            evented: false,
+                            zIndex: zIndex.points
+                        });
 
-                        controls.fabricCanvas.add(img);
-                        controls.fabricCanvas.orderByZindex();
-                        controls.exportCanvas.add(img);
-                        controls.exportCanvas.orderByZindex();
+                        addAndOrder(img);
 
                         elements.strongpoints[x].push(img);
                     });
@@ -275,14 +292,113 @@
             }
             fabric.Image.fromURL('', function (img) {
                 elements.defaultgarries = img;
-                img.selectable = false;
-                img.zIndex = zIndex.default_garrisons;
-                img.visible = $("#dg-visible").is("checked");
-                controls.fabricCanvas.add(img);
-                controls.fabricCanvas.orderByZindex();
-                controls.exportCanvas.add(img);
-                controls.exportCanvas.orderByZindex();
+
+                img.set({
+                    selectable: false,
+                    evented: false,
+                    visible: $("#dg-visible").is("checked"),
+                    zIndex: zIndex.default_garrisons
+                });
+
+                addAndOrder(img);
             });
+
+            const deleteIcon = "data:image/svg+xml,%3C%3Fxml version='1.0' encoding='utf-8'%3F%3E%3C!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN' 'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'%3E%3Csvg version='1.1' id='Ebene_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='595.275px' height='595.275px' viewBox='200 215 230 470' xml:space='preserve'%3E%3Ccircle style='fill:%23F44336;' cx='299.76' cy='439.067' r='218.516'/%3E%3Cg%3E%3Crect x='267.162' y='307.978' transform='matrix(0.7071 -0.7071 0.7071 0.7071 -222.6202 340.6915)' style='fill:white;' width='65.545' height='262.18'/%3E%3Crect x='266.988' y='308.153' transform='matrix(0.7071 0.7071 -0.7071 0.7071 398.3889 -83.3116)' style='fill:white;' width='65.544' height='262.179'/%3E%3C/g%3E%3C/svg%3E";
+            const deleteImg = document.createElement('img');
+            deleteImg.src = deleteIcon;
+            fabric.Object.prototype.controls.deleteControl = new fabric.Control({
+                x: 0.5,
+                y: -0.5,
+                cursorStyle: 'pointer',
+                mouseUpHandler: deleteObject,
+                render: renderIcon,
+                cornerSize: 24
+            });
+
+            function deleteObject(eventData, transform) {
+                var target = transform.target;
+
+                controls.fabricCanvas.remove(target);
+                controls.fabricCanvas.requestRenderAll();
+                controls.exportCanvas.remove(target);
+                controls.exportCanvas.requestRenderAll();
+            }
+
+            function renderIcon(ctx, left, top, styleOverride, fabricObject) {
+                var size = this.cornerSize;
+                ctx.save();
+                ctx.translate(left, top);
+                ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
+                ctx.drawImage(deleteImg, -size/2, -size/2, size, size);
+                ctx.restore();
+            }
+
+            controls.fabricCanvas.on('object:moving', function (e) {});
+            controls.fabricCanvas.on('object:modified', function (e) {
+                internal.updateStatesAndRender();
+            });
+
+            controls.fabricCanvas.on('mouse:dblclick', function (e) {
+                console.log(e);
+
+                fabric.Image.fromURL('./maps/garry-plain.png', function (img) {
+                    img.set({
+                        selectable: true,
+                        evented: true,
+                        hasRotatingPoint: false,
+                        zIndex: zIndex.garrisons,
+                        top: e.absolutePointer.y - 380 / 2,
+                        left: e.absolutePointer.x - 380 / 2,
+                        width: 380,
+                        height: 380,
+                        transparentCorners: true
+                    });
+                    // disable rotation and resizing
+                    img.setControlsVisibility({
+                        mt: false,
+                        mb: false,
+                        ml: false,
+                        mr: false,
+                        bl: false,
+                        br: false,
+                        tl: false,
+                        tr: false,
+                        mtr: false
+                    })
+                    garrisons.push(img);
+
+                    addAndOrder(img);
+                    internal.updateStatesAndRender();
+                    fixGarrySelectBox();
+                });
+            });
+
+            controls.btnRemoveGarries.on('click', function () {
+                console.log('Remove all garries')
+
+                while (garrisons.length > 0) {
+                    const garry = garrisons.pop();
+
+                    controls.fabricCanvas.remove(garry)
+                    controls.exportCanvas.remove(garry)
+                }
+
+                controls.fabricCanvas.orderByZindex();
+                controls.exportCanvas.orderByZindex();
+            })
+
+            controls.btnUndoLastGarry.on('click', function () {
+                console.log('Undo last garry')
+
+                const garry = garrisons.pop();
+
+                if (garry) {
+                    controls.fabricCanvas.remove(garry)
+                    controls.fabricCanvas.orderByZindex();
+                    controls.exportCanvas.remove(garry)
+                    controls.exportCanvas.orderByZindex();
+                }
+            })
 
             internal.setupPage();
         },
@@ -326,68 +442,20 @@
                 panning = false;
             });
             controls.fabricCanvas.on('mouse:down', function (e) {
-                if (e.target && e.target.zIndex >= 10) {
-                    // Don't pan if clicked on top of draggable elements
-                    return;
+                if (e.target && e.target.selectable === true) {
+                    panning = false;
+                } else {
+                    panning = true;
                 }
-                panning = true;
             });
             controls.fabricCanvas.on('mouse:move', function (e) {
                 if (panning && e && e.e) {
+                    console.log(panning);
                     var delta = new fabric.Point(e.e.movementX, e.e.movementY);
                     controls.fabricCanvas.relativePan(delta);
                 }
             });
             // Look into https://stackoverflow.com/a/45131912/2650847
-
-            controls.fabricCanvas.on('mouse:dblclick', function (e) {
-                console.log(e);
-
-                fabric.Image.fromURL('./maps/garry-plain.png', function (img) {
-                    img.selectable = false;
-                    img.zIndex = zIndex.garrisons;
-                    img.top = e.absolutePointer.y - 380 / 2;
-                    img.left = e.absolutePointer.x - 380 / 2;
-                    img.width = 380;
-                    img.height = 380;
-
-                    garrisons.push(img);
-
-                    controls.fabricCanvas.add(img);
-                    controls.fabricCanvas.orderByZindex();
-                    controls.exportCanvas.add(img);
-                    controls.exportCanvas.orderByZindex();
-
-                    internal.updateStatesAndRender();
-                });
-            });
-
-            controls.btnRemoveGarries.on('click', function () {
-                console.log('Remove all garries')
-
-                while (garrisons.length > 0) {
-                    const garry = garrisons.pop();
-
-                    controls.fabricCanvas.remove(garry)
-                    controls.exportCanvas.remove(garry)
-                }
-
-                controls.fabricCanvas.orderByZindex();
-                controls.exportCanvas.orderByZindex();
-            })
-
-            controls.btnUndoLastGarry.on('click', function () {
-                console.log('Undo last garry')
-
-                const garry = garrisons.pop();
-
-                if (garry) {
-                    controls.fabricCanvas.remove(garry)
-                    controls.fabricCanvas.orderByZindex();
-                    controls.exportCanvas.remove(garry)
-                    controls.exportCanvas.orderByZindex();
-                }
-            })
 
             controls.fabricCanvas.on('mouse:wheel', function (opt) {
                 var delta = opt.e.deltaY;
@@ -398,6 +466,8 @@
                 controls.fabricCanvas.zoomToPoint({x: opt.e.offsetX, y: opt.e.offsetY}, zoom);
                 opt.e.preventDefault();
                 opt.e.stopPropagation();
+
+                fixGarrySelectBox();
             });
 
             const spImage = new Image();
@@ -667,14 +737,6 @@
             controls.fabricCanvas.renderAll();
             controls.exportCanvas.renderAll();
         },
-
-        pointRender: function () {
-            pointRender++;
-
-            if (pointRender >= 15) {
-                internal.render();
-            }
-        }
     }
 
     $(document).ready(internal.init);
