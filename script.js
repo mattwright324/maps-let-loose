@@ -36,6 +36,31 @@ const mll = (function () {
         this.orderObjects((a, b) => (a.zIndex > b.zIndex) ? 1 : -1);
     }
 
+    const rotateIcon = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' style='stroke:white;stroke-width:1px;' class='bi bi-arrow-clockwise' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z'/%3E%3Cpath d='M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z'/%3E%3C/svg%3E";
+    const rotateImg = document.createElement('img');
+    rotateImg.src = rotateIcon;
+
+    fabric.Object.prototype.controls.mtr = new fabric.Control({
+        x: 0,
+        y: -0.5,
+        offsetY: -40,
+        cursorStyle: 'crosshair',
+        actionHandler: fabric.controlsUtils.rotationWithSnapping,
+        actionName: 'rotate',
+        render: renderIcon,
+        cornerSize: 24,
+        withConnection: true
+    });
+
+    function renderIcon(ctx, left, top, styleOverride, fabricObject) {
+        const size = this.cornerSize;
+        ctx.save();
+        ctx.translate(left, top);
+        ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
+        ctx.drawImage(rotateImg, -size / 2, -size / 2, size, size);
+        ctx.restore();
+    }
+
     // Each point supports multiple coordinates to draw to tempCanvas
     // Each map has 25 sectors but 15 points
     // Sectors without point are represented by null
