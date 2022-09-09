@@ -21,6 +21,13 @@ const mll = (function () {
         tank: 8,
         'at-gun': 8,
     }
+    const elementSizes = {
+        garry: 380,
+        airhead: 122,
+        halftrack: 122,
+        tank: 51,
+        'at-gun': 51
+    }
 
     function fixSpawnSelectBoxes() {
         const sel = new fabric.ActiveSelection(spawns, {canvas: controls.fabricCanvas});
@@ -66,6 +73,9 @@ const mll = (function () {
     // Sectors without point are represented by null
     // Coordinates are dependent on a 1920x1920 map image
     // [x, y, w, h]
+    // How-to: Points were extracted using https://www.textcompare.org/image/
+    // comparing the map with a grid and points to the map with a grid and no points.
+    // Diff Type = 'Diff only'. Then noise/unnecessary bits removed around remaining points to reduce file size.
     const pointCoords = {
         Carentan: [
             [null, null, null, null, null],
@@ -201,7 +211,7 @@ const mll = (function () {
         fabric.Image.fromURL('', function (img) {
             console.log(img);
             console.log(img.height + "," + img.width)
-            const wh = type === 'garry' ? 380 : 122;
+            const wh = elementSizes[type];
             img.set({
                 type: type,
                 selectable: true,
