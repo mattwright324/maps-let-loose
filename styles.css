@@ -11,6 +11,7 @@ a[href] {
     width: 100% !important;
     resize: vertical !important;
     overflow: auto !important;
+    position: relative;
 }
 
 canvas {
@@ -87,4 +88,43 @@ html.dark a {
 
 html.dark .progress-bar {
     color: #fff;
+}
+
+
+.box {
+    position: relative;
+}
+
+.menu-x {
+    visibility: hidden;
+    z-index: -100;
+    position: absolute;
+    top: 0;
+    left: 0;
+    box-sizing: border-box;
+    border-radius: 5px;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+    background-color: rgb(34, 34, 34);
+}
+
+.menu-li {
+    box-sizing: border-box;
+    padding: 4px 8px;
+    border-bottom: 1px solid #ccc;
+    cursor: pointer;
+}
+
+.menu-li:hover {
+    background-color: black;
+}
+
+.menu-li:first-child {
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+.menu-li:last-child {
+    border-bottom: none;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
 }

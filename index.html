@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="description"
-          content="Quickly create custom tacmaps for Hell Let Loose. Customize visible points, add custom garrisons, toggle and change the active sectors, see offensive default garrisons and maximum artillery reach.">
+          content="Quickly create custom tacmaps for Hell Let Loose. Customize visible points, add garrisons airheads and halftracks, toggle and change the active sectors, see offensive default garrisons and maximum artillery reach.">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Maps Let Loose</title>
     <link rel="icon" href="./icon.png">
@@ -62,7 +62,9 @@
                     <input class="form-check-input" type="checkbox" value="" id="dg-visible">
                     <label class="form-check-label" for="dg-visible">
                         Offensive default garrisons
-                        <a target="blank" href="https://drive.google.com/drive/folders/1KTFLvtiQ3is9Q7GzFXTbnaRsxDLH7QAA" title="All default garrisons">
+                        <a target="blank"
+                           href="https://drive.google.com/drive/folders/1KTFLvtiQ3is9Q7GzFXTbnaRsxDLH7QAA"
+                           title="All default garrisons">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                  class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
                                 <path fill-rule="evenodd"
@@ -77,26 +79,28 @@
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" value="" id="garry-visible" checked>
                     <label class="form-check-label" for="garry-visible">
-                        Placed garrisons
+                        Placed map elements
                         <a id="removePlacedGarrisons" href="javascript:" title="Remove all placed garrisons">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                 class="bi bi-trash3-fill" viewBox="0 0 16 16">
                                 <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"/>
                             </svg>
                         </a>
                         <a id="undoLastGarrison" href="javascript:" title="Undo last garrison">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-left-fill" viewBox="0 0 16 16">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                 class="bi bi-caret-left-fill" viewBox="0 0 16 16">
                                 <path d="m3.86 8.753 5.482 4.796c.646.566 1.658.106 1.658-.753V3.204a1 1 0 0 0-1.659-.753l-5.48 4.796a1 1 0 0 0 0 1.506z"/>
                             </svg>
                         </a>
                     </label>
                     <p style="margin-bottom: 0">
-                        <small class="text-muted">Double click on map to add</small>
+                        <small class="text-muted">Double click or right click on map</small>
                     </p>
                 </div>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" value="" id="garry-radius-visible">
                     <label class="form-check-label" for="garry-radius-visible">
-                        Hide placed garrison radius
+                        Hide spawn point radiuses
                     </label>
                 </div>
 
@@ -162,6 +166,15 @@
         <div class="col col-md-9">
             <div id="canvas-container">
                 <canvas id="canvas" class="hasmenu"></canvas>
+                <div id="menu" class="menu-x">
+                    <div class="menu-li" onclick="mll.menuAdd('garry')">Add Garrison</div>
+                    <div class="menu-li" onclick="mll.menuAdd('airhead')">Add Airhead</div>
+                    <div class="menu-li" onclick="mll.menuAdd('halftrack')">Add Halftrack</div>
+
+                    <div class="menu-li" onclick="mll.menuAdd('tank')">Add Tank</div>
+                    <div class="menu-li" onclick="mll.menuAdd('at-gun')">Add AT Gun</div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -171,9 +184,12 @@
     <h4>Additional details</h4>
     <ul>
         <li>There are 3^5 or 243 total potential objective configurations</li>
-        <li>Offensive is allowed all 243 configurations (unconfirmed, at least allows some map-edge to map-edge layouts)</li>
+        <li>Offensive is allowed all 243 configurations (unconfirmed, at least allows some map-edge to map-edge
+            layouts)
+        </li>
         <li>Warfare is allowed only 99 configurations as it removes any that have a map-edge to map-edge layout</li>
         <li>Original tacmaps can be obtained from the <i>#hll-tacmaps</i> channel in the official HLL Discord</li>
+        <li>There is a theoretical limit of 14 team spawns: 8 maximum garrisons, 5 maximum halftracks, and 1 airhead.</li>
     </ul>
 </div>
 
