@@ -18,6 +18,8 @@ const mll = (function () {
         garry: 7,
         airhead: 8,
         halftrack: 8,
+        tank: 8,
+        'at-gun': 8,
     }
 
     function fixSpawnSelectBoxes() {
