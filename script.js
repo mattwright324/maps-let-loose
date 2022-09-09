@@ -18,7 +18,7 @@
     }
 
     function fixGarrySelectBox() {
-        const sel = new fabric.ActiveSelection(garrisons, { canvas: controls.fabricCanvas });
+        const sel = new fabric.ActiveSelection(garrisons, {canvas: controls.fabricCanvas});
         controls.fabricCanvas.setActiveObject(sel).requestRenderAll();
         controls.fabricCanvas.discardActiveObject(sel).requestRenderAll();
     }
@@ -303,7 +303,7 @@
                 addAndOrder(img);
             });
 
-            const deleteIcon = "data:image/svg+xml,%3C%3Fxml version='1.0' encoding='utf-8'%3F%3E%3C!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN' 'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'%3E%3Csvg version='1.1' id='Ebene_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='595.275px' height='595.275px' viewBox='200 215 230 470' xml:space='preserve'%3E%3Ccircle style='fill:%23F44336;' cx='299.76' cy='439.067' r='218.516'/%3E%3Cg%3E%3Crect x='267.162' y='307.978' transform='matrix(0.7071 -0.7071 0.7071 0.7071 -222.6202 340.6915)' style='fill:white;' width='65.545' height='262.18'/%3E%3Crect x='266.988' y='308.153' transform='matrix(0.7071 0.7071 -0.7071 0.7071 398.3889 -83.3116)' style='fill:white;' width='65.544' height='262.179'/%3E%3C/g%3E%3C/svg%3E";
+            const deleteIcon = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='red' class='bi bi-trash3' viewBox='0 0 16 16'%3E%3Cpath d='M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z'/%3E%3C/svg%3E";
             const deleteImg = document.createElement('img');
             deleteImg.src = deleteIcon;
             fabric.Object.prototype.controls.deleteControl = new fabric.Control({
@@ -312,6 +312,31 @@
                 cursorStyle: 'pointer',
                 mouseUpHandler: deleteObject,
                 render: renderIcon,
+                cornerSize: 24
+            });
+
+            const dragSvg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' style='stroke:white;stroke-width:1px;' class='bi bi-arrows-move' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M7.646.146a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 1.707V5.5a.5.5 0 0 1-1 0V1.707L6.354 2.854a.5.5 0 1 1-.708-.708l2-2zM8 10a.5.5 0 0 1 .5.5v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 .708-.708L7.5 14.293V10.5A.5.5 0 0 1 8 10zM.146 8.354a.5.5 0 0 1 0-.708l2-2a.5.5 0 1 1 .708.708L1.707 7.5H5.5a.5.5 0 0 1 0 1H1.707l1.147 1.146a.5.5 0 0 1-.708.708l-2-2zM10 8a.5.5 0 0 1 .5-.5h3.793l-1.147-1.146a.5.5 0 0 1 .708-.708l2 2a.5.5 0 0 1 0 .708l-2 2a.5.5 0 0 1-.708-.708L14.293 8.5H10.5A.5.5 0 0 1 10 8z'/%3E%3C/svg%3E"
+            const dragImg = document.createElement("img");
+            dragImg.src = dragSvg;
+            fabric.Object.prototype.controls.moveObject = new fabric.Control({
+                x: -0.5,
+                y: -0.5,
+                actionHandler: fabric.controlsUtils.dragHandler, // change to this
+                mouseUpHandler: function (e, t, x, y) {
+                    t.target.set({
+                        lockMovementX: true,
+                        lockMovementY: true
+                    })
+                },
+                mouseDownHandler: function (e, t, x, y) {
+                    t.target.set({
+                        lockMovementX: false,
+                        lockMovementY: false
+                    })
+                },
+                actionName: 'drag',
+                cursorStyle: 'pointer',
+                render: renderIconDrag,
                 cornerSize: 24
             });
 
@@ -329,11 +354,21 @@
                 ctx.save();
                 ctx.translate(left, top);
                 ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
-                ctx.drawImage(deleteImg, -size/2, -size/2, size, size);
+                ctx.drawImage(deleteImg, -size / 2, -size / 2, size, size);
                 ctx.restore();
             }
 
-            controls.fabricCanvas.on('object:moving', function (e) {});
+            function renderIconDrag(ctx, left, top, styleOverride, fabricObject) {
+                var size = this.cornerSize;
+                ctx.save();
+                ctx.translate(left, top);
+                ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
+                ctx.drawImage(dragImg, -size / 2, -size / 2, size, size);
+                ctx.restore();
+            }
+
+            controls.fabricCanvas.on('object:moving', function (e) {
+            });
             controls.fabricCanvas.on('object:modified', function (e) {
                 internal.updateStatesAndRender();
             });
@@ -345,13 +380,14 @@
                     img.set({
                         selectable: true,
                         evented: true,
-                        hasRotatingPoint: false,
+                        hasBorders: false,
+                        lockMovementX: true,
+                        lockMovementY: true,
                         zIndex: zIndex.garrisons,
                         top: e.absolutePointer.y - 380 / 2,
                         left: e.absolutePointer.x - 380 / 2,
                         width: 380,
                         height: 380,
-                        transparentCorners: true
                     });
                     // disable rotation and resizing
                     img.setControlsVisibility({
@@ -442,7 +478,7 @@
                 panning = false;
             });
             controls.fabricCanvas.on('mouse:down', function (e) {
-                if (e.target && e.target.selectable === true) {
+                if (e.target && e.target.selectable === true && e.target.lockMovementX === false) {
                     panning = false;
                 } else {
                     panning = true;
