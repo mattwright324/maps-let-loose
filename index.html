@@ -86,7 +86,7 @@
                                 <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"/>
                             </svg>
                         </a>
-                        <a id="undoLastGarrison" href="javascript:" title="Undo most recent map element">
+                        <a id="undoLastGarrison" href="javascript:" title="Remove most recent map element">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                  class="bi bi-caret-left-fill" viewBox="0 0 16 16">
                                 <path d="m3.86 8.753 5.482 4.796c.646.566 1.658.106 1.658-.753V3.204a1 1 0 0 0-1.659-.753l-5.48 4.796a1 1 0 0 0 0 1.506z"/>
@@ -170,9 +170,33 @@
                     <div class="menu-li" onclick="mll.menuAdd('garry')">Add Garrison</div>
                     <div class="menu-li" onclick="mll.menuAdd('airhead')">Add Airhead</div>
                     <div class="menu-li" onclick="mll.menuAdd('halftrack')">Add Halftrack</div>
-
-                    <div class="menu-li" onclick="mll.menuAdd('tank')">Add Tank</div>
+                    <div class="menu-li submenu">
+                        Add Outpost
+                        <small>
+                            <a href="javascript:mll.menuAdd('outpost', 'normal')">Normal</a> |
+                            <a href="javascript:mll.menuAdd('outpost', 'recon')">Recon</a>
+                        </small>
+                    </div>
+                    <div class="menu-li submenu">
+                        Add Tank
+                        <small>
+                            <a href="javascript:mll.menuAdd('tank', 'heavy')">Heavy</a> |
+                            <a href="javascript:mll.menuAdd('tank', 'med')">Medium</a> |
+                            <a href="javascript:mll.menuAdd('tank', 'light')">Light</a> |
+                            <a href="javascript:mll.menuAdd('tank', 'recon')">Recon</a>
+                        </small>
+                    </div>
+                    <div class="menu-li submenu">
+                        Add Truck
+                        <small>
+                            <a href="javascript:mll.menuAdd('truck', 'supply')">Supply</a> |
+                            <a href="javascript:mll.menuAdd('truck', 'transport')">Transport</a>
+                        </small>
+                    </div>
                     <div class="menu-li" onclick="mll.menuAdd('at-gun')">Add AT Gun</div>
+
+                    <div class="menu-li" onclick="mll.menuAdd('enemy-garry')">Mark Enemy Garrison</div>
+                    <div class="menu-li" onclick="mll.menuAdd('enemy-infantry')">Mark Enemy Infantry</div>
                 </div>
 
             </div>

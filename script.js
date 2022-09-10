@@ -6,7 +6,7 @@ const mll = (function () {
 
     let currentLoadedPoints = '';
     let contextMenuEvent;
-    let spawns = [];
+    let placed = [];
 
     const zIndex = {
         map: 0,
@@ -20,17 +20,113 @@ const mll = (function () {
         halftrack: 8,
         tank: 8,
         'at-gun': 8,
+        'enemy-garry': 8,
+        'enemy-infantry': 8,
+    }
+    const placedMeta = {
+        garry: {
+            wh: 380,
+            resolveImg: function (object) {
+                const sectorBred = controls.checkSectorSwap.is(":checked");
+                const sectorsVisible = controls.checkSectors.is(":checked");
+                const radiusHidden = controls.checkGarryRadius.is(":checked");
+                const objectX = object.left + object.width / 2;
+                const objectY = object.top + object.height / 2;
+
+                if (radiusHidden) {
+                    return './maps/garry-plain.png';
+                } else if (sectorsVisible &&
+                    (!sectorBred && rectContainsPoint(elements.sectorA, objectX, objectY) ||
+                        sectorBred && rectContainsPoint(elements.sectorB, objectX, objectY))) {
+                    return './maps/garry-red-zone.png';
+                } else if (sectorsVisible &&
+                    (sectorBred && rectContainsPoint(elements.sectorA, objectX, objectY) ||
+                        !sectorBred && rectContainsPoint(elements.sectorB, objectX, objectY))) {
+                    return './maps/garry-blue-zone.png';
+                } else if (sectorsVisible) {
+                    return './maps/garry-invalid.png';
+                }
+
+                return './maps/garry-blue-zone.png';
+            }
+        },
+        airhead: {
+            wh: 122,
+            resolveImg: function (object) {
+                const radiusHidden = controls.checkGarryRadius.is(":checked");
+                return './maps/airhead-' + (radiusHidden ? 'plain' : 'radius') + '.png'
+            }
+        },
+        halftrack: {
+            wh: 122,
+            resolveImg: function (object) {
+                const radiusHidden = controls.checkGarryRadius.is(":checked");
+                return './maps/halftrack-' + (radiusHidden ? 'plain' : 'radius') + '.png'
+            },
+            controlsVisibility: {mtr: true}
+        },
+        outpost: {
+            wh: 122,
+            resolveImg: function (object) {
+                const radiusHidden = controls.checkGarryRadius.is(":checked");
+                return './maps/outpost-' + object.modifier + "-" + (radiusHidden ? 'plain' : 'radius') + '.png'
+            },
+            controlsVisibility: {mtr: true}
+        },
+        tank: {
+            wh: 51,
+            resolveImg: function (object) {
+                if (object.modifier) {
+                    return './maps/tank-' + object.modifier + ".png";
+                }
+
+                return './maps/tank-med.png'
+            },
+            controlsVisibility: {mtr: true}
+        },
+        truck: {
+            wh: 51,
+            resolveImg: function (object) {
+                if (object.modifier) {
+                    return './maps/truck-' + object.modifier + ".png";
+                }
+
+                return './maps/truck-supply.png'
+            },
+            controlsVisibility: {mtr: true}
+        },
+        'at-gun': {
+            wh: 51,
+            resolveImg: function (object) {
+                return './maps/at-gun-plain.png'
+            },
+            controlsVisibility: {mtr: true}
+        },
+        'enemy-garry': {
+            wh: 51,
+            resolveImg: function (object) {
+                return './maps/enemy-garry.png'
+            }
+        },
+        'enemy-infantry': {
+            wh: 51,
+            resolveImg: function (object) {
+                return './maps/enemy-infantry.png'
+            }
+        }
     }
     const elementSizes = {
         garry: 380,
         airhead: 122,
         halftrack: 122,
         tank: 51,
-        'at-gun': 51
+        'at-gun': 51,
+        'enemy-garry': 51,
+        'enemy-infantry': 51,
     }
 
     function fixSpawnSelectBoxes() {
-        const sel = new fabric.ActiveSelection(spawns, {canvas: controls.fabricCanvas});
+        const sel = new fabric.ActiveSelection(placed, {canvas: controls.fabricCanvas});
         controls.fabricCanvas.setActiveObject(sel).requestRenderAll();
         controls.fabricCanvas.discardActiveObject(sel).requestRenderAll();
     }
@@ -204,14 +300,15 @@ const mll = (function () {
         return rx <= x && rx2 >= x && ry <= y && ry2 >= y;
     }
 
-    function addSpawn(type, e) {
+    function addMapElement(e, type, modifier) {
         console.log('addSpawn(' + type + ')')
         console.log(e);
 
         fabric.Image.fromURL('', function (img) {
             console.log(img);
-            console.log(img.height + "," + img.width)
-            const wh = elementSizes[type];
+
+            img.modifier = modifier;
+            const wh = placedMeta[type].wh;
             img.set({
                 type: type,
                 selectable: true,
@@ -225,19 +322,18 @@ const mll = (function () {
                 width: wh,
                 height: wh,
             });
+            if (placedMeta[type].set) {
+                img.setControlsVisibility(placedMeta[type].set);
+            }
             // disable rotation and resizing
             img.setControlsVisibility({
-                mt: false,
-                mb: false,
-                ml: false,
-                mr: false,
-                bl: false,
-                br: false,
-                tl: false,
-                tr: false,
-                mtr: type !== 'garry' && type !== 'airhead' // halftrack can rotate
+                mt: false, mb: false, ml: false, mr: false, bl: false, br: false, tl: false, tr: false, mtr: false
             })
-            spawns.push(img);
+            if (placedMeta[type].controlsVisibility) {
+                img.setControlsVisibility(placedMeta[type].controlsVisibility);
+            }
+
+            placed.push(img);
 
             addAndOrder(img);
             internal.updateStatesAndRender();
@@ -456,14 +552,14 @@ const mll = (function () {
             });
 
             controls.fabricCanvas.on('mouse:dblclick', function (e) {
-                addSpawn('garry', e);
+                addMapElement(e, 'garry');
             });
 
             controls.btnRemoveGarries.on('click', function () {
                 console.log('Remove all garries')
 
-                while (spawns.length > 0) {
-                    const garry = spawns.pop();
+                while (placed.length > 0) {
+                    const garry = placed.pop();
 
                     controls.fabricCanvas.remove(garry)
                     controls.exportCanvas.remove(garry)
@@ -476,7 +572,7 @@ const mll = (function () {
             controls.btnUndoLastGarry.on('click', function () {
                 console.log('Undo last garry')
 
-                const garry = spawns.pop();
+                const garry = placed.pop();
 
                 if (garry) {
                     controls.fabricCanvas.remove(garry)
@@ -727,8 +823,8 @@ const mll = (function () {
             if (elements.arty) {
                 elements.arty.visible = controls.checkArty.is(":checked");
             }
-            for (let i = 0; i < spawns.length; i++) {
-                spawns[i].visible = controls.checkPlacedGarries.is(":checked");
+            for (let i = 0; i < placed.length; i++) {
+                placed[i].visible = controls.checkPlacedGarries.is(":checked");
             }
 
             const mapVertical = pointCoords[filePrefix][0][1] != null;
@@ -767,36 +863,11 @@ const mll = (function () {
                 elements.sectorB.set({fill: sectorBlue});
             }
 
-            const sectorsVisible = controls.checkSectors.is(":checked");
-            const radiusHidden = controls.checkGarryRadius.is(":checked");
-            for (let i = 0; i < spawns.length; i++) {
-                const spawn = spawns[i];
-                const spawnX = spawn.left + spawn.width / 2;
-                const spawnY = spawn.top + spawn.height / 2;
+            // Update placed element images
+            for (let i = 0; i < placed.length; i++) {
+                const object = placed[i];
                 promises.push(new Promise(function (resolve) {
-                    if (spawn.type === 'airhead') {
-                        spawn.setSrc('./maps/airhead-' + (radiusHidden ? 'plain' : 'radius') + '.png', resolve);
-                    } else if (spawn.type === 'halftrack') {
-                        spawn.setSrc('./maps/halftrack-' + (radiusHidden ? 'plain' : 'radius') + '.png', resolve);
-                    } else if (spawn.type === 'tank') {
-                        spawn.setSrc('./maps/tank-plain.png', resolve);
-                    } else if (spawn.type === 'at-gun') {
-                        spawn.setSrc('./maps/at-gun-plain.png', resolve);
-                    } else if (radiusHidden) {
-                        spawn.setSrc('./maps/garry-plain.png', resolve);
-                    } else if (sectorsVisible &&
-                        (!sectorBred && rectContainsPoint(elements.sectorA, spawnX, spawnY) ||
-                            sectorBred && rectContainsPoint(elements.sectorB, spawnX, spawnY))) {
-                        spawn.setSrc('./maps/garry-red-zone.png', resolve);
-                    } else if (sectorsVisible &&
-                        (sectorBred && rectContainsPoint(elements.sectorA, spawnX, spawnY) ||
-                            !sectorBred && rectContainsPoint(elements.sectorB, spawnX, spawnY))) {
-                        spawn.setSrc('./maps/garry-blue-zone.png', resolve);
-                    } else if (sectorsVisible) {
-                        spawn.setSrc('./maps/garry-invalid.png', resolve);
-                    } else {
-                        spawn.setSrc('./maps/garry-blue-zone.png', resolve);
-                    }
+                    object.setSrc(placedMeta[object.type].resolveImg(object), resolve);
                 }));
             }
 
@@ -847,11 +918,11 @@ const mll = (function () {
     $(document).ready(internal.init);
 
     return {
-        menuAdd: function (type) {
+        menuAdd: function (type, modifier) {
             elements.contextMenu.css("visibility", "hidden");
             console.log('menuAdd(' + type + ')')
 
-            addSpawn(type, contextMenuEvent);
+            addMapElement(contextMenuEvent, type, modifier);
         }
     }
 }());
