@@ -11,6 +11,9 @@ a[href] {
     width: 100% !important;
     resize: vertical !important;
     overflow: auto !important;
+}
+
+body {
     position: relative;
 }
 
