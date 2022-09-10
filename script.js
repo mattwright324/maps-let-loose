@@ -697,10 +697,11 @@ const mll = (function () {
             controls.fabricCanvas.on('mouse:down', function (e) {
                 elements.contextMenu.css("visibility", "hidden");
                 if (e.button === 3) {
+                    const offset = controls.fabricCanvas._offset;
                     // Right click context menu
                     elements.contextMenu.css("visibility", "visible")
-                        .css("left", e.pointer.x + 'px')
-                        .css("top", e.pointer.y + "px")
+                        .css("left", offset.left + e.pointer.x + 'px')
+                        .css("top", offset.top + e.pointer.y + "px")
                         .css("z-index", 100);
                     contextMenuEvent = e;
                 } else if (e.target && e.target.selectable === true && e.target.lockMovementX === false || e.transform && e.transform.action === 'rotate' ||
@@ -993,6 +994,10 @@ const mll = (function () {
         menuAdd: function (type, modifier) {
             elements.contextMenu.css("visibility", "hidden");
             console.log('menuAdd(' + type + ')')
+
+            if (!type) {
+                return;
+            }
 
             addMapElement(contextMenuEvent, type, modifier);
         }
