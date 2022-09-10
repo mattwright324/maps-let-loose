@@ -119,6 +119,33 @@
             </div>
 
             <div class="mb-4">
+                <h4>Draw</h4>
+                <div style="display: inline-block;">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="drawing-visible" checked>
+                        <label class="form-check-label" for="drawing-visible">
+                            Drawings visible
+                        </label>
+                    </div>
+                    <div style="margin: 5px 0">
+                        <button id="drawing-mode" class="btn btn-secondary">Enter drawing mode</button>
+                    </div>
+                    <div>
+                        <a id="clear-paths" href="javascript:" style="margin-right: 10px">Clear</a>
+                        <a id="undo-path" href="javascript:">Undo</a>
+                    </div>
+
+                    <div id="drawing-mode-options" style="margin: 5px 0; display:none">
+                        <label for="drawing-line-width">Line width: (<span id="line-width-value">0</span>) </label>
+                        <input type="range" value="7" min="3" max="25" id="drawing-line-width"><br>
+
+                        <label for="drawing-color">Line color: </label>
+                        <input type="color" value="#0080ff" id="drawing-color"><br>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4">
                 <h4>Strongpoints</h4>
                 <div class="form-check mb-3">
                     <input class="form-check-input" type="checkbox" value="" id="sp-visible" checked>
@@ -218,7 +245,8 @@
             <img src="./maps/warfare-not-ok.png" width="200">
         </li>
         <li>Original tacmaps can be obtained from the <i>#hll-tacmaps</i> channel in the official HLL Discord</li>
-        <li>There is a theoretical limit of 14 team spawns: 8 maximum garrisons, 5 maximum halftracks, and 1 airhead.</li>
+        <li>There is a theoretical limit of 14 team spawns: 8 maximum garrisons, 5 maximum halftracks, and 1 airhead.
+        </li>
     </ul>
 </div>
 
@@ -227,10 +255,14 @@
     <p>Links to other handy things Hell Let Loose related</p>
     <ul>
         <li><a target="_blank" href="https://www.funletloose.com/">Fun Let Loose - Simple artillery calculator</a></li>
-        <li><a target="_blank" href="https://www.hell-let-loose-calculator.com/#/">Hell Let Loose Calculator - Interactive map artillery calculator</a></li>
-        <li><a target="_blank" href="https://worldwarways.web.app/#/">World War Ways - Interactive map truck directions</a></li>
-        <li><a target="_blank" href="https://hellletloose.fandom.com/wiki/Hell_Let_Loose_Wiki">Hell Let Loose Wiki (not updated often)</a></li>
-        <li><a target="_blank" href="https://www.hellletloose.com/">Official HLL Website - Links to the official Discord</a></li>
+        <li><a target="_blank" href="https://www.hell-let-loose-calculator.com/#/">Hell Let Loose Calculator -
+            Interactive map artillery calculator</a></li>
+        <li><a target="_blank" href="https://worldwarways.web.app/#/">World War Ways - Interactive map truck
+            directions</a></li>
+        <li><a target="_blank" href="https://hellletloose.fandom.com/wiki/Hell_Let_Loose_Wiki">Hell Let Loose Wiki (not
+            updated often)</a></li>
+        <li><a target="_blank" href="https://www.hellletloose.com/">Official HLL Website - Links to the official
+            Discord</a></li>
     </ul>
 </div>
 
