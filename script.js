@@ -7,6 +7,7 @@ const mll = (function () {
     let currentLoadedPoints = '';
     let contextMenuEvent;
     let placed = [];
+    let drawings = [];
 
     const zIndex = {
         map: 0,
@@ -15,13 +16,14 @@ const mll = (function () {
         sectors: 3,
         arty_range: 5,
         default_garrisons: 6,
-        garry: 7,
-        airhead: 8,
-        halftrack: 8,
-        tank: 8,
-        'at-gun': 8,
-        'enemy-garry': 8,
-        'enemy-infantry': 8,
+        drawings: 7,
+        garry: 8,
+        airhead: 9,
+        halftrack: 9,
+        tank: 9,
+        'at-gun': 9,
+        'enemy-garry': 9,
+        'enemy-infantry': 9,
     }
     const placedMeta = {
         garry: {
@@ -561,12 +563,9 @@ const mll = (function () {
                 while (placed.length > 0) {
                     const garry = placed.pop();
 
-                    controls.fabricCanvas.remove(garry)
-                    controls.exportCanvas.remove(garry)
+                    controls.fabricCanvas.remove(garry);
+                    controls.exportCanvas.remove(garry);
                 }
-
-                controls.fabricCanvas.orderByZindex();
-                controls.exportCanvas.orderByZindex();
             })
 
             controls.btnUndoLastGarry.on('click', function () {
@@ -575,12 +574,91 @@ const mll = (function () {
                 const garry = placed.pop();
 
                 if (garry) {
-                    controls.fabricCanvas.remove(garry)
-                    controls.fabricCanvas.orderByZindex();
-                    controls.exportCanvas.remove(garry)
-                    controls.exportCanvas.orderByZindex();
+                    controls.fabricCanvas.remove(garry);
+                    controls.exportCanvas.remove(garry);
                 }
+            });
+
+            const drawingModeEl = $('#drawing-mode'),
+                drawingOptionsEl = $('#drawing-mode-options'),
+                drawingColorEl = $('#drawing-color'),
+                drawingLineWidthEl = $('#drawing-line-width'),
+                clearEl = $('#clear-paths'),
+                undoEl = $("#undo-path"),
+                checkDrawingsVisible = $("#drawing-visible");
+
+            drawingModeEl.on('click', function () {
+                controls.fabricCanvas.isDrawingMode = !controls.fabricCanvas.isDrawingMode;
+                if (controls.fabricCanvas.isDrawingMode) {
+                    drawingModeEl.text('Cancel drawing mode');
+                    drawingOptionsEl.show();
+                    elements.canvas.addClass("drawing-mode");
+                } else {
+                    drawingModeEl.text('Enter drawing mode');
+                    drawingOptionsEl.hide();
+                    elements.canvas.removeClass("drawing-mode");
+                }
+            });
+
+            controls.fabricCanvas.freeDrawingBrush = new fabric.PencilBrush(controls.fabricCanvas);
+
+            drawingColorEl.on('change', function () {
+                const value = drawingColorEl.val();
+                const brush = controls.fabricCanvas.freeDrawingBrush;
+                brush.color = value;
+                if (brush.getPatternSrc) {
+                    brush.source = brush.getPatternSrc.call(brush);
+                }
+            });
+            drawingColorEl.trigger('change');
+            drawingLineWidthEl.on('change', function () {
+                const value = drawingLineWidthEl.val();
+                controls.fabricCanvas.freeDrawingBrush.width = parseInt(value, 10) || 1;
+                $("#line-width-value").text(value);
+            });
+            drawingLineWidthEl.trigger('change');
+
+            controls.fabricCanvas.freeDrawingBrush.color = drawingColorEl.val();
+            controls.fabricCanvas.freeDrawingBrush.width = parseInt(drawingLineWidthEl.val(), 10) || 1;
+
+            controls.fabricCanvas.on('path:created', function (e) {
+                console.log(e);
+
+                e.path.set({
+                    zIndex: zIndex.drawings,
+                    evented: false,
+                    selectable: false
+                });
+
+                drawings.push(e.path);
+
+                controls.fabricCanvas.orderByZindex();
+                controls.exportCanvas.add(e.path);
+                controls.exportCanvas.orderByZindex();
+            });
+
+            undoEl.click(function (e) {
+                const path = drawings.pop();
+                controls.fabricCanvas.remove(path);
+                controls.exportCanvas.remove(path);
             })
+
+            clearEl.click(function (e) {
+                for (let i = 0; i < drawings.length; i++) {
+                    const path = drawings[i];
+                    controls.fabricCanvas.remove(path);
+                    controls.exportCanvas.remove(path);
+                }
+            });
+
+            checkDrawingsVisible.click(function () {
+                for (let i = 0; i < drawings.length; i++) {
+                    const path = drawings[i];
+                    path.visible = checkDrawingsVisible.is(":checked");
+                }
+
+                internal.render();
+            });
 
             internal.setupPage();
         },
@@ -632,7 +710,8 @@ const mll = (function () {
                         .css("top", e.pointer.y + "px")
                         .css("z-index", 100);
                     contextMenuEvent = e;
-                } else if (e.target && e.target.selectable === true && e.target.lockMovementX === false || e.transform && e.transform.action === 'rotate') {
+                } else if (e.target && e.target.selectable === true && e.target.lockMovementX === false || e.transform && e.transform.action === 'rotate' ||
+                    controls.fabricCanvas.isDrawingMode === true) {
                     // Dragging element
                     panning = false;
                 } else {

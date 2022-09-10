@@ -7,7 +7,7 @@ A tool to quickly create custom tacmaps for Hell Let Loose.
 - Toggle the grid
 - Toggle and change friendly and enemy sectors
 - Toggle offensive default garrisons for both directions
-- Add, move, and remove garrisons, halftracks, and airheads
+- Add, move, and remove garrisons, outposts, halftracks, airheads, tanks, trucks, markers
     - Toggle radius on and off
     - Rotate halftracks
     - Dynamic garrisons when sectors are visible and changing

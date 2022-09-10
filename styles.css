@@ -90,9 +90,8 @@ html.dark .progress-bar {
     color: #fff;
 }
 
-
-.box {
-    position: relative;
+canvas.drawing-mode {
+    cursor: crosshair !important;
 }
 
 .menu-x {
