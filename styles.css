@@ -50,7 +50,7 @@ label a {
             transparent 5px,
             rgba(127, 127, 127, 0.5) 5px,
             rgba(127, 127, 127, 0.5) 10px
-    );;
+    );
     user-input: none;
     cursor: default;
 }
@@ -88,10 +88,6 @@ html.dark a {
 
 html.dark .progress-bar {
     color: #fff;
-}
-
-canvas.drawing-mode {
-    cursor: crosshair !important;
 }
 
 .menu-x {

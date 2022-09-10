@@ -21,6 +21,7 @@ const mll = (function () {
         airhead: 9,
         halftrack: 9,
         tank: 9,
+        truck: 9,
         'at-gun': 9,
         'enemy-garry': 9,
         'enemy-infantry': 9,
