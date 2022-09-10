@@ -222,8 +222,15 @@
                     </div>
                     <div class="menu-li" onclick="mll.menuAdd('at-gun')">Add AT Gun</div>
 
-                    <div class="menu-li" onclick="mll.menuAdd('enemy-garry')">Mark Enemy Garrison</div>
-                    <div class="menu-li" onclick="mll.menuAdd('enemy-infantry')">Mark Enemy Infantry</div>
+                    <div class="menu-li submenu">
+                        Mark Enemy
+                        <small>
+                            <a href="javascript:mll.menuAdd('enemy', 'garry')">Garrison</a> |
+                            <a href="javascript:mll.menuAdd('enemy', 'op')">Outpost</a> |
+                            <a href="javascript:mll.menuAdd('enemy', 'infantry')">Infantry</a> |
+                            <a href="javascript:mll.menuAdd('enemy', 'tank')">Tank</a>
+                        </small>
+                    </div>
                 </div>
 
             </div>

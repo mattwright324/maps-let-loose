@@ -21,9 +21,9 @@ const mll = (function () {
         airhead: 9,
         halftrack: 9,
         tank: 9,
+        truck: 9,
         'at-gun': 9,
-        'enemy-garry': 9,
-        'enemy-infantry': 9,
+        enemy: 9,
     }
     const placedMeta = {
         garry: {
@@ -73,7 +73,6 @@ const mll = (function () {
                 const radiusHidden = controls.checkGarryRadius.is(":checked");
                 return './maps/outpost-' + object.modifier + "-" + (radiusHidden ? 'plain' : 'radius') + '.png'
             },
-            controlsVisibility: {mtr: true}
         },
         tank: {
             wh: 51,
@@ -104,16 +103,10 @@ const mll = (function () {
             },
             controlsVisibility: {mtr: true}
         },
-        'enemy-garry': {
+        enemy: {
             wh: 51,
             resolveImg: function (object) {
-                return './maps/enemy-garry.png'
-            }
-        },
-        'enemy-infantry': {
-            wh: 51,
-            resolveImg: function (object) {
-                return './maps/enemy-infantry.png'
+                return './maps/enemy-' + object.modifier + '.png'
             }
         }
     }
