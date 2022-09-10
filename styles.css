@@ -114,6 +114,10 @@ html.dark .progress-bar {
     cursor: pointer;
 }
 
+.menu-li.submenu {
+    cursor: default;
+}
+
 .menu-li:hover {
     background-color: black;
 }
