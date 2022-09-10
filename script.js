@@ -16,13 +16,14 @@ const mll = (function () {
         sectors: 3,
         arty_range: 5,
         default_garrisons: 6,
-        garry: 7,
-        airhead: 8,
-        halftrack: 8,
-        tank: 8,
-        'at-gun': 8,
-        'enemy-garry': 8,
-        'enemy-infantry': 8,
+        drawings: 7,
+        garry: 8,
+        airhead: 9,
+        halftrack: 9,
+        tank: 9,
+        'at-gun': 9,
+        'enemy-garry': 9,
+        'enemy-infantry': 9,
     }
     const placedMeta = {
         garry: {
@@ -624,7 +625,7 @@ const mll = (function () {
                 console.log(e);
 
                 e.path.set({
-                    zIndex: 100,
+                    zIndex: zIndex.drawings,
                     evented: false,
                     selectable: false
                 });
