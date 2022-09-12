@@ -147,10 +147,16 @@
 
             <div class="mb-4">
                 <h4>Strongpoints</h4>
-                <div class="form-check mb-3">
+                <div class="form-check">
                     <input class="form-check-input" type="checkbox" value="" id="sp-visible" checked>
                     <label class="form-check-label" for="sp-visible">
                         Strongpoints visible
+                    </label>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" value="" id="sp-resource-visible" checked>
+                    <label class="form-check-label" for="sp-resource-visible">
+                        Hide resource icons
                     </label>
                 </div>
                 <div id="sp-grid" class="mb-3"></div>
@@ -245,16 +251,27 @@
     <h4>Additional details</h4>
     <ul>
         <li>There are 3^5 or 243 total potential objective configurations</li>
-        <li>Offensive is allowed all 243 configurations (unconfirmed, at least allows some map-edge to map-edge
+        <li>
+            Offensive is allowed all 243 configurations (unconfirmed, at least allows some map-edge to map-edge
             layouts)
             <br>
             <img src="./maps/offensive-ok.png" width="200">
         </li>
-        <li>Warfare is allowed only 99 configurations as it removes any that have a map-edge to map-edge layout
+        <li>
+            Warfare is allowed only 99 configurations as it removes any that have a map-edge to map-edge layout
             <br>
             <img src="./maps/warfare-not-ok.png" width="200">
         </li>
-        <li>There is a theoretical limit of 14 team spawns: 8 maximum garrisons, 5 maximum halftracks, and 1 airhead.
+        <li>
+            There is a theoretical limit of 14 team spawns: 8 maximum garrisons, 5 maximum halftracks, and 1 airhead.
+        </li>
+        <li>
+            Almost all spawn points have a 50m warning radius where it goes "hot" when an enemy is within the radius
+            regardless of where they are placed.
+        </li>
+        <li>Garrisons are the exception and have a lockout radius of 100m while placed in the red zone.</li>
+        <li>
+            Only one set of default garrisons will be present in offensive mode and will be the three closest to the attacking side.
         </li>
     </ul>
 </div>
@@ -266,19 +283,24 @@
         Original tacmaps can be obtained from the <i>#hll-tacmaps</i> channel in the official HLL Discord.
     </p>
     <ul>
-        <li><a target="_blank" href="https://drive.google.com/drive/folders/1Ob8vprqHc953rgCJPfNPMG3VNj51B8qE?usp=sharing">
+        <li><a target="_blank"
+               href="https://drive.google.com/drive/folders/1Ob8vprqHc953rgCJPfNPMG3VNj51B8qE?usp=sharing">
             All 12 tacmaps (no-grid) ~69 MB total
         </a></li>
-        <li><a target="_blank" href="https://drive.google.com/drive/folders/1--1a4qypC3Ygr_d_gQfKuoEVUfOuQ4BL?usp=sharing">
+        <li><a target="_blank"
+               href="https://drive.google.com/drive/folders/1--1a4qypC3Ygr_d_gQfKuoEVUfOuQ4BL?usp=sharing">
             All 12 tacmaps (grid) ~67 MB total
         </a></li>
-        <li><a target="_blank" href="https://drive.google.com/drive/folders/1E4fjjOleU0UPsIejK6v0_BIYYuabLoRb?usp=sharing">
+        <li><a target="_blank"
+               href="https://drive.google.com/drive/folders/1E4fjjOleU0UPsIejK6v0_BIYYuabLoRb?usp=sharing">
             All 12 tacmaps (grid, strongpoints, and HQ) ~68 MB total
         </a></li>
-        <li><a target="_blank" href="https://drive.google.com/drive/folders/1jh-LchMt335WcxhoevW1hjQdpmLLN7CD?usp=sharing">
+        <li><a target="_blank"
+               href="https://drive.google.com/drive/folders/1jh-LchMt335WcxhoevW1hjQdpmLLN7CD?usp=sharing">
             All 12 tacmaps (grid, strongpoints, no-HQ) ~93 MB total
         </a></li>
-        <li><a target="_blank" href="https://drive.google.com/drive/folders/1KTFLvtiQ3is9Q7GzFXTbnaRsxDLH7QAA?usp=sharing">
+        <li><a target="_blank"
+               href="https://drive.google.com/drive/folders/1KTFLvtiQ3is9Q7GzFXTbnaRsxDLH7QAA?usp=sharing">
             All 12 tacmaps (grid, strongpoints, marked default offensive garrisons) ~88 MB total
         </a></li>
     </ul>

@@ -350,6 +350,7 @@ const mll = (function () {
             controls.checkArty = $("#arty-visible");
             controls.checkArtyFlip = $("#flip-arty");
             controls.checkStrongpoints = $("#sp-visible");
+            controls.checkSpResource = $("#sp-resource-visible");
             elements.strongpointGrid = $("#sp-grid");
             controls.checkDefaultGarries = $("#dg-visible");
             controls.checkPlacedGarries = $("#garry-visible");
@@ -765,11 +766,12 @@ const mll = (function () {
             }
 
             function initStrongpointData(filePrefix) {
-                if (pointCutoutData.hasOwnProperty(filePrefix)) {
+                const strongpointKey = filePrefix + controls.checkSpResource.is(":checked");
+                if (pointCutoutData.hasOwnProperty(strongpointKey)) {
                     return;
                 }
 
-                console.log("initStrongpoints('" + filePrefix + "')")
+                console.log("initStrongpoints('" + strongpointKey + "')")
 
                 const data = {}
                 for (let x = 0; x < 5; x++) {
@@ -828,7 +830,7 @@ const mll = (function () {
 
                 console.log(data);
 
-                pointCutoutData[filePrefix] = data;
+                pointCutoutData[strongpointKey] = data;
             }
 
             controls.comboMapSelect.change(function () {
@@ -839,8 +841,12 @@ const mll = (function () {
                 elements.defaultgarries.setSrc('./maps/defaultgarries/' + filePrefix + '_defaultgarries.png', internal.render)
                 let artySuffix = controls.checkArtyFlip.is(":checked") ? 2 : 1;
                 elements.arty.setSrc('./maps/arty/' + filePrefix + '_Arty' + artySuffix + '.png', internal.render)
-                spImage.src = './maps/points/' + filePrefix + '_SP_NoMap2.png';
+                spImage.src = './maps/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
             });
+            controls.checkSpResource.change(function () {
+                const filePrefix = controls.comboMapSelect.val();
+                spImage.src = './maps/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
+            })
             controls.comboMapSelect.trigger('change');
 
             [controls.checkGrid, controls.checkArty, controls.checkStrongpoints, controls.checkDefaultGarries,
@@ -885,6 +891,7 @@ const mll = (function () {
         updateStatesAndRender: function () {
             console.log("updateStatesAndRender()");
             const filePrefix = controls.comboMapSelect.val();
+            const strongpointKey = filePrefix + controls.checkSpResource.is(":checked");
             const promises = [];
 
             if (elements.grid) {
@@ -950,12 +957,12 @@ const mll = (function () {
 
                     spObject.visible = controls.checkStrongpoints.is(":checked") && $(".sp-toggle-" + x + y).hasClass("selected");
 
-                    if (!pointCutoutData.hasOwnProperty(filePrefix)) {
+                    if (!pointCutoutData.hasOwnProperty(strongpointKey)) {
                         continue;
                     }
 
-                    if (currentLoadedPoints !== filePrefix) {
-                        const pointData = pointCutoutData[filePrefix]['' + x + y];
+                    if (currentLoadedPoints !== strongpointKey) {
+                        const pointData = pointCutoutData[strongpointKey]['' + x + y];
                         if (pointData.visible) {
                             promises.push(new Promise(function (resolve) {
                                 spObject.setSrc(pointData.dataUrl, resolve);
@@ -968,8 +975,8 @@ const mll = (function () {
                 }
             }
 
-            if (currentLoadedPoints !== filePrefix) {
-                currentLoadedPoints = filePrefix;
+            if (currentLoadedPoints !== strongpointKey) {
+                currentLoadedPoints = strongpointKey;
             }
 
             if (promises.length) {
