@@ -18,9 +18,14 @@ body {
 }
 
 canvas {
-    cursor: grab !important;
     /*border: 2px rgba(127,127,127,0.25) dashed;*/
     border-radius: 5px;
+}
+canvas.drag-mode {
+    cursor: grab !important;
+}
+canvas.draw-mode {
+    cursor: crosshair !important;
 }
 
 #sp-grid {

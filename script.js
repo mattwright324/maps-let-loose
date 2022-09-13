@@ -8,6 +8,7 @@ const mll = (function () {
     let contextMenuEvent;
     let placed = [];
     let drawings = [];
+    let resetSelectedPoints = true;
 
     const zIndex = {
         map: 0,
@@ -584,13 +585,11 @@ const mll = (function () {
             drawingModeEl.on('click', function () {
                 controls.fabricCanvas.isDrawingMode = !controls.fabricCanvas.isDrawingMode;
                 if (controls.fabricCanvas.isDrawingMode) {
-                    drawingModeEl.text('Cancel drawing mode');
-                    drawingOptionsEl.show();
-                    elements.canvas.addClass("drawing-mode");
+                    drawingModeEl.text('Stop drawing mode');
+                    $("canvas").addClass("draw-mode").removeClass('drag-mode');
                 } else {
-                    drawingModeEl.text('Enter drawing mode');
-                    drawingOptionsEl.hide();
-                    elements.canvas.removeClass("drawing-mode");
+                    drawingModeEl.text('Start drawing mode');
+                    $("canvas").removeClass("draw-mode").addClass('drag-mode');
                 }
             });
 
@@ -605,7 +604,7 @@ const mll = (function () {
                 }
             });
             drawingColorEl.trigger('change');
-            drawingLineWidthEl.on('change', function () {
+            drawingLineWidthEl.on('input', function () {
                 const value = drawingLineWidthEl.val();
                 controls.fabricCanvas.freeDrawingBrush.width = parseInt(value, 10) || 1;
                 $("#line-width-value").text(value);
@@ -653,6 +652,12 @@ const mll = (function () {
 
                 internal.render();
             });
+
+            $(document).on('keypress', function (e) {
+                if (e.shiftKey && String.fromCharCode(e.which).toLowerCase() === 'd') {
+                    drawingModeEl.click();
+                }
+            })
 
             internal.setupPage();
         },
@@ -754,19 +759,28 @@ const mll = (function () {
 
                 for (let x = 0; x < 5; x++) {
                     for (let y = 0; y < 5; y++) {
+                        const toggle = $(".sp-toggle-" + x + y);
                         if (pointCoords[filePrefix][x][y] == null) {
-                            $(".sp-toggle-" + x + y).removeClass('selected').removeClass('available').addClass('unavailable');
-                        } else {
-                            $(".sp-toggle-" + x + y).addClass('selected').addClass('available').removeClass('unavailable')
+                            toggle.removeClass("selected").removeClass('available').addClass('unavailable');
+                            continue;
+                        }
+
+                        toggle.addClass('available').removeClass('unavailable')
+
+                        if (resetSelectedPoints) {
+                            toggle.addClass('selected');
                         }
                     }
                 }
+
+                resetSelectedPoints = false;
 
                 internal.updateStatesAndRender();
             }
 
             function initStrongpointData(filePrefix) {
-                const strongpointKey = filePrefix + controls.checkSpResource.is(":checked");
+                const resourceChecked = controls.checkSpResource.is(":checked");
+                const strongpointKey = filePrefix + resourceChecked;
                 if (pointCutoutData.hasOwnProperty(strongpointKey)) {
                     return;
                 }
@@ -834,6 +848,8 @@ const mll = (function () {
             }
 
             controls.comboMapSelect.change(function () {
+                resetSelectedPoints = true;
+
                 const filePrefix = controls.comboMapSelect.val();
                 console.log("Loading " + filePrefix)
 
