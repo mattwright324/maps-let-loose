@@ -177,6 +177,12 @@
                                 </label>
                             </div>
                             <input type="range" class="form-range" min="0" max="6" value="3" id="sector-range">
+
+                            <small class="text-muted">
+                                Ctrl+Left or Ctrl+Up to decrement
+                                <br>
+                                Ctrl+Right or Ctrl+Down to increment
+                            </small>
                         </div>
                     </div>
                 </div>
@@ -193,7 +199,7 @@
                          aria-labelledby="flush-headingTwo">
                         <div class="accordion-body">
                             <div style="display: inline-block;">
-                                <div class="form-check">
+                                <div class="form-check mb-3">
                                     <input class="form-check-input" type="checkbox" value="" id="drawing-visible"
                                            checked>
                                     <label class="form-check-label" for="drawing-visible">
@@ -201,25 +207,51 @@
                                     </label>
                                 </div>
                                 <div style="margin: 5px 0">
-                                    <button id="drawing-mode" class="btn btn-secondary">Start drawing mode</button>
-                                    <small class="text-muted">Shift + D</small>
+                                    <div class="btn-group" role="group" aria-label="Basic example">
+                                        <button id="drawing-mode" type="button" class="btn btn-secondary">Start drawing mode</button>
+                                        <button id="clear-paths" type="button" class="btn btn-link" title="Clear all drawings">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                 fill="currentColor"
+                                                 class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                                                <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"/>
+                                            </svg>
+                                        </button>
+                                        <button id="undo-path" type="button" class="btn btn-link" title="Undo last drawing">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                 fill="currentColor"
+                                                 class="bi bi-caret-left-fill" viewBox="0 0 16 16">
+                                                <path d="m3.86 8.753 5.482 4.796c.646.566 1.658.106 1.658-.753V3.204a1 1 0 0 0-1.659-.753l-5.48 4.796a1 1 0 0 0 0 1.506z"/>
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div>
-                                    <a id="clear-paths" href="javascript:" style="margin-right: 10px">Clear</a>
-                                    <a id="undo-path" href="javascript:">Undo</a>
-                                </div>
+                                <small class="text-muted">
+                                    Shift+D to toggle drawing mode on the fly
+                                    <br>
+                                    Shift+Drag to create straight lines
+                                </small>
 
                                 <div id="drawing-mode-options" style="margin: 5px 0;">
                                     <label for="drawing-line-width">Line width
                                         (<span id="line-width-value">7</span>)
                                     </label>
                                     <br>
-                                    <input type="range" value="7" min="3" max="25" id="drawing-line-width"><br>
+                                    <input type="range" class="form-range" value="7" min="3" max="25" id="drawing-line-width"><br>
+
 
                                     <label for="drawing-color">Line color </label>
                                     <br>
-                                    <input type="color" value="#0080ff" id="drawing-color"><br>
+                                    <div id="line-color-div" class="d-flex align-items-center">
+                                        <input type="color" value="#0080ff" id="drawing-color">
+                                        <span>or quick</span>
+                                        <span class="color blue" onclick="$('#drawing-color').val('#0080ff').trigger('change')"></span>
+                                        <span class="color red" onclick="$('#drawing-color').val('#ff8080').trigger('change')"></span>
+                                    </div>
                                 </div>
+
+                                <p>
+
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -312,13 +344,13 @@
     <ul>
         <li>There are 3^5 or 243 total potential objective configurations</li>
         <li>
-            Offensive is allowed all 243 configurations (unconfirmed, at least allows some map-edge to map-edge
+            Offensive is allowed all 243 configurations (unconfirmed, at least allows some consecutive map-edge to map-edge
             layouts)
             <br>
             <img src="./maps/offensive-ok.png" width="200">
         </li>
         <li>
-            Warfare is allowed only 99 configurations as it removes any map-edge to map-edge layouts
+            Warfare is allowed only 99 configurations as it removes any consecutive map-edge to map-edge layouts
             <br>
             <img src="./maps/warfare-not-ok.png" width="200">
         </li>

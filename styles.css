@@ -38,6 +38,23 @@ canvas.draw-mode {
     cursor: crosshair !important;
 }
 
+.color {
+    display: inline-block;
+    width: 35px;
+    height: 30px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.color.blue {
+    background-color: #0080ff;
+}
+.color.red {
+    background-color: #ff8080;
+}
+#line-color-div span {
+    margin-left: 5px;
+}
+
 #sp-grid {
     display: grid;
     grid-template-columns: repeat(5, 40px);
@@ -100,7 +117,7 @@ html.dark .btn-primary {
     border-color: #0d6efd;
 }
 
-html.dark a {
+html.dark a, html.dark .btn-link {
     color: lightskyblue;
 }
 

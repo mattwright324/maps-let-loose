@@ -655,7 +655,20 @@ const mll = (function () {
 
             $(document).on('keypress', function (e) {
                 if (e.shiftKey && String.fromCharCode(e.which).toLowerCase() === 'd') {
+                    console.log("Shift+D")
                     drawingModeEl.click();
+                }
+            })
+            $(document).on('keyup', function (e) {
+                if (e.ctrlKey && e.keyCode === 37 || e.keyCode === 38) { // left or up
+                    console.log("Ctrl+" + e.keyCode)
+                    controls.sectorRange.val(Number(controls.sectorRange.val()) - 1);
+                    controls.sectorRange.trigger('input');
+                }
+                if (e.ctrlKey && e.keyCode === 39 || e.keyCode === 40) { // right or down
+                    console.log("Ctrl+" + e.keyCode)
+                    controls.sectorRange.val(Number(controls.sectorRange.val()) + 1);
+                    controls.sectorRange.trigger('input');
                 }
             })
 
