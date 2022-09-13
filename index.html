@@ -31,7 +31,7 @@
 <div class="container mb-5">
     <div class="row">
         <div class="col col-md-3" style="user-select: none">
-            <div class="mb-4">
+            <div class="mb-3">
                 <h4>Select Map</h4>
                 <select class="form-select" id="map-select">
                     <option value="Carentan">Carentan</option>
@@ -49,154 +49,220 @@
                 </select>
             </div>
 
-            <div class="mb-4">
-                <h4>Toggle Elements</h4>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="grid-visible" checked>
-                    <label class="form-check-label" for="grid-visible">
-                        Grid visible
-                    </label>
-                </div>
+            <div class="accordion accordion-flush mb-3" id="accordionFlushExample">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="flush-headingOne">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#flush-collapseOne" aria-expanded="false"
+                                aria-controls="flush-collapseOne">
+                            Toggle Elements
+                        </button>
+                    </h2>
+                    <div id="flush-collapseOne" class="accordion-collapse collapse  show"
+                         aria-labelledby="flush-headingOne">
+                        <div class="accordion-body">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="grid-visible" checked>
+                                <label class="form-check-label" for="grid-visible">
+                                    Grid visible
+                                </label>
+                            </div>
 
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="dg-visible">
-                    <label class="form-check-label" for="dg-visible">
-                        Offensive default garrisons
-                        <a target="blank"
-                           href="https://drive.google.com/drive/folders/1KTFLvtiQ3is9Q7GzFXTbnaRsxDLH7QAA"
-                           title="All default garrisons">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                 class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
-                                <path fill-rule="evenodd"
-                                      d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
-                                <path fill-rule="evenodd"
-                                      d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
-                            </svg>
-                        </a>
-                    </label>
-                </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="dg-visible">
+                                <label class="form-check-label" for="dg-visible">
+                                    Offensive default garrisons
+                                </label>
+                            </div>
 
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="garry-visible" checked>
-                    <label class="form-check-label" for="garry-visible">
-                        Placed map elements
-                        <a id="removePlacedGarrisons" href="javascript:" title="Remove all map elements">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                 class="bi bi-trash3-fill" viewBox="0 0 16 16">
-                                <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"/>
-                            </svg>
-                        </a>
-                        <a id="undoLastGarrison" href="javascript:" title="Remove most recent map element">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                 class="bi bi-caret-left-fill" viewBox="0 0 16 16">
-                                <path d="m3.86 8.753 5.482 4.796c.646.566 1.658.106 1.658-.753V3.204a1 1 0 0 0-1.659-.753l-5.48 4.796a1 1 0 0 0 0 1.506z"/>
-                            </svg>
-                        </a>
-                    </label>
-                    <p style="margin-bottom: 0">
-                        <small class="text-muted">Double click or right click on map</small>
-                    </p>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="garry-radius-visible">
-                    <label class="form-check-label" for="garry-radius-visible">
-                        Hide spawn point radiuses
-                    </label>
-                </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="garry-visible" checked>
+                                <label class="form-check-label" for="garry-visible">
+                                    Placed map elements
+                                    <a id="removePlacedGarrisons" href="javascript:" title="Remove all map elements">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                             fill="currentColor"
+                                             class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                                            <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"/>
+                                        </svg>
+                                    </a>
+                                    <a id="undoLastGarrison" href="javascript:" title="Remove most recent map element">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                             fill="currentColor"
+                                             class="bi bi-caret-left-fill" viewBox="0 0 16 16">
+                                            <path d="m3.86 8.753 5.482 4.796c.646.566 1.658.106 1.658-.753V3.204a1 1 0 0 0-1.659-.753l-5.48 4.796a1 1 0 0 0 0 1.506z"/>
+                                        </svg>
+                                    </a>
+                                </label>
+                                <p style="margin-bottom: 0">
+                                    <small class="text-muted">Double click or right click on map</small>
+                                </p>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="garry-radius-visible">
+                                <label class="form-check-label" for="garry-radius-visible">
+                                    Hide spawn point radiuses
+                                </label>
+                            </div>
 
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="arty-visible">
-                    <label class="form-check-label" for="arty-visible">
-                        Artillery range visible
-                    </label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="flip-arty">
-                    <label class="form-check-label" for="flip-arty">
-                        Flip artillery range
-                    </label>
-                </div>
-            </div>
-
-            <div class="mb-4">
-                <h4>Draw</h4>
-                <div style="display: inline-block;">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="" id="drawing-visible" checked>
-                        <label class="form-check-label" for="drawing-visible">
-                            Drawings visible
-                        </label>
-                    </div>
-                    <div style="margin: 5px 0">
-                        <button id="drawing-mode" class="btn btn-secondary">Enter drawing mode</button>
-                    </div>
-                    <div>
-                        <a id="clear-paths" href="javascript:" style="margin-right: 10px">Clear</a>
-                        <a id="undo-path" href="javascript:">Undo</a>
-                    </div>
-
-                    <div id="drawing-mode-options" style="margin: 5px 0; display:none">
-                        <label for="drawing-line-width">Line width: (<span id="line-width-value">0</span>) </label>
-                        <input type="range" value="7" min="3" max="25" id="drawing-line-width"><br>
-
-                        <label for="drawing-color">Line color: </label>
-                        <input type="color" value="#0080ff" id="drawing-color"><br>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="arty-visible">
+                                <label class="form-check-label" for="arty-visible">
+                                    Artillery range visible
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="flip-arty">
+                                <label class="form-check-label" for="flip-arty">
+                                    Flip artillery range
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="mb-4">
-                <h4>Strongpoints</h4>
-                <div class="form-check mb-3">
-                    <input class="form-check-input" type="checkbox" value="" id="sp-visible" checked>
-                    <label class="form-check-label" for="sp-visible">
-                        Strongpoints visible
-                    </label>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="flush-headingThree">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#flush-collapseThree" aria-expanded="false"
+                                aria-controls="flush-collapseThree">
+                            Strongpoints
+                        </button>
+                    </h2>
+                    <div id="flush-collapseThree" class="accordion-collapse collapse show"
+                         aria-labelledby="flush-headingThree">
+                        <div class="accordion-body">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="sp-visible" checked>
+                                <label class="form-check-label" for="sp-visible">
+                                    Strongpoints visible
+                                </label>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" value="" id="sp-resource-visible">
+                                <label class="form-check-label" for="sp-resource-visible">
+                                    Hide resource icons
+                                </label>
+                            </div>
+                            <div id="sp-grid" class="mb-3"></div>
+                            <div class="mb-3">
+                                <a id="enableAll" href="javascript:" style="margin-right: 10px">Enable all</a>
+                                <a id="disableAll" href="javascript:">Disable all</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div id="sp-grid" class="mb-3"></div>
-                <div class="mb-3">
-                    <a id="enableAll" href="javascript:" style="margin-right: 10px">Enable all</a>
-                    <a id="disableAll" href="javascript:">Disable all</a>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="flush-headingFour">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#flush-collapseFour" aria-expanded="false"
+                                aria-controls="flush-collapseFour">
+                            Captured Sectors
+                        </button>
+                    </h2>
+                    <div id="flush-collapseFour" class="accordion-collapse collapse show"
+                         aria-labelledby="flush-headingFour">
+                        <div class="accordion-body">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="sector-visible">
+                                <label class="form-check-label" for="sector-visible">
+                                    Sectors visible
+                                </label>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" value="" id="swap-sector-color">
+                                <label class="form-check-label" for="swap-sector-color">
+                                    Swap sector colors
+                                </label>
+                            </div>
+                            <input type="range" class="form-range" min="0" max="6" value="3" id="sector-range">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="flush-headingTwo">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#flush-collapseTwo" aria-expanded="false"
+                                aria-controls="flush-collapseTwo">
+                            Free Draw
+                        </button>
+                    </h2>
+                    <div id="flush-collapseTwo" class="accordion-collapse collapse show"
+                         aria-labelledby="flush-headingTwo">
+                        <div class="accordion-body">
+                            <div style="display: inline-block;">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="" id="drawing-visible"
+                                           checked>
+                                    <label class="form-check-label" for="drawing-visible">
+                                        Drawings visible
+                                    </label>
+                                </div>
+                                <div style="margin: 5px 0">
+                                    <button id="drawing-mode" class="btn btn-secondary">Start drawing mode</button>
+                                    <small class="text-muted">Shift + D</small>
+                                </div>
+                                <div>
+                                    <a id="clear-paths" href="javascript:" style="margin-right: 10px">Clear</a>
+                                    <a id="undo-path" href="javascript:">Undo</a>
+                                </div>
+
+                                <div id="drawing-mode-options" style="margin: 5px 0;">
+                                    <label for="drawing-line-width">Line width
+                                        (<span id="line-width-value">7</span>)
+                                    </label>
+                                    <br>
+                                    <input type="range" value="7" min="3" max="25" id="drawing-line-width"><br>
+
+                                    <label for="drawing-color">Line color </label>
+                                    <br>
+                                    <input type="color" value="#0080ff" id="drawing-color"><br>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="flush-headingFive">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#flush-collapseFive" aria-expanded="false"
+                                aria-controls="flush-collapseFive">
+                            Export
+                        </button>
+                    </h2>
+                    <div id="flush-collapseFive" class="accordion-collapse collapse show"
+                         aria-labelledby="flush-headingFive">
+                        <div class="accordion-body">
+                            <button id="save" class="btn btn-secondary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                     class="bi bi-download" viewBox="0 0 16 16">
+                                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                                    <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                                </svg>
+                                Save as PNG
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <div class="mb-3">
-                <h4>Sectors</h4>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="sector-visible">
-                    <label class="form-check-label" for="sector-visible">
-                        Sectors visible
-                    </label>
-                </div>
-                <div class="form-check mb-3">
-                    <input class="form-check-input" type="checkbox" value="" id="swap-sector-color">
-                    <label class="form-check-label" for="swap-sector-color">
-                        Swap sector colors
-                    </label>
-                </div>
-                <input type="range" class="form-range" min="0" max="6" value="3" id="sector-range">
-            </div>
-
-            <div class="mb-3">
-                <h4>Export</h4>
-                <button id="save" class="btn btn-secondary">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                         class="bi bi-download" viewBox="0 0 16 16">
-                        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-                        <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
-                    </svg>
-                    Save as PNG
-                </button>
-            </div>
-
         </div>
+
         <div class="col col-md-9">
             <div id="canvas-container">
-                <canvas id="canvas" class="hasmenu"></canvas>
+                <canvas id="canvas" class="hasmenu drag-mode"></canvas>
                 <div id="menu" class="menu-x">
-                    <div class="menu-li" onclick="mll.menuAdd('garry')">Add Garrison</div>
-                    <div class="menu-li" onclick="mll.menuAdd('airhead')">Add Airhead</div>
-                    <div class="menu-li" onclick="mll.menuAdd('halftrack')">Add Halftrack</div>
+                    <div class="menu-li submenu">
+                        Add Spawn
+                        <small>
+                            <a href="javascript:mll.menuAdd('garry')">Garrison</a> |
+                            <a href="javascript:mll.menuAdd('airhead')">Airhead</a> |
+                            <a href="javascript:mll.menuAdd('halftrack')">Halftrack</a>
+                        </small>
+                    </div>
                     <div class="menu-li submenu">
                         Add Outpost
                         <small>
@@ -245,16 +311,28 @@
     <h4>Additional details</h4>
     <ul>
         <li>There are 3^5 or 243 total potential objective configurations</li>
-        <li>Offensive is allowed all 243 configurations (unconfirmed, at least allows some map-edge to map-edge
+        <li>
+            Offensive is allowed all 243 configurations (unconfirmed, at least allows some map-edge to map-edge
             layouts)
             <br>
             <img src="./maps/offensive-ok.png" width="200">
         </li>
-        <li>Warfare is allowed only 99 configurations as it removes any that have a map-edge to map-edge layout
+        <li>
+            Warfare is allowed only 99 configurations as it removes any map-edge to map-edge layouts
             <br>
             <img src="./maps/warfare-not-ok.png" width="200">
         </li>
-        <li>There is a theoretical limit of 14 team spawns: 8 maximum garrisons, 5 maximum halftracks, and 1 airhead.
+        <li>
+            There is a theoretical limit of 14 team spawns: 8 maximum garrisons, 5 maximum halftracks, and 1 airhead
+        </li>
+        <li>
+            Almost all spawn points have a 50m warning radius where it goes "hot" when an enemy is within the radius
+            regardless of where they are placed.
+        </li>
+        <li>Garrisons are the exception and have a lockout radius of 100m while placed in the red zone</li>
+        <li>
+            Only one set of default garrisons will be present in offensive mode and will be the three closest to the
+            attacking side
         </li>
     </ul>
 </div>
@@ -266,19 +344,24 @@
         Original tacmaps can be obtained from the <i>#hll-tacmaps</i> channel in the official HLL Discord.
     </p>
     <ul>
-        <li><a target="_blank" href="https://drive.google.com/drive/folders/1Ob8vprqHc953rgCJPfNPMG3VNj51B8qE?usp=sharing">
+        <li><a target="_blank"
+               href="https://drive.google.com/drive/folders/1Ob8vprqHc953rgCJPfNPMG3VNj51B8qE?usp=sharing">
             All 12 tacmaps (no-grid) ~69 MB total
         </a></li>
-        <li><a target="_blank" href="https://drive.google.com/drive/folders/1--1a4qypC3Ygr_d_gQfKuoEVUfOuQ4BL?usp=sharing">
+        <li><a target="_blank"
+               href="https://drive.google.com/drive/folders/1--1a4qypC3Ygr_d_gQfKuoEVUfOuQ4BL?usp=sharing">
             All 12 tacmaps (grid) ~67 MB total
         </a></li>
-        <li><a target="_blank" href="https://drive.google.com/drive/folders/1E4fjjOleU0UPsIejK6v0_BIYYuabLoRb?usp=sharing">
+        <li><a target="_blank"
+               href="https://drive.google.com/drive/folders/1E4fjjOleU0UPsIejK6v0_BIYYuabLoRb?usp=sharing">
             All 12 tacmaps (grid, strongpoints, and HQ) ~68 MB total
         </a></li>
-        <li><a target="_blank" href="https://drive.google.com/drive/folders/1jh-LchMt335WcxhoevW1hjQdpmLLN7CD?usp=sharing">
+        <li><a target="_blank"
+               href="https://drive.google.com/drive/folders/1jh-LchMt335WcxhoevW1hjQdpmLLN7CD?usp=sharing">
             All 12 tacmaps (grid, strongpoints, no-HQ) ~93 MB total
         </a></li>
-        <li><a target="_blank" href="https://drive.google.com/drive/folders/1KTFLvtiQ3is9Q7GzFXTbnaRsxDLH7QAA?usp=sharing">
+        <li><a target="_blank"
+               href="https://drive.google.com/drive/folders/1KTFLvtiQ3is9Q7GzFXTbnaRsxDLH7QAA?usp=sharing">
             All 12 tacmaps (grid, strongpoints, marked default offensive garrisons) ~88 MB total
         </a></li>
     </ul>
@@ -288,25 +371,33 @@
     <h4>Other resources</h4>
     <p>Links to other handy things Hell Let Loose related</p>
     <ul>
-        <li><a target="_blank" href="https://store.steampowered.com/news/app/686810/view/2998819983302580037">The
-            Ultimate New Player Handbook</a></li>
-        <li><a target="_blank" href="https://www.theline.gg/tankbible">The Tank Bible</a></li>
-        <li><a target="_blank" href="https://www.funletloose.com/">Fun Let Loose - Simple artillery calculator</a></li>
-        <li><a target="_blank" href="https://www.hell-let-loose-calculator.com/#/">Hell Let Loose Calculator -
-            Interactive map artillery calculator</a></li>
-        <li><a target="_blank" href="https://worldwarways.web.app/#/">World War Ways - Interactive map truck
-            directions</a></li>
-        <li><a target="_blank" href="https://hellletloose.fandom.com/wiki/Hell_Let_Loose_Wiki">Hell Let Loose Wiki (not
-            updated often)</a></li>
-        <li><a target="_blank" href="https://www.hellletloose.com/">Official HLL Website - Links to the official
-            Discord</a></li>
+        <li><a target="_blank" href="https://store.steampowered.com/news/app/686810/view/2998819983302580037">
+            The Ultimate New Player Handbook
+        </a></li>
+        <li><a target="_blank" href="https://www.theline.gg/tankbible">
+            The Tank Bible
+        </a></li>
+        <li><a target="_blank" href="https://www.funletloose.com/">
+            Fun Let Loose - Simple artillery calculator
+        </a></li>
+        <li><a target="_blank" href="https://www.hell-let-loose-calculator.com/#/">
+            Hell Let Loose Calculator - Interactive map artillery calculator
+        </a></li>
+        <li><a target="_blank" href="https://worldwarways.web.app/#/">
+            World War Ways - Interactive map driving directions
+        </a></li>
+        <li><a target="_blank" href="https://hellletloose.fandom.com/wiki/Hell_Let_Loose_Wiki">
+            Hell Let Loose Wiki (not up to date)
+        </a></li>
+        <li><a target="_blank" href="https://www.hellletloose.com/">
+            Official HLL Website - Links to the official Discord
+        </a></li>
     </ul>
 </div>
 
 <div class="ui container" style="padding-top:3%;padding-bottom:3%;color:darkgray;text-align:center">
     mattwright324 | 2022 | <a href="/">home</a> | <a target="_blank" href="https://github.com/mattwright324">github</a>
-    |
-    <a target="_blank" href="https://github.com/mattwright324/maps-let-loose">maps-let-loose</a>
+    | <a target="_blank" href="https://github.com/mattwright324/maps-let-loose">maps-let-loose</a>
 </div>
 </body>
 </html>

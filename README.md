@@ -15,3 +15,14 @@ A tool to quickly create custom tacmaps for Hell Let Loose.
   - You can hit the last row a bit more often than you might think!
 - All client side for very fast image generation
 - Export your creation as a high quality png (1920x1920)
+
+## Build
+
+Refer to [BUILD.md](./BUILD.md)
+for instructions on how to build and run from source.
+
+## Contributing
+
+Contributions are welcome, refer
+to [CONTRIBUTING.md](./CONTRIBUTING.md)
+for more detail.
