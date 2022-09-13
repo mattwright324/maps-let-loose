@@ -609,7 +609,7 @@ const mll = (function () {
                 controls.fabricCanvas.freeDrawingBrush.width = parseInt(value, 10) || 1;
                 $("#line-width-value").text(value);
             });
-            drawingLineWidthEl.trigger('change');
+            drawingLineWidthEl.trigger('input');
 
             controls.fabricCanvas.freeDrawingBrush.color = drawingColorEl.val();
             controls.fabricCanvas.freeDrawingBrush.width = parseInt(drawingLineWidthEl.val(), 10) || 1;
