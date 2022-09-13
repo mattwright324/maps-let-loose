@@ -17,6 +17,16 @@ body {
     position: relative;
 }
 
+.accordion-button {
+    padding: 8px 8px;
+    font-size: 22px;
+}
+
+html.dark .accordion-button:not(.collapsed) {
+    color: inherit !important;
+    background-color: inherit !important;
+}
+
 canvas {
     /*border: 2px rgba(127,127,127,0.25) dashed;*/
     border-radius: 5px;
