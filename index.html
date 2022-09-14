@@ -30,7 +30,7 @@
 
 <div class="container mb-5">
     <div class="row">
-        <div class="col col-md-3" style="user-select: none">
+        <div class="col col-lg-3" style="user-select: none">
             <div class="mb-3">
                 <h4>Select Map</h4>
                 <select class="form-select" id="map-select">
@@ -179,9 +179,9 @@
                             <input type="range" class="form-range" min="0" max="6" value="3" id="sector-range">
 
                             <small class="text-muted">
-                                Ctrl+Left or Ctrl+Up to decrement
+                                Ctrl+Left to shift sectors left or up
                                 <br>
-                                Ctrl+Right or Ctrl+Down to increment
+                                Ctrl+Right to shift sectors right or down
                             </small>
                         </div>
                     </div>
@@ -248,10 +248,6 @@
                                         <span class="color red" onclick="$('#drawing-color').val('#ff8080').trigger('change')"></span>
                                     </div>
                                 </div>
-
-                                <p>
-
-                                </p>
                             </div>
                         </div>
                     </div>
@@ -283,7 +279,7 @@
             </div>
         </div>
 
-        <div class="col col-md-9">
+        <div class="col col-lg-9">
             <div id="canvas-container">
                 <canvas id="canvas" class="hasmenu drag-mode"></canvas>
                 <div id="menu" class="menu-x">

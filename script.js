@@ -609,7 +609,7 @@ const mll = (function () {
                 controls.fabricCanvas.freeDrawingBrush.width = parseInt(value, 10) || 1;
                 $("#line-width-value").text(value);
             });
-            drawingLineWidthEl.trigger('change');
+            drawingLineWidthEl.trigger('input');
 
             controls.fabricCanvas.freeDrawingBrush.color = drawingColorEl.val();
             controls.fabricCanvas.freeDrawingBrush.width = parseInt(drawingLineWidthEl.val(), 10) || 1;
@@ -660,12 +660,12 @@ const mll = (function () {
                 }
             })
             $(document).on('keyup', function (e) {
-                if (e.ctrlKey && e.keyCode === 37 || e.keyCode === 38) { // left or up
+                if ((e.ctrlKey || e.shiftKey) && e.keyCode === 37) {
                     console.log("Ctrl+" + e.keyCode)
                     controls.sectorRange.val(Number(controls.sectorRange.val()) - 1);
                     controls.sectorRange.trigger('input');
                 }
-                if (e.ctrlKey && e.keyCode === 39 || e.keyCode === 40) { // right or down
+                if ((e.ctrlKey || e.shiftKey) && e.keyCode === 39) {
                     console.log("Ctrl+" + e.keyCode)
                     controls.sectorRange.val(Number(controls.sectorRange.val()) + 1);
                     controls.sectorRange.trigger('input');

@@ -162,3 +162,15 @@ html.dark .progress-bar {
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
 }
+
+@media only screen and (max-width: 768px) {
+    #canvas-container {
+        height: 400px;
+        user-input: none;
+    }
+}
+@media only screen and (min-width: 769px) {
+    #canvas-container {
+        height: 800px;
+    }
+}
