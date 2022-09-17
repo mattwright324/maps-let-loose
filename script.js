@@ -628,8 +628,8 @@ const mll = (function () {
             if (elements.joinPanel[0]) {
                 roomsMode = true;
                 console.log("Rooms Mode");
-                socket = io('localhost:3000');
-                //socket = io('https://maps-let-loose-websocket.herokuapp.com/');
+                //socket = io('localhost:3000');
+                socket = io('https://maps-let-loose-websocket.herokuapp.com/');
             } else {
                 roomsMode = false;
                 console.log("Solo Mode");
