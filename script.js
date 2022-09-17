@@ -4,11 +4,243 @@ const mll = (function () {
     const elements = {};
     const controls = {};
 
+    function uuidv4() {
+        return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
+            (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+        );
+    }
+
+    function parseQuery(queryString) {
+        const query = {};
+        const pairs = (queryString[0] === '?' ? queryString.substr(1) : queryString).split('&');
+        for (let i = 0; i < pairs.length; i++) {
+            let pair = pairs[i].split('=');
+            query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
+        }
+        return query;
+    }
+
+    function sanitize(input) {
+        return String(input).trim()
+            .substring(0, 50)
+            .replaceAll(/[^\w+ !@#$&%/\-\[\]]/gi, '');
+    }
+
+    let lastLoadedMap;
+    let roomsMode = false;
+    let roomsRole = 'viewer';
+    let socket;
     let currentLoadedPoints = '';
     let contextMenuEvent;
     let placed = [];
     let drawings = [];
-    let resetSelectedPoints = true;
+    let resetSelectedPoints = false;
+
+    function getControlsRoomState() {
+        const selected = [];
+        $(".sp-toggle.available.selected").each(function (i, el) {
+            const toggle = $(el);
+            selected.push('' + toggle.data('x') + toggle.data('y'));
+        })
+        return {
+            map: controls.comboMapSelect.val(),
+            grid: controls.checkGrid.is(":checked"),
+            defaultGarries: controls.checkDefaultGarries.is(":checked"),
+            placed: controls.checkPlacedGarries.is(":checked"),
+            spawnRadius: controls.checkGarryRadius.is(":checked"),
+            arty: controls.checkArty.is(":checked"),
+            flipArty: controls.checkArtyFlip.is(":checked"),
+            sp: controls.checkStrongpoints.is(":checked"),
+            spResource: controls.checkSpResource.is(":checked"),
+            selectedSp: selected,
+            sectors: controls.checkSectors.is(":checked"),
+            swapSectors: controls.checkSectorSwap.is(":checked"),
+            sectorValue: controls.sectorRange.val(),
+            drawings: controls.checkDrawingsVisible.is(":checked")
+        }
+    }
+
+    async function loadFromRoomState(message) {
+        if (!message || !message.state) {
+            console.warn('message or state was null')
+            return;
+        }
+
+        console.log("loadFromState()")
+        console.log(message);
+
+        const controlState = message.state.controls;
+        if (controlState) {
+            console.log('updating controls state')
+            controls.comboMapSelect.val(controlState.map);
+            controls.checkGrid.prop('checked', controlState.grid);
+            controls.checkDefaultGarries.prop('checked', controlState.defaultGarries);
+            controls.checkPlacedGarries.prop('checked', controlState.placed);
+            controls.checkGarryRadius.prop('checked', controlState.spawnRadius);
+            controls.checkArty.prop('checked', controlState.arty);
+            controls.checkArtyFlip.prop('checked', controlState.flipArty);
+            controls.checkStrongpoints.prop('checked', controlState.sp);
+            controls.checkSpResource.prop('checked', controlState.spResource);
+            controls.checkSectors.prop('checked', controlState.sectors);
+            controls.checkSectorSwap.prop('checked', controlState.swapSectors);
+            controls.sectorRange.val(controlState.sectorValue);
+            controls.checkDrawingsVisible.prop('checked', controlState.drawings);
+
+            internal.roomsLoadMapAndSP(controlState.map, controlState.selectedSp);
+        }
+
+        const elementState = message.state.elements;
+        if (elementState) {
+            console.log('updating element state')
+
+            const updateIds = [];
+            for (let i = 0; i < elementState.length; i++) {
+                updateIds.push(elementState[i].type.id);
+            }
+
+            // remove elements not un update list
+            const currentIds = [];
+            const newPlaced = [];
+            for (let i = 0; i < placed.length; i++) {
+                const element = placed[i];
+                if (updateIds.indexOf(element.type.id) === -1) {
+                    console.log('removing ' + element.type.id)
+                    controls.fabricCanvas.remove(element);
+                    controls.exportCanvas.remove(element);
+                } else {
+                    newPlaced.push(element);
+                    currentIds.push(element.type.id);
+                }
+            }
+            placed = newPlaced;
+
+            // update element angle and position if changed
+            for (let i = 0; i < placed.length; i++) {
+                const element = placed[i];
+                for (let j = 0; j < elementState.length; j++) {
+                    const updated = elementState[j];
+                    if (element.type.id === updated.type.id) {
+                        element.set({
+                            angle: updated.angle,
+                            top: updated.top,
+                            left: updated.left
+                        })
+                        if (roomsMode && roomsRole === 'viewer') {
+                            element.set({
+                                selectable: false,
+                                evented: false
+                            })
+                        }
+                    }
+                }
+            }
+
+            // add elements from update not in current list
+
+            console.log(elementState);
+            for (let i = 0; i < elementState.length; i++) {
+                const meta = elementState[i].type;
+
+                if (currentIds.indexOf(meta.id) === -1) {
+                    console.log('adding ' + meta.id)
+                    addMapElement(meta.originalEvent, meta.type, meta.modifier, false, meta.id, elementState[i]);
+                }
+            }
+        }
+
+        if (controlState || elementState) {
+            internal.updateStatesAndRender();
+        }
+
+        const drawingState = message.state.drawings;
+        if (drawingState) {
+            console.log('updating drawing state')
+            while (drawings.length) {
+                const element = drawings.pop();
+                controls.fabricCanvas.remove(element);
+                controls.exportCanvas.remove(element);
+            }
+
+            fabric.util.enlivenObjects(drawingState, function (objects) {
+                objects.forEach(function (o) {
+                    drawings.push(o);
+
+                    o.set({
+                        zIndex: zIndex.drawings,
+                        evented: false,
+                        selectable: false
+                    });
+
+                    controls.fabricCanvas.add(o);
+                    controls.exportCanvas.add(o);
+                });
+            });
+            controls.fabricCanvas.orderByZindex();
+            controls.exportCanvas.orderByZindex();
+
+            internal.render();
+        }
+    }
+
+    function roomEditorUpdateControls(about) {
+        console.log("roomEditorUpdateControls(" + about + ")")
+        if (roomsMode && roomsRole === 'editor') {
+            console.log('sending editor-controls event')
+            socket.emit('editor-controls', {
+                roomId: controls.inputRoomId.val(),
+                editorKey: $("#editorKeyDisplay").val(),
+                state: {
+                    controls: getControlsRoomState()
+                }
+            });
+        }
+    }
+
+    function roomEditorUpdateElements() {
+        if (roomsMode && roomsRole === 'editor') {
+            console.log('sending editor-elements event');
+
+            // images cannot be enlivened as easily as drawings
+            // storing only necessary data to recreate in the clients
+            const reducedElements = [];
+            for (let i = 0; i < placed.length; i++) {
+                if (i >= 50) {
+                    break;
+                }
+
+                const element = placed[i];
+                reducedElements.push({
+                    angle: element.angle,
+                    height: element.height,
+                    left: element.left,
+                    top: element.top,
+                    type: element.type,
+                    width: element.width
+                })
+            }
+
+            socket.emit('editor-elements', {
+                roomId: controls.inputRoomId.val(),
+                editorKey: $("#editorKeyDisplay").val(),
+                state: {
+                    elements: reducedElements
+                }
+            });
+        }
+    }
+
+    function roomEditorUpdateDrawings() {
+        if (roomsMode && roomsRole === 'editor') {
+            console.log('sending editor-drawings event')
+            socket.emit('editor-drawings', {
+                roomId: controls.inputRoomId.val(),
+                editorKey: $("#editorKeyDisplay").val(),
+                state: {
+                    drawings: drawings.slice(0, 50)
+                }
+            });
+        }
+    }
 
     const zIndex = {
         map: 0,
@@ -72,14 +304,14 @@ const mll = (function () {
             wh: 122,
             resolveImg: function (object) {
                 const radiusHidden = controls.checkGarryRadius.is(":checked");
-                return './maps/outpost-' + object.modifier + "-" + (radiusHidden ? 'plain' : 'radius') + '.png'
+                return './maps/outpost-' + object.type.modifier + "-" + (radiusHidden ? 'plain' : 'radius') + '.png'
             },
         },
         tank: {
             wh: 51,
             resolveImg: function (object) {
-                if (object.modifier) {
-                    return './maps/tank-' + object.modifier + ".png";
+                if (object.type.modifier) {
+                    return './maps/tank-' + object.type.modifier + ".png";
                 }
 
                 return './maps/tank-med.png'
@@ -89,8 +321,8 @@ const mll = (function () {
         truck: {
             wh: 51,
             resolveImg: function (object) {
-                if (object.modifier) {
-                    return './maps/truck-' + object.modifier + ".png";
+                if (object.type.modifier) {
+                    return './maps/truck-' + object.type.modifier + ".png";
                 }
 
                 return './maps/truck-supply.png'
@@ -107,18 +339,9 @@ const mll = (function () {
         enemy: {
             wh: 51,
             resolveImg: function (object) {
-                return './maps/enemy-' + object.modifier + '.png'
+                return './maps/enemy-' + object.type.modifier + '.png'
             }
         }
-    }
-    const elementSizes = {
-        garry: 380,
-        airhead: 122,
-        halftrack: 122,
-        tank: 51,
-        'at-gun': 51,
-        'enemy-garry': 51,
-        'enemy-infantry': 51,
     }
 
     function fixSpawnSelectBoxes() {
@@ -296,17 +519,15 @@ const mll = (function () {
         return rx <= x && rx2 >= x && ry <= y && ry2 >= y;
     }
 
-    function addMapElement(e, type, modifier) {
-        console.log('addSpawn(' + type + ')')
+    function addMapElement(e, type, modifier, roomSendUpdate, uuid, otherObject) {
+        console.log('addSpawn(' + type + ', ' + modifier + ')')
         console.log(e);
 
         fabric.Image.fromURL('', function (img) {
             console.log(img);
 
-            img.modifier = modifier;
             const wh = placedMeta[type].wh;
             img.set({
-                type: type,
                 selectable: true,
                 evented: true,
                 hasBorders: false,
@@ -318,6 +539,25 @@ const mll = (function () {
                 width: wh,
                 height: wh,
             });
+            img.type = {
+                id: uuid ? uuid : uuidv4(),
+                type: type,
+                modifier: modifier,
+                originalEvent: {absolutePointer: e.absolutePointer}
+            };
+            if (otherObject) {
+                img.set({
+                    angle: otherObject.angle,
+                    top: otherObject.top,
+                    left: otherObject.left
+                })
+                if (roomsMode && roomsRole === 'viewer') {
+                    img.set({
+                        selectable: false,
+                        evented: false
+                    })
+                }
+            }
             if (placedMeta[type].set) {
                 img.setControlsVisibility(placedMeta[type].set);
             }
@@ -334,6 +574,10 @@ const mll = (function () {
             addAndOrder(img);
             internal.updateStatesAndRender();
             fixSpawnSelectBoxes();
+
+            if (roomSendUpdate) {
+                roomEditorUpdateElements()
+            }
         });
     }
 
@@ -368,6 +612,220 @@ const mll = (function () {
             controls.sectorRange = $("#sector-range");
             elements.contextMenu = $("#menu");
 
+            elements.viewerPanel = $("#viewer-panel");
+            elements.editorPanel = $("#editor-panel");
+            elements.joinPanel = $("#join-panel");
+            elements.menuPanel = $("#menu-panel");
+            elements.canvasPanel = $("#canvas-panel");
+            controls.inputRoomId = $("#roomId");
+            controls.inputViewerPassword = $("#viewerPassword");
+            controls.inputEditorKey = $("#editorKey");
+            elements.joinError = $("#joinError");
+            controls.btnCreateJoin = $("#submitJoin");
+
+            new ClipboardJS('.btn');
+
+            if (elements.joinPanel[0]) {
+                roomsMode = true;
+                console.log("Rooms Mode");
+                //socket = io('localhost:3000');
+                socket = io('https://maps-let-loose-websocket.herokuapp.com/');
+            } else {
+                roomsMode = false;
+                console.log("Solo Mode");
+            }
+
+            controls.btnCreateJoin.click(function () {
+                if (!roomsMode) {
+                    return;
+                }
+
+                const payload = {
+                    roomId: sanitize(controls.inputRoomId.val()),
+                    viewerPassword: sanitize(controls.inputViewerPassword.val()),
+                    editorKey: sanitize(controls.inputEditorKey.val())
+                }
+
+                if (!payload.roomId || !payload.roomId.length) {
+                    console.warn('sanitized roomId was blank')
+                    return;
+                }
+
+                socket.emit('create-or-join', payload);
+            });
+
+            if (roomsMode) {
+                controls.inputRoomId.val("Map-Session-" + Math.trunc(99999 * Math.random()))
+
+                socket.on('room-status', function (message) {
+                    console.log(message);
+
+                    $(".connected").text(message.connected)
+                    $(".editors").text(message.editors)
+                    $(".viewers").text(message.viewers)
+                })
+
+                socket.on('join-error', function (message) {
+                    console.warn('Join error')
+
+                    elements.joinError.text(JSON.stringify(message));
+                });
+
+                socket.on('connect_error', function (error) {
+                    console.warn('connect error')
+
+                    elements.joinError.text(JSON.stringify(error));
+                    controls.btnCreateJoin.prop('disabled', true);
+                });
+
+                async function checkRestart() {
+                    if ($("#viewer-panel").is(":visible") || $("#editor-panel").is(":visible")) {
+                        console.warn('server restart, room no longer exists')
+
+                        $("#viewer-panel").hide();
+                        $("#editor-panel").hide();
+                        $("#menu-panel").hide();
+                        $("#canvas-panel").hide();
+                        $("#join-panel").show();
+
+                        $("#warning-panel").show();
+                        $("#warn-reason").text("Either you lost connection or the rooms server restarted and the room no longer exists. Try joining again or create a new one.");
+                    }
+                }
+
+                socket.on('connect', function (error) {
+                    console.info('connected')
+
+                    elements.joinError.text("");
+                    controls.btnCreateJoin.prop('disabled', false);
+
+                    checkRestart();
+                });
+
+                socket.on('join-success', function (message) {
+                    console.log('join-success')
+                    console.log(message)
+
+                    $(".room-id").val(message.roomId);
+                    $(".editor-key").val(message.editorKey);
+                    $(".viewer-password").val(message.viewerPassword);
+
+                    $("#warning-panel").hide();
+                    elements.joinPanel.hide();
+                    elements.menuPanel.show();
+                    if (message.role === 'editor') {
+                        roomsRole = "editor";
+                        $(".menu-panel").show();
+                        elements.editorPanel.show();
+                        elements.viewerPanel.hide();
+
+                        $("#shareLinkDisplay").val(
+                            window.location.origin + window.location.pathname +
+                            "?roomId=" + encodeURI(message.roomId || "") +
+                            "&viewerPassword=" + encodeURI(message.viewerPassword || "") +
+                            "&join=true");
+
+                        const filePrefix = controls.comboMapSelect.val();
+                        internal.loadMap(filePrefix);
+                    } else {
+                        roomsRole = 'viewer'
+                        $(".menu-panel").hide();
+                        elements.editorPanel.hide();
+                        elements.viewerPanel.show();
+                    }
+                    elements.canvasPanel.show();
+
+                    loadFromRoomState(message);
+                });
+
+                socket.on('update-controls', function (message) {
+                    console.log('update-controls')
+                    console.log(message);
+
+                    loadFromRoomState(message);
+                });
+                socket.on('update-elements', function (message) {
+                    console.log('update-elements')
+                    console.log(message);
+
+                    loadFromRoomState(message);
+                });
+                socket.on('update-drawings', function (message) {
+                    console.log('update-drawings')
+                    console.log(message);
+
+                    loadFromRoomState(message);
+                });
+
+                $(document).on('click', '.leave-room', function () {
+                    console.log('leave room')
+
+                    socket.emit('leave-room');
+
+                    $("#viewer-panel").hide();
+                    $("#editor-panel").hide();
+                    $("#menu-panel").hide();
+                    $("#canvas-panel").hide();
+                    $("#join-panel").show();
+                });
+
+                socket.on('room-expired', function () {
+                    console.log('current room expired, leaving')
+
+                    $(".leave-room").click();
+
+                    $("#warning-panel").show();
+                    $("#warn-reason").text("The room you were in has expired. Create a new room or join another.");
+                })
+
+                socket.on('room-pw-change', function (message) {
+                    console.log('room password changed');
+
+                    if (roomsRole === 'viewer' && message && !message.blankPw) {
+                        $(".leave-room").click();
+
+                        $("#warning-panel").show();
+                        $("#warn-reason").text("The password for the room was changed and is not blank. Ask an editor for the new password.");
+                    }
+                    if (roomsRole === 'editor') {
+                        socket.emit('editor-get-pw', {
+                            roomId: controls.inputRoomId.val(),
+                            editorKey: $("#editorKeyDisplay").val()
+                        });
+                    }
+                });
+
+                socket.on('editor-get-pw', function (message) {
+                    console.log('editor retrieve new pw');
+
+                    $("#editor-update-pw").prop('disabled', true);
+                    $("#editor-viewer-pw").val(message.viewerPassword);
+                    $("#shareLinkDisplay").val(
+                        window.location.origin + window.location.pathname +
+                        "?roomId=" + encodeURI(message.roomId || "") +
+                        "&viewerPassword=" + encodeURI(message.viewerPassword || "") +
+                        "&join=true");
+                });
+
+                $("#editor-viewer-pw").on('keyup', function () {
+                    $("#editor-update-pw").prop('disabled', false);
+
+                    $("#editor-viewer-pw").val(sanitize($("#editor-viewer-pw").val()));
+                })
+
+                $("#editor-update-pw").click(function () {
+                    if (roomsRole === 'viewer') {
+                        return;
+                    }
+                    socket.emit('update-room-pw', {
+                        roomId: sanitize(controls.inputRoomId.val()),
+                        editorKey: sanitize($("#editorKeyDisplay").val()),
+                        viewerPassword: sanitize($("#editor-viewer-pw").val())
+                    });
+                });
+                $("#editor-update-pw").prop('disabled', true);
+            }
+
             controls.fabricCanvas = new fabric.Canvas(elements.canvas.get(0), {
                 selection: false,
                 fireRightClick: true,
@@ -389,7 +847,7 @@ const mll = (function () {
                 scale: 1,
                 width: 1920,
                 height: 1920
-            })
+            });
 
             elements.sectorA = new fabric.Rect({
                 zIndex: zIndex.sectors,
@@ -516,12 +974,21 @@ const mll = (function () {
             });
 
             function deleteObject(eventData, transform) {
-                var target = transform.target;
+                const target = transform.target;
+
+                for (let i = 0; i < placed.length; i++) {
+                    if (placed[i].type.id === target.type.id) {
+                        placed.splice(i, 1);
+                        break;
+                    }
+                }
 
                 controls.fabricCanvas.remove(target);
-                controls.fabricCanvas.requestRenderAll();
                 controls.exportCanvas.remove(target);
+                controls.fabricCanvas.requestRenderAll();
                 controls.exportCanvas.requestRenderAll();
+
+                roomEditorUpdateElements();
             }
 
             function renderIcon(ctx, left, top, styleOverride, fabricObject) {
@@ -542,14 +1009,17 @@ const mll = (function () {
                 ctx.restore();
             }
 
-            controls.fabricCanvas.on('object:moving', function (e) {
-            });
             controls.fabricCanvas.on('object:modified', function (e) {
                 internal.updateStatesAndRender();
+                roomEditorUpdateElements();
             });
 
             controls.fabricCanvas.on('mouse:dblclick', function (e) {
-                addMapElement(e, 'garry');
+                if (roomsMode && roomsRole === 'viewer') {
+                    return;
+                }
+
+                addMapElement(e, 'garry', null, true);
             });
 
             controls.btnRemoveGarries.on('click', function () {
@@ -561,6 +1031,8 @@ const mll = (function () {
                     controls.fabricCanvas.remove(garry);
                     controls.exportCanvas.remove(garry);
                 }
+
+                roomEditorUpdateElements()
             })
 
             controls.btnUndoLastGarry.on('click', function () {
@@ -572,6 +1044,8 @@ const mll = (function () {
                     controls.fabricCanvas.remove(garry);
                     controls.exportCanvas.remove(garry);
                 }
+
+                roomEditorUpdateElements()
             });
 
             const drawingModeEl = $('#drawing-mode'),
@@ -579,8 +1053,9 @@ const mll = (function () {
                 drawingColorEl = $('#drawing-color'),
                 drawingLineWidthEl = $('#drawing-line-width'),
                 clearEl = $('#clear-paths'),
-                undoEl = $("#undo-path"),
-                checkDrawingsVisible = $("#drawing-visible");
+                undoEl = $("#undo-path");
+
+            controls.checkDrawingsVisible = $("#drawing-visible");
 
             drawingModeEl.on('click', function () {
                 controls.fabricCanvas.isDrawingMode = !controls.fabricCanvas.isDrawingMode;
@@ -628,26 +1103,32 @@ const mll = (function () {
                 controls.fabricCanvas.orderByZindex();
                 controls.exportCanvas.add(e.path);
                 controls.exportCanvas.orderByZindex();
+
+                roomEditorUpdateDrawings();
             });
 
-            undoEl.click(function (e) {
+            undoEl.click(function () {
                 const path = drawings.pop();
                 controls.fabricCanvas.remove(path);
                 controls.exportCanvas.remove(path);
+
+                roomEditorUpdateDrawings();
             })
 
-            clearEl.click(function (e) {
-                for (let i = 0; i < drawings.length; i++) {
-                    const path = drawings[i];
+            clearEl.click(function () {
+                while (drawings.length) {
+                    const path = drawings.pop();
                     controls.fabricCanvas.remove(path);
                     controls.exportCanvas.remove(path);
                 }
+
+                roomEditorUpdateDrawings();
             });
 
-            checkDrawingsVisible.click(function () {
+            controls.checkDrawingsVisible.click(function () {
                 for (let i = 0; i < drawings.length; i++) {
                     const path = drawings[i];
-                    path.visible = checkDrawingsVisible.is(":checked");
+                    path.visible = controls.checkDrawingsVisible.is(":checked");
                 }
 
                 internal.render();
@@ -655,6 +1136,10 @@ const mll = (function () {
 
             $(document).on('keypress', function (e) {
                 if (e.shiftKey && String.fromCharCode(e.which).toLowerCase() === 'd') {
+                    if (roomsMode && roomsRole === 'viewer') {
+                        return;
+                    }
+
                     console.log("Shift+D")
                     drawingModeEl.click();
                 }
@@ -695,18 +1180,21 @@ const mll = (function () {
                 }
 
                 internal.updateStatesAndRender();
+                roomEditorUpdateControls(e.target.id);
             });
 
             controls.btnEnableAll.click(function () {
                 $(".sp-toggle.available").addClass("selected");
 
                 internal.updateStatesAndRender();
+                roomEditorUpdateControls("btnEnableAll");
             })
 
             controls.btnDisableAll.click(function () {
                 $(".sp-toggle.available").removeClass("selected");
 
                 internal.updateStatesAndRender();
+                roomEditorUpdateControls("btnDisableAll");
             })
 
             let panning = false;
@@ -716,6 +1204,10 @@ const mll = (function () {
             controls.fabricCanvas.on('mouse:down', function (e) {
                 elements.contextMenu.css("visibility", "hidden");
                 if (e.button === 3) {
+                    if (roomsMode && roomsRole === 'viewer') {
+                        return;
+                    }
+
                     const offset = controls.fabricCanvas._offset;
                     // Right click context menu
                     elements.contextMenu.css("visibility", "visible")
@@ -755,9 +1247,9 @@ const mll = (function () {
                 fixSpawnSelectBoxes();
             });
 
-            const spImage = new Image();
-            spImage.onload = loadStrongpoints;
-            spImage.onerror = function () {
+            elements.spImage = new Image();
+            elements.spImage.onload = loadStrongpoints;
+            elements.spImage.onerror = function () {
                 for (let i = 0; i < elements.strongpoints.length; i++) {
                     for (let j = 0; j < elements.strongpoints[i].length; j++) {
                         elements.strongpoints[i][j].setSrc('')
@@ -766,6 +1258,7 @@ const mll = (function () {
             }
 
             function loadStrongpoints() {
+                console.log("loadStrongpoints(" + elements.spImage.src + ")")
                 const filePrefix = controls.comboMapSelect.val();
 
                 initStrongpointData(filePrefix);
@@ -784,6 +1277,20 @@ const mll = (function () {
                             toggle.addClass('selected');
                         }
                     }
+                }
+
+                let wasRoomEvent = false;
+                if (elements.spImage.roomsSelectedSp) {
+                    $(".sp-toggle.available").removeClass('selected');
+                    for (let i = 0; i < elements.spImage.roomsSelectedSp.length; i++) {
+                        $(".sp-toggle-" + elements.spImage.roomsSelectedSp[i]).addClass('selected');
+                    }
+                    delete elements.spImage.roomsSelectedSp;
+                    wasRoomEvent = true;
+                }
+
+                if (!wasRoomEvent && roomsMode && roomsRole === "editor") {
+                    roomEditorUpdateControls("loadStrongpoints editor");
                 }
 
                 resetSelectedPoints = false;
@@ -843,7 +1350,7 @@ const mll = (function () {
                                 const dw = rect[2];
                                 const dh = rect[3];
 
-                                context.drawImage(spImage, rect[0], rect[1], rect[2], rect[3], dx, dy, dw, dh);
+                                context.drawImage(elements.spImage, rect[0], rect[1], rect[2], rect[3], dx, dy, dw, dh);
                             }
 
                             pointData["dataUrl"] = tempCanvas.toDataURL();
@@ -860,39 +1367,91 @@ const mll = (function () {
                 pointCutoutData[strongpointKey] = data;
             }
 
-            controls.comboMapSelect.change(function () {
+            internal.loadMap = function (filePrefix) {
+                if (lastLoadedMap === filePrefix) {
+                    return;
+                }
+                lastLoadedMap = filePrefix;
                 resetSelectedPoints = true;
 
-                const filePrefix = controls.comboMapSelect.val();
                 console.log("Loading " + filePrefix)
 
                 elements.map.setSrc('./maps/no-grid/' + filePrefix + '_NoGrid.png', internal.render);
                 elements.defaultgarries.setSrc('./maps/defaultgarries/' + filePrefix + '_defaultgarries.png', internal.render)
                 let artySuffix = controls.checkArtyFlip.is(":checked") ? 2 : 1;
                 elements.arty.setSrc('./maps/arty/' + filePrefix + '_Arty' + artySuffix + '.png', internal.render)
-                spImage.src = './maps/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
+                elements.spImage.src = './maps/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
+            }
+
+            internal.roomsLoadMapAndSP = function (filePrefix, selectedSp) {
+                resetSelectedPoints = true;
+
+                console.log("Rooms loading " + filePrefix);
+
+                const promises = [
+                    new Promise(function (resolve) {
+                        const imgSrc = './maps/no-grid/' + filePrefix + '_NoGrid.png';
+                        if (elements.map.src !== imgSrc) {
+                            elements.map.setSrc(imgSrc, resolve);
+                        } else {
+                            resolve();
+                        }
+                    }),
+                    new Promise(function (resolve) {
+                        const imgSrc = './maps/defaultgarries/' + filePrefix + '_defaultgarries.png';
+                        if (elements.defaultgarries.src !== imgSrc) {
+                            elements.defaultgarries.setSrc(imgSrc, resolve);
+                        } else {
+                            resolve();
+                        }
+                    }),
+                    new Promise(function (resolve) {
+                        const artySuffix = controls.checkArtyFlip.is(":checked") ? 2 : 1;
+                        const imgSrc = './maps/arty/' + filePrefix + '_Arty' + artySuffix + '.png';
+                        if (elements.arty.src !== imgSrc) {
+                            elements.arty.setSrc(imgSrc, resolve);
+                        } else {
+                            resolve();
+                        }
+                    })
+                ];
+                Promise.all(promises).then(internal.render);
+
+                elements.spImage.roomsSelectedSp = selectedSp;
+                elements.spImage.src = './maps/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
+            }
+
+            controls.comboMapSelect.change(function () {
+                if (roomsMode && roomsMode === "viewer") {
+                    return;
+                }
+
+                const filePrefix = controls.comboMapSelect.val();
+                internal.loadMap(filePrefix);
+
+                roomEditorUpdateControls("comboMapSelect");
             });
             controls.checkSpResource.change(function () {
+                if (roomsMode && roomsMode === "viewer") {
+                    return;
+                }
                 const filePrefix = controls.comboMapSelect.val();
-                spImage.src = './maps/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
+                elements.spImage.src = './maps/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
             })
-            controls.comboMapSelect.trigger('change');
+            if (!roomsMode) {
+                controls.comboMapSelect.trigger('change');
+            }
 
             [controls.checkGrid, controls.checkArty, controls.checkStrongpoints, controls.checkDefaultGarries,
-                controls.checkSectors, controls.checkSectorSwap, controls.checkPlacedGarries, controls.checkGarryRadius
+                controls.checkSectors, controls.checkSectorSwap, controls.checkPlacedGarries, controls.checkGarryRadius,
+                controls.checkArtyFlip, controls.checkSpResource
             ].forEach(function (control) {
                 control.change(function () {
-                    internal.updateStatesAndRender()
+                    internal.updateStatesAndRender();
+
+                    roomEditorUpdateControls(control.id);
                 });
-            })
-
-            controls.checkArtyFlip.change(function () {
-                const filePrefix = controls.comboMapSelect.val();
-                let artySuffix = controls.checkArtyFlip.is(":checked") ? 2 : 1;
-                elements.arty.setSrc('./maps/arty/' + filePrefix + '_Arty' + artySuffix + '.png', internal.render);
-
-                internal.render();
-            })
+            });
 
             controls.btnSave.click(function () {
                 $('<a>').attr({
@@ -906,6 +1465,7 @@ const mll = (function () {
                 if (controls.sectorRange.val() !== lastRangeVal) {
                     lastRangeVal = controls.sectorRange.val();
 
+                    roomEditorUpdateControls("sectorRange input");
                     internal.updateStatesAndRender();
                 }
             })
@@ -914,6 +1474,26 @@ const mll = (function () {
                 controls.fabricCanvas.setWidth(elements.canvasParent.clientWidth)
                 controls.fabricCanvas.setHeight(elements.canvasParent.clientHeight)
             }).observe(document.getElementById("canvas-container"));
+
+            internal.pageReady();
+        },
+
+        pageReady: function () {
+            const query = parseQuery(window.location.search);
+            console.log(query);
+
+            if (query.roomId) {
+                controls.inputRoomId.val(sanitize(query.roomId));
+            }
+            if (query.viewerPassword) {
+                controls.inputViewerPassword.val(sanitize(query.viewerPassword))
+            }
+            if (query.editorKey) {
+                controls.inputEditorKey.val(sanitize(query.editorKey))
+            }
+            if (query["join"] && query["join"] === "true") {
+                controls.btnCreateJoin.click();
+            }
         },
 
         // Update fabricjs element states and re-render
@@ -935,6 +1515,10 @@ const mll = (function () {
             for (let i = 0; i < placed.length; i++) {
                 placed[i].visible = controls.checkPlacedGarries.is(":checked");
             }
+
+            let artySuffix = controls.checkArtyFlip.is(":checked") ? 2 : 1;
+            elements.arty.setSrc('./maps/arty/' + filePrefix + '_Arty' + artySuffix + '.png', internal.render);
+            //elements.spImage.src = './maps/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
 
             const mapVertical = pointCoords[filePrefix][0][1] != null;
             const range = sectorData[controls.sectorRange.val()];
@@ -976,10 +1560,11 @@ const mll = (function () {
             for (let i = 0; i < placed.length; i++) {
                 const object = placed[i];
                 promises.push(new Promise(function (resolve) {
-                    object.setSrc(placedMeta[object.type].resolveImg(object), resolve);
+                    object.setSrc(placedMeta[object.type.type].resolveImg(object), resolve);
                 }));
             }
 
+            let wasLoaded = false;
             for (let x = 0; x < 5; x++) {
                 for (let y = 0; y < 5; y++) {
                     const spObject = elements.strongpoints[x][y];
@@ -989,6 +1574,8 @@ const mll = (function () {
                     if (!pointCutoutData.hasOwnProperty(strongpointKey)) {
                         continue;
                     }
+
+                    wasLoaded = true;
 
                     if (currentLoadedPoints !== strongpointKey) {
                         const pointData = pointCutoutData[strongpointKey]['' + x + y];
@@ -1004,7 +1591,7 @@ const mll = (function () {
                 }
             }
 
-            if (currentLoadedPoints !== strongpointKey) {
+            if (wasLoaded && currentLoadedPoints !== strongpointKey) {
                 currentLoadedPoints = strongpointKey;
             }
 
@@ -1035,7 +1622,7 @@ const mll = (function () {
                 return;
             }
 
-            addMapElement(contextMenuEvent, type, modifier);
+            addMapElement(contextMenuEvent, type, modifier, true);
         }
     }
 }());

@@ -7,7 +7,7 @@
     <meta name="description"
           content="Quickly create custom tacmaps for Hell Let Loose. Customize visible points, add garrisons airheads and halftracks, toggle and change the active sectors, draw freely on the map, see offensive default garrisons and maximum artillery reach.">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Maps Let Loose</title>
+    <title>Rooms - Maps Let Loose</title>
     <link rel="icon" href="./icon.png">
 
     <link href="//cdn.jsdelivr.net/npm/bootstrap-dark-5@1.1.3/dist/css/bootstrap-nightshade.min.css" rel="stylesheet">
@@ -15,6 +15,8 @@
             type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.1/dist/jquery.min.js" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/fabric@5.2.4-browser/dist/fabric.min.js" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.5.2/dist/socket.io.min.js"
+            type="text/javascript"></script>
     <script src="//cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js"></script>
 
     <link href="./styles.css?v={{ site.time | date_to_xmlschema }}" rel="stylesheet"/>
@@ -43,10 +45,162 @@
     </div>
 </nav>
 
-<div id="side-menu" class="container mb-5">
+<div id="warning-panel" class="container session-panel mb-3" style="display:none">
+    <h4>Alert</h4>
+    <p id="warn-reason" style="margin:0"></p>
+</div>
+
+<div id="viewer-panel" class="container session-panel mb-3" style="display:none">
     <div class="row">
-        <div class="col col-lg-3" style="user-select: none">
-            <div class="mb-3">
+        <div class="col-md-1">
+            <h4>Viewer</h4>
+            <div title="Total Connected">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-people-fill" viewBox="0 0 16 16">
+                    <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                    <path fill-rule="evenodd" d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216z"/>
+                    <path d="M4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
+                </svg>
+                <small class="text-muted connected"></small>
+            </div>
+            <div title="Editor count">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen-fill" viewBox="0 0 16 16">
+                    <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001z"/>
+                </svg>
+                <small class="text-muted editors"></small>
+            </div>
+            <div title="Viewer count">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
+                    <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                    <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+                </svg>
+                <small class="text-muted viewers" ></small>
+            </div>
+        </div>
+        <div class="col-auto">
+            <label class="form-label">Room</label>
+            <div class="input-group">
+                <input type="text" class="room-id form-control" value="room-id" maxlength="50" readonly>
+                <button class="leave-room btn btn-sm btn-secondary">Leave</button>
+            </div>
+            <small class="text-muted">
+                Room will expire after 30 minutes of inactivity
+            </small>
+        </div>
+    </div>
+</div>
+
+<div id="editor-panel" class="container session-panel mb-3" style="display:none">
+    <div class="row">
+        <div class="col-md-1">
+            <h4>Editor</h4>
+            <div title="Total Connected">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-people-fill" viewBox="0 0 16 16">
+                    <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                    <path fill-rule="evenodd" d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216z"/>
+                    <path d="M4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
+                </svg>
+                <small class="text-muted connected"></small>
+            </div>
+            <div title="Editor count">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen-fill" viewBox="0 0 16 16">
+                    <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001z"/>
+                </svg>
+                <small class="text-muted editors"></small>
+            </div>
+            <div title="Viewer count">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
+                    <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                    <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+                </svg>
+                <small class="text-muted viewers" ></small>
+            </div>
+        </div>
+        <div class="col-auto">
+            <label for="exampleInputEmail2" class="form-label">Room</label>
+            <div class="input-group">
+                <input type="text" class="room-id form-control" id="exampleInputEmail2" maxlength="50" value="room-id" readonly>
+                <button class="leave-room btn btn-sm btn-secondary">Leave</button>
+            </div>
+            <small class="text-muted">
+                Room will expire after 30 minutes of inactivity.
+            </small>
+        </div>
+        <div class="col-auto">
+            <label class="form-label">Password</label>
+            <div class="input-group" style="width: 300px;">
+                <input id="editor-viewer-pw" type="text" class="viewer-password form-control fake-password" maxlength="50" style="width: 0;">
+                <button id="editor-update-pw" class="btn btn-sm btn-secondary update-password" disabled>Update</button>
+                <button class="btn btn-sm btn-secondary" data-clipboard-target="#editor-viewer-pw">Copy</button>
+            </div>
+            <small class="text-muted">
+                Updating will kick all viewers unless blank.<br>
+                Blank is open to all.
+            </small>
+        </div>
+        <div class="col-auto">
+            <label class="form-label">Editor Key</label>
+            <div class="input-group">
+                <input id="editorKeyDisplay" type="text" class="editor-key form-control fake-password" maxlength="50" style="width: 0;" readonly>
+                <button class="btn btn-sm btn-secondary" data-clipboard-target="#editorKeyDisplay">Copy</button>
+            </div>
+            <small class="text-muted">
+                Save this to join back as editor.
+            </small>
+        </div>
+        <div class="col-auto">
+            <label class="form-label">Share Viewer Link</label>
+            <div class="input-group">
+                <input id="shareLinkDisplay" type="text" class="form-control" maxlength="50" style="width: 0;" readonly>
+                <button class="btn btn-sm btn-secondary" data-clipboard-target="#shareLinkDisplay">Copy</button>
+            </div>
+            <small class="text-muted">
+                Remove password from link if shared separately.
+            </small>
+        </div>
+    </div>
+</div>
+
+<div id="join-panel" class="container mb-5">
+    <h4>Create or Join</h4>
+    <p>
+        Want to share a live custom tacmap to an entire group?
+        Create a room and share the Room ID and Password.
+        Multiple editors are allowed.
+    </p>
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Room ID</label>
+            <input id="roomId" type="text" class="form-control" maxlength="50" placeholder="Map-Session-00000">
+            <small class="text-muted">
+                Required. A room will expire after 30 minutes of inactivity.
+            </small>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Viewer Password</label>
+            <input id="viewerPassword" type="text" class="form-control fake-password" maxlength="50" placeholder="hunter2">
+            <small class="text-muted">
+                Optional.
+                Leave blank if session has no password.
+            </small>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Editor Key</label>
+            <input id="editorKey" type="text" class="form-control fake-password" maxlength="50" placeholder="52ca7b0e-1bf8-49ad-9878-1dacb6348fde">
+            <small class="text-muted">
+                Optional, required to become an editor for a map session.
+                If blank when creating a session, a random key will be generated.
+            </small>
+        </div>
+    </div>
+
+    <button id="submitJoin" class="btn btn-primary" disabled>Create or Join</button>
+    <div id="joinError"></div>
+</div>
+
+<div class="container mb-5">
+    <div class="row">
+        <div id="menu-panel" class="col col-lg-3" style="display: none; user-select: none">
+            <div class="mb-3 menu-panel">
                 <h4>Select Map</h4>
                 <select class="form-select" id="map-select">
                     <option value="Carentan">Carentan</option>
@@ -65,7 +219,7 @@
             </div>
 
             <div class="accordion accordion-flush mb-3" id="accordionFlushExample">
-                <div class="accordion-item">
+                <div class="accordion-item menu-panel">
                     <h2 class="accordion-header" id="flush-headingOne">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#flush-collapseOne" aria-expanded="false"
@@ -136,7 +290,7 @@
                     </div>
                 </div>
 
-                <div class="accordion-item">
+                <div class="accordion-item menu-panel">
                     <h2 class="accordion-header" id="flush-headingThree">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#flush-collapseThree" aria-expanded="false"
@@ -168,7 +322,7 @@
                     </div>
                 </div>
 
-                <div class="accordion-item">
+                <div class="accordion-item menu-panel">
                     <h2 class="accordion-header" id="flush-headingFour">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#flush-collapseFour" aria-expanded="false"
@@ -202,7 +356,7 @@
                     </div>
                 </div>
 
-                <div class="accordion-item">
+                <div class="accordion-item menu-panel">
                     <h2 class="accordion-header" id="flush-headingTwo">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#flush-collapseTwo" aria-expanded="false"
@@ -223,15 +377,19 @@
                                 </div>
                                 <div style="margin: 5px 0">
                                     <div class="btn-group" role="group" aria-label="Basic example">
-                                        <button id="drawing-mode" type="button" class="btn btn-secondary">Start drawing mode</button>
-                                        <button id="clear-paths" type="button" class="btn btn-link" title="Clear all drawings">
+                                        <button id="drawing-mode" type="button" class="btn btn-secondary">Start drawing
+                                            mode
+                                        </button>
+                                        <button id="clear-paths" type="button" class="btn btn-link"
+                                                title="Clear all drawings">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                  fill="currentColor"
                                                  class="bi bi-trash3-fill" viewBox="0 0 16 16">
                                                 <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"/>
                                             </svg>
                                         </button>
-                                        <button id="undo-path" type="button" class="btn btn-link" title="Undo last drawing">
+                                        <button id="undo-path" type="button" class="btn btn-link"
+                                                title="Undo last drawing">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                  fill="currentColor"
                                                  class="bi bi-caret-left-fill" viewBox="0 0 16 16">
@@ -251,7 +409,8 @@
                                         (<span id="line-width-value">7</span>)
                                     </label>
                                     <br>
-                                    <input type="range" class="form-range" value="7" min="3" max="25" id="drawing-line-width"><br>
+                                    <input type="range" class="form-range" value="7" min="3" max="25"
+                                           id="drawing-line-width"><br>
 
 
                                     <label for="drawing-color">Line color </label>
@@ -259,8 +418,10 @@
                                     <div id="line-color-div" class="d-flex align-items-center">
                                         <input type="color" value="#0080ff" id="drawing-color">
                                         <span>or quick</span>
-                                        <span class="color blue" onclick="$('#drawing-color').val('#0080ff').trigger('change')"></span>
-                                        <span class="color red" onclick="$('#drawing-color').val('#ff8080').trigger('change')"></span>
+                                        <span class="color blue"
+                                              onclick="$('#drawing-color').val('#0080ff').trigger('change')"></span>
+                                        <span class="color red"
+                                              onclick="$('#drawing-color').val('#ff8080').trigger('change')"></span>
                                     </div>
                                 </div>
                             </div>
@@ -294,7 +455,7 @@
             </div>
         </div>
 
-        <div id="canvas-div" class="col col-lg-9">
+        <div id="canvas-panel" class="col col-lg-9" style="display: none">
             <div id="canvas-container">
                 <canvas id="canvas" class="hasmenu drag-mode"></canvas>
                 <div id="menu" class="menu-x">
@@ -355,7 +516,8 @@
     <ul>
         <li>There are 3^5 or 243 total potential objective configurations</li>
         <li>
-            Offensive is allowed all 243 configurations (unconfirmed, at least allows some consecutive map-edge to map-edge
+            Offensive is allowed all 243 configurations (unconfirmed, at least allows some consecutive map-edge to
+            map-edge
             layouts)
             <br>
             <img src="./maps/offensive-ok.png" width="200">
