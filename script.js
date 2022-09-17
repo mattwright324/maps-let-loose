@@ -182,8 +182,8 @@ const mll = (function () {
         }
     }
 
-    function roomEditorUpdateControls() {
-        console.log(controls.fabricCanvas.toDatalessJSON())
+    function roomEditorUpdateControls(about) {
+        console.log("roomEditorUpdateControls(" + about + ")")
         if (roomsMode && roomsRole === 'editor') {
             console.log('sending editor-controls event')
             socket.emit('editor-controls', {
@@ -628,8 +628,8 @@ const mll = (function () {
             if (elements.joinPanel[0]) {
                 roomsMode = true;
                 console.log("Rooms Mode");
-                //socket = io('localhost:3000');
-                socket = io('https://maps-let-loose-websocket.herokuapp.com/');
+                socket = io('localhost:3000');
+                //socket = io('https://maps-let-loose-websocket.herokuapp.com/');
             } else {
                 roomsMode = false;
                 console.log("Solo Mode");
@@ -725,7 +725,8 @@ const mll = (function () {
                             "&viewerPassword=" + encodeURI(message.viewerPassword || "") +
                             "&join=true");
 
-                        controls.comboMapSelect.trigger('change');
+                        const filePrefix = controls.comboMapSelect.val();
+                        internal.loadMap(filePrefix);
                     } else {
                         roomsRole = 'viewer'
                         $(".menu-panel").hide();
@@ -1179,21 +1180,21 @@ const mll = (function () {
                 }
 
                 internal.updateStatesAndRender();
-                roomEditorUpdateControls();
+                roomEditorUpdateControls(e.target.id);
             });
 
             controls.btnEnableAll.click(function () {
                 $(".sp-toggle.available").addClass("selected");
 
                 internal.updateStatesAndRender();
-                roomEditorUpdateControls();
+                roomEditorUpdateControls("btnEnableAll");
             })
 
             controls.btnDisableAll.click(function () {
                 $(".sp-toggle.available").removeClass("selected");
 
                 internal.updateStatesAndRender();
-                roomEditorUpdateControls();
+                roomEditorUpdateControls("btnDisableAll");
             })
 
             let panning = false;
@@ -1278,22 +1279,23 @@ const mll = (function () {
                     }
                 }
 
-                console.log(elements.spImage.roomsSelectedSp)
+                let wasRoomEvent = false;
                 if (elements.spImage.roomsSelectedSp) {
                     $(".sp-toggle.available").removeClass('selected');
                     for (let i = 0; i < elements.spImage.roomsSelectedSp.length; i++) {
                         $(".sp-toggle-" + elements.spImage.roomsSelectedSp[i]).addClass('selected');
                     }
                     delete elements.spImage.roomsSelectedSp;
+                    wasRoomEvent = true;
+                }
+
+                if (!wasRoomEvent && roomsMode && roomsRole === "editor") {
+                    roomEditorUpdateControls("loadStrongpoints editor");
                 }
 
                 resetSelectedPoints = false;
 
                 internal.updateStatesAndRender();
-
-                if (roomsMode && roomsRole === "editor") {
-                    roomEditorUpdateControls();
-                }
             }
 
             function initStrongpointData(filePrefix) {
@@ -1427,7 +1429,7 @@ const mll = (function () {
                 const filePrefix = controls.comboMapSelect.val();
                 internal.loadMap(filePrefix);
 
-                roomEditorUpdateControls();
+                roomEditorUpdateControls("comboMapSelect");
             });
             controls.checkSpResource.change(function () {
                 if (roomsMode && roomsMode === "viewer") {
@@ -1447,7 +1449,7 @@ const mll = (function () {
                 control.change(function () {
                     internal.updateStatesAndRender();
 
-                    roomEditorUpdateControls();
+                    roomEditorUpdateControls(control.id);
                 });
             });
 
@@ -1463,7 +1465,7 @@ const mll = (function () {
                 if (controls.sectorRange.val() !== lastRangeVal) {
                     lastRangeVal = controls.sectorRange.val();
 
-                    roomEditorUpdateControls();
+                    roomEditorUpdateControls("sectorRange input");
                     internal.updateStatesAndRender();
                 }
             })
