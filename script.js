@@ -689,7 +689,7 @@ const mll = (function () {
                         $("#join-panel").show();
 
                         $("#warning-panel").show();
-                        $("#warn-reason").text("The rooms server restarted and the room no longer exists. Create a new room or join another.");
+                        $("#warn-reason").text("Either you lost connection or the rooms server restarted and the room no longer exists. Try joining again or create a new one.");
                     }
                 }
 
