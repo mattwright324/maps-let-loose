@@ -10,6 +10,22 @@ const mll = (function () {
         );
     }
 
+    function parseQuery(queryString) {
+        const query = {};
+        const pairs = (queryString[0] === '?' ? queryString.substr(1) : queryString).split('&');
+        for (let i = 0; i < pairs.length; i++) {
+            let pair = pairs[i].split('=');
+            query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
+        }
+        return query;
+    }
+
+    function sanitize(input) {
+        return String(input).trim()
+            .substring(0, 50)
+            .replaceAll(/[^\w+ !@#$&%/\-\[\]]/gi, '');
+    }
+
     let lastLoadedMap;
     let roomsMode = false;
     let roomsRole = 'viewer';
@@ -50,11 +66,13 @@ const mll = (function () {
             return;
         }
 
+        console.log("loadFromState()")
+        console.log(message);
+
         const controlState = message.state.controls;
         if (controlState) {
             console.log('updating controls state')
             controls.comboMapSelect.val(controlState.map);
-            internal.loadMap(controlState.map);
             controls.checkGrid.prop('checked', controlState.grid);
             controls.checkDefaultGarries.prop('checked', controlState.defaultGarries);
             controls.checkPlacedGarries.prop('checked', controlState.placed);
@@ -68,10 +86,7 @@ const mll = (function () {
             controls.sectorRange.val(controlState.sectorValue);
             controls.checkDrawingsVisible.prop('checked', controlState.drawings);
 
-            $(".sp-toggle.available").removeClass('selected');
-            for (let i = 0; i < controlState.selectedSp.length; i++) {
-                $(".sp-toggle-" + controlState.selectedSp[i]).addClass('selected');
-            }
+            internal.roomsLoadMapAndSP(controlState.map, controlState.selectedSp);
         }
 
         const elementState = message.state.elements;
@@ -183,12 +198,32 @@ const mll = (function () {
 
     function roomEditorUpdateElements() {
         if (roomsMode && roomsRole === 'editor') {
-            console.log('sending editor-elements event')
+            console.log('sending editor-elements event');
+
+            // images cannot be enlivened as easily as drawings
+            // storing only necessary data to recreate in the clients
+            const reducedElements = [];
+            for (let i = 0; i < placed.length; i++) {
+                if (i >= 50) {
+                    break;
+                }
+
+                const element = placed[i];
+                reducedElements.push({
+                    angle: element.angle,
+                    height: element.height,
+                    left: element.left,
+                    top: element.top,
+                    type: element.type,
+                    width: element.width
+                })
+            }
+
             socket.emit('editor-elements', {
                 roomId: controls.inputRoomId.val(),
                 editorKey: $("#editorKeyDisplay").val(),
                 state: {
-                    elements: placed.slice(0, 200)
+                    elements: reducedElements
                 }
             });
         }
@@ -201,7 +236,7 @@ const mll = (function () {
                 roomId: controls.inputRoomId.val(),
                 editorKey: $("#editorKeyDisplay").val(),
                 state: {
-                    drawings: drawings.slice(0, 200)
+                    drawings: drawings.slice(0, 50)
                 }
             });
         }
@@ -275,7 +310,7 @@ const mll = (function () {
         tank: {
             wh: 51,
             resolveImg: function (object) {
-                if (object.modifier) {
+                if (object.type.modifier) {
                     return './maps/tank-' + object.type.modifier + ".png";
                 }
 
@@ -286,7 +321,7 @@ const mll = (function () {
         truck: {
             wh: 51,
             resolveImg: function (object) {
-                if (object.modifier) {
+                if (object.type.modifier) {
                     return './maps/truck-' + object.type.modifier + ".png";
                 }
 
@@ -600,12 +635,6 @@ const mll = (function () {
                 console.log("Solo Mode");
             }
 
-            function sanitize(input) {
-                return String(input).trim()
-                    .substring(0, 50)
-                    .replaceAll(/[^\w+ !@#$&%/\-\[\]]/gi, '');
-            }
-
             controls.btnCreateJoin.click(function () {
                 if (!roomsMode) {
                     return;
@@ -629,9 +658,11 @@ const mll = (function () {
                 controls.inputRoomId.val("Map-Session-" + Math.trunc(99999 * Math.random()))
 
                 socket.on('room-status', function (message) {
-                    if (message && message.connected) {
-                        $(".connected").text(message.connected);
-                    }
+                    console.log(message);
+
+                    $(".connected").text(message.connected)
+                    $(".editors").text(message.editors)
+                    $(".viewers").text(message.viewers)
                 })
 
                 socket.on('join-error', function (message) {
@@ -672,7 +703,7 @@ const mll = (function () {
                 });
 
                 socket.on('join-success', function (message) {
-                    console.log('Join success')
+                    console.log('join-success')
                     console.log(message)
 
                     $(".room-id").val(message.roomId);
@@ -687,6 +718,14 @@ const mll = (function () {
                         $(".menu-panel").show();
                         elements.editorPanel.show();
                         elements.viewerPanel.hide();
+
+                        $("#shareLinkDisplay").val(
+                            window.location.origin + window.location.pathname +
+                            "?roomId=" + encodeURI(message.roomId || "") +
+                            "&viewerPassword=" + encodeURI(message.viewerPassword || "") +
+                            "&join=true");
+
+                        controls.comboMapSelect.trigger('change');
                     } else {
                         roomsRole = 'viewer'
                         $(".menu-panel").hide();
@@ -746,9 +785,25 @@ const mll = (function () {
 
                         $("#warning-panel").show();
                         $("#warn-reason").text("The password for the room was changed and is not blank. Ask an editor for the new password.");
-                    } else {
-                        //$(".viewer-password").val(message.viewerPassword);
                     }
+                    if (roomsRole === 'editor') {
+                        socket.emit('editor-get-pw', {
+                            roomId: controls.inputRoomId.val(),
+                            editorKey: $("#editorKeyDisplay").val()
+                        });
+                    }
+                });
+
+                socket.on('editor-get-pw', function (message) {
+                    console.log('editor retrieve new pw');
+
+                    $("#editor-update-pw").prop('disabled', true);
+                    $("#editor-viewer-pw").val(message.viewerPassword);
+                    $("#shareLinkDisplay").val(
+                        window.location.origin + window.location.pathname +
+                        "?roomId=" + encodeURI(message.roomId || "") +
+                        "&viewerPassword=" + encodeURI(message.viewerPassword || "") +
+                        "&join=true");
                 });
 
                 $("#editor-viewer-pw").on('keyup', function () {
@@ -1201,14 +1256,8 @@ const mll = (function () {
                 }
             }
 
-            let lastSpImageSrc;
-
             function loadStrongpoints() {
-                if (lastSpImageSrc === elements.spImage.src) {
-                    return;
-                }
-                lastSpImageSrc = elements.spImage.src;
-
+                console.log("loadStrongpoints(" + elements.spImage.src + ")")
                 const filePrefix = controls.comboMapSelect.val();
 
                 initStrongpointData(filePrefix);
@@ -1229,9 +1278,22 @@ const mll = (function () {
                     }
                 }
 
+                console.log(elements.spImage.roomsSelectedSp)
+                if (elements.spImage.roomsSelectedSp) {
+                    $(".sp-toggle.available").removeClass('selected');
+                    for (let i = 0; i < elements.spImage.roomsSelectedSp.length; i++) {
+                        $(".sp-toggle-" + elements.spImage.roomsSelectedSp[i]).addClass('selected');
+                    }
+                    delete elements.spImage.roomsSelectedSp;
+                }
+
                 resetSelectedPoints = false;
 
                 internal.updateStatesAndRender();
+
+                if (roomsMode && roomsRole === "editor") {
+                    roomEditorUpdateControls();
+                }
             }
 
             function initStrongpointData(filePrefix) {
@@ -1319,17 +1381,64 @@ const mll = (function () {
                 elements.spImage.src = './maps/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
             }
 
+            internal.roomsLoadMapAndSP = function (filePrefix, selectedSp) {
+                resetSelectedPoints = true;
+
+                console.log("Rooms loading " + filePrefix);
+
+                const promises = [
+                    new Promise(function (resolve) {
+                        const imgSrc = './maps/no-grid/' + filePrefix + '_NoGrid.png';
+                        if (elements.map.src !== imgSrc) {
+                            elements.map.setSrc(imgSrc, resolve);
+                        } else {
+                            resolve();
+                        }
+                    }),
+                    new Promise(function (resolve) {
+                        const imgSrc = './maps/defaultgarries/' + filePrefix + '_defaultgarries.png';
+                        if (elements.defaultgarries.src !== imgSrc) {
+                            elements.defaultgarries.setSrc(imgSrc, resolve);
+                        } else {
+                            resolve();
+                        }
+                    }),
+                    new Promise(function (resolve) {
+                        const artySuffix = controls.checkArtyFlip.is(":checked") ? 2 : 1;
+                        const imgSrc = './maps/arty/' + filePrefix + '_Arty' + artySuffix + '.png';
+                        if (elements.arty.src !== imgSrc) {
+                            elements.arty.setSrc(imgSrc, resolve);
+                        } else {
+                            resolve();
+                        }
+                    })
+                ];
+                Promise.all(promises).then(internal.render);
+
+                elements.spImage.roomsSelectedSp = selectedSp;
+                elements.spImage.src = './maps/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
+            }
+
             controls.comboMapSelect.change(function () {
+                if (roomsMode && roomsMode === "viewer") {
+                    return;
+                }
+
                 const filePrefix = controls.comboMapSelect.val();
                 internal.loadMap(filePrefix);
 
                 roomEditorUpdateControls();
             });
             controls.checkSpResource.change(function () {
+                if (roomsMode && roomsMode === "viewer") {
+                    return;
+                }
                 const filePrefix = controls.comboMapSelect.val();
                 elements.spImage.src = './maps/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
             })
-            controls.comboMapSelect.trigger('change');
+            if (!roomsMode) {
+                controls.comboMapSelect.trigger('change');
+            }
 
             [controls.checkGrid, controls.checkArty, controls.checkStrongpoints, controls.checkDefaultGarries,
                 controls.checkSectors, controls.checkSectorSwap, controls.checkPlacedGarries, controls.checkGarryRadius,
@@ -1363,6 +1472,26 @@ const mll = (function () {
                 controls.fabricCanvas.setWidth(elements.canvasParent.clientWidth)
                 controls.fabricCanvas.setHeight(elements.canvasParent.clientHeight)
             }).observe(document.getElementById("canvas-container"));
+
+            internal.pageReady();
+        },
+
+        pageReady: function () {
+            const query = parseQuery(window.location.search);
+            console.log(query);
+
+            if (query.roomId) {
+                controls.inputRoomId.val(sanitize(query.roomId));
+            }
+            if (query.viewerPassword) {
+                controls.inputViewerPassword.val(sanitize(query.viewerPassword))
+            }
+            if (query.editorKey) {
+                controls.inputEditorKey.val(sanitize(query.editorKey))
+            }
+            if (query["join"] && query["join"] === "true") {
+                controls.btnCreateJoin.click();
+            }
         },
 
         // Update fabricjs element states and re-render
@@ -1433,6 +1562,7 @@ const mll = (function () {
                 }));
             }
 
+            let wasLoaded = false;
             for (let x = 0; x < 5; x++) {
                 for (let y = 0; y < 5; y++) {
                     const spObject = elements.strongpoints[x][y];
@@ -1442,6 +1572,8 @@ const mll = (function () {
                     if (!pointCutoutData.hasOwnProperty(strongpointKey)) {
                         continue;
                     }
+
+                    wasLoaded = true;
 
                     if (currentLoadedPoints !== strongpointKey) {
                         const pointData = pointCutoutData[strongpointKey]['' + x + y];
@@ -1457,7 +1589,7 @@ const mll = (function () {
                 }
             }
 
-            if (currentLoadedPoints !== strongpointKey) {
+            if (wasLoaded && currentLoadedPoints !== strongpointKey) {
                 currentLoadedPoints = strongpointKey;
             }
 
