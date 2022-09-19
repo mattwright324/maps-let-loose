@@ -572,7 +572,9 @@ const mll = (function () {
             placed.push(img);
 
             addAndOrder(img);
-            internal.updateStatesAndRender();
+            if (roomSendUpdate) {
+                internal.updateStatesAndRender();
+            }
             fixSpawnSelectBoxes();
 
             if (roomSendUpdate) {
