@@ -175,7 +175,8 @@ const mll = (function () {
                     o.set({
                         zIndex: zIndex.drawings,
                         evented: false,
-                        selectable: false
+                        selectable: false,
+                        visible: (idx(["state", "controls", "drawings"], message) || controls.checkDrawingsVisible.is(":checked"))
                     });
 
                     controls.fabricCanvas.add(o);
