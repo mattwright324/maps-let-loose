@@ -4,6 +4,10 @@ const mll = (function () {
     const elements = {};
     const controls = {};
 
+    function idx(p, o) {
+        return p.reduce((xs, x) => (xs && xs[x]) ? xs[x] : null, o)
+    }
+
     function uuidv4() {
         return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
             (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
@@ -23,7 +27,7 @@ const mll = (function () {
     function sanitize(input) {
         return String(input).trim()
             .substring(0, 50)
-            .replaceAll(/[^\w+ !@#$&%/\-\[\]]/gi, '');
+            .replaceAll(/[^\w+ !@#$&%=,/\-\[\]]/gi, '');
     }
 
     let lastLoadedMap;
@@ -36,12 +40,15 @@ const mll = (function () {
     let drawings = [];
     let resetSelectedPoints = false;
 
-    function getControlsRoomState() {
+    function getSelectedSp() {
         const selected = [];
         $(".sp-toggle.available.selected").each(function (i, el) {
             const toggle = $(el);
             selected.push('' + toggle.data('x') + toggle.data('y'));
         })
+        return selected;
+    }
+    function getControlsRoomState() {
         return {
             map: controls.comboMapSelect.val(),
             grid: controls.checkGrid.is(":checked"),
@@ -52,7 +59,7 @@ const mll = (function () {
             flipArty: controls.checkArtyFlip.is(":checked"),
             sp: controls.checkStrongpoints.is(":checked"),
             spResource: controls.checkSpResource.is(":checked"),
-            selectedSp: selected,
+            selectedSp: getSelectedSp(),
             sectors: controls.checkSectors.is(":checked"),
             swapSectors: controls.checkSectorSwap.is(":checked"),
             sectorValue: controls.sectorRange.val(),
@@ -168,7 +175,8 @@ const mll = (function () {
                     o.set({
                         zIndex: zIndex.drawings,
                         evented: false,
-                        selectable: false
+                        selectable: false,
+                        visible: (idx(["state", "controls", "drawings"], message) || controls.checkDrawingsVisible.is(":checked"))
                     });
 
                     controls.fabricCanvas.add(o);
@@ -182,17 +190,21 @@ const mll = (function () {
         }
     }
 
-    function roomEditorUpdateControls(about) {
-        console.log("roomEditorUpdateControls(" + about + ")")
+    function roomEditorUpdateControls(control) {
+        const controlAbout = control instanceof jQuery ? control.attr("id") + "=" + (control.val() || control.is(":checked")) : control;
+        console.log("roomEditorUpdateControls(" + controlAbout + ")")
         if (roomsMode && roomsRole === 'editor') {
             console.log('sending editor-controls event')
-            socket.emit('editor-controls', {
+            const payload = {
                 roomId: controls.inputRoomId.val(),
                 editorKey: $("#editorKeyDisplay").val(),
                 state: {
                     controls: getControlsRoomState()
-                }
-            });
+                },
+                controlsChange: controlAbout
+            };
+            console.log(payload);
+            socket.emit('editor-controls', payload);
         }
     }
 
@@ -572,7 +584,9 @@ const mll = (function () {
             placed.push(img);
 
             addAndOrder(img);
-            internal.updateStatesAndRender();
+            if (roomSendUpdate) {
+                internal.updateStatesAndRender();
+            }
             fixSpawnSelectBoxes();
 
             if (roomSendUpdate) {
@@ -725,6 +739,8 @@ const mll = (function () {
                             "&viewerPassword=" + encodeURI(message.viewerPassword || "") +
                             "&join=true");
 
+                        const map = idx(["state", "controls", "map"], message) || "Carentan";
+                        controls.comboMapSelect.val(map)
                         const filePrefix = controls.comboMapSelect.val();
                         internal.loadMap(filePrefix);
                     } else {
@@ -1125,15 +1141,6 @@ const mll = (function () {
                 roomEditorUpdateDrawings();
             });
 
-            controls.checkDrawingsVisible.click(function () {
-                for (let i = 0; i < drawings.length; i++) {
-                    const path = drawings[i];
-                    path.visible = controls.checkDrawingsVisible.is(":checked");
-                }
-
-                internal.render();
-            });
-
             $(document).on('keypress', function (e) {
                 if (e.shiftKey && String.fromCharCode(e.which).toLowerCase() === 'd') {
                     if (roomsMode && roomsRole === 'viewer') {
@@ -1180,7 +1187,7 @@ const mll = (function () {
                 }
 
                 internal.updateStatesAndRender();
-                roomEditorUpdateControls(e.target.id);
+                roomEditorUpdateControls("selectedSp=" + getSelectedSp());
             });
 
             controls.btnEnableAll.click(function () {
@@ -1188,14 +1195,14 @@ const mll = (function () {
 
                 internal.updateStatesAndRender();
                 roomEditorUpdateControls("btnEnableAll");
-            })
+            });
 
             controls.btnDisableAll.click(function () {
                 $(".sp-toggle.available").removeClass("selected");
 
                 internal.updateStatesAndRender();
                 roomEditorUpdateControls("btnDisableAll");
-            })
+            });
 
             let panning = false;
             controls.fabricCanvas.on('mouse:up', function (e) {
@@ -1429,7 +1436,7 @@ const mll = (function () {
                 const filePrefix = controls.comboMapSelect.val();
                 internal.loadMap(filePrefix);
 
-                roomEditorUpdateControls("comboMapSelect");
+                roomEditorUpdateControls(controls.comboMapSelect);
             });
             controls.checkSpResource.change(function () {
                 if (roomsMode && roomsMode === "viewer") {
@@ -1444,12 +1451,12 @@ const mll = (function () {
 
             [controls.checkGrid, controls.checkArty, controls.checkStrongpoints, controls.checkDefaultGarries,
                 controls.checkSectors, controls.checkSectorSwap, controls.checkPlacedGarries, controls.checkGarryRadius,
-                controls.checkArtyFlip, controls.checkSpResource
+                controls.checkArtyFlip, controls.checkSpResource, controls.checkDrawingsVisible
             ].forEach(function (control) {
                 control.change(function () {
                     internal.updateStatesAndRender();
 
-                    roomEditorUpdateControls(control.id);
+                    roomEditorUpdateControls(control);
                 });
             });
 
@@ -1465,7 +1472,7 @@ const mll = (function () {
                 if (controls.sectorRange.val() !== lastRangeVal) {
                     lastRangeVal = controls.sectorRange.val();
 
-                    roomEditorUpdateControls("sectorRange input");
+                    roomEditorUpdateControls(controls.sectorRange);
                     internal.updateStatesAndRender();
                 }
             })
@@ -1518,7 +1525,11 @@ const mll = (function () {
 
             let artySuffix = controls.checkArtyFlip.is(":checked") ? 2 : 1;
             elements.arty.setSrc('./maps/arty/' + filePrefix + '_Arty' + artySuffix + '.png', internal.render);
-            //elements.spImage.src = './maps/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
+
+            for (let i = 0; i < drawings.length; i++) {
+                const path = drawings[i];
+                path.visible = controls.checkDrawingsVisible.is(":checked");
+            }
 
             const mapVertical = pointCoords[filePrefix][0][1] != null;
             const range = sectorData[controls.sectorRange.val()];
