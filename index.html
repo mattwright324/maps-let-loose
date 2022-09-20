@@ -22,7 +22,7 @@
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-light mb-3" style="border-bottom: 1px solid rgba(127,127,127,0.1);">
-    <div class="container">
+    <span class="container">
         <div class="navbar-brand">
             <img src="./icon.png" alt="" class="d-inline-block align-text-top"><span style="padding-left: .75rem;">Maps Let Loose</span>
         </div>
@@ -39,8 +39,14 @@
                     <a class="nav-link" href="./rooms">Rooms</a>
                 </li>
             </ul>
+            <div class="navbar-text">
+                <span style="font-size:0.85em; margin-right: 10px;">Partnered with</span>
+                <a target="_blank" href="https://discord.gg/glows">
+                    <img src="glowssmall.png" style="height: 40px;">
+                </a>
+            </div>
         </div>
-    </div>
+    </span>
 </nav>
 
 <div id="side-menu" class="container mb-5">
@@ -223,15 +229,19 @@
                                 </div>
                                 <div style="margin: 5px 0">
                                     <div class="btn-group" role="group" aria-label="Basic example">
-                                        <button id="drawing-mode" type="button" class="btn btn-secondary">Start drawing mode</button>
-                                        <button id="clear-paths" type="button" class="btn btn-link" title="Clear all drawings">
+                                        <button id="drawing-mode" type="button" class="btn btn-secondary">Start drawing
+                                            mode
+                                        </button>
+                                        <button id="clear-paths" type="button" class="btn btn-link"
+                                                title="Clear all drawings">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                  fill="currentColor"
                                                  class="bi bi-trash3-fill" viewBox="0 0 16 16">
                                                 <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"/>
                                             </svg>
                                         </button>
-                                        <button id="undo-path" type="button" class="btn btn-link" title="Undo last drawing">
+                                        <button id="undo-path" type="button" class="btn btn-link"
+                                                title="Undo last drawing">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                  fill="currentColor"
                                                  class="bi bi-caret-left-fill" viewBox="0 0 16 16">
@@ -251,7 +261,8 @@
                                         (<span id="line-width-value">7</span>)
                                     </label>
                                     <br>
-                                    <input type="range" class="form-range" value="7" min="3" max="25" id="drawing-line-width"><br>
+                                    <input type="range" class="form-range" value="7" min="3" max="25"
+                                           id="drawing-line-width"><br>
 
 
                                     <label for="drawing-color">Line color </label>
@@ -259,8 +270,10 @@
                                     <div id="line-color-div" class="d-flex align-items-center">
                                         <input type="color" value="#0080ff" id="drawing-color">
                                         <span>or quick</span>
-                                        <span class="color blue" onclick="$('#drawing-color').val('#0080ff').trigger('change')"></span>
-                                        <span class="color red" onclick="$('#drawing-color').val('#ff8080').trigger('change')"></span>
+                                        <span class="color blue"
+                                              onclick="$('#drawing-color').val('#0080ff').trigger('change')"></span>
+                                        <span class="color red"
+                                              onclick="$('#drawing-color').val('#ff8080').trigger('change')"></span>
                                     </div>
                                 </div>
                             </div>
@@ -355,7 +368,8 @@
     <ul>
         <li>There are 3^5 or 243 total potential objective configurations</li>
         <li>
-            Offensive is allowed all 243 configurations (unconfirmed, at least allows some consecutive map-edge to map-edge
+            Offensive is allowed all 243 configurations (unconfirmed, at least allows some consecutive map-edge to
+            map-edge
             layouts)
             <br>
             <img src="./maps/offensive-ok.png" width="200">
@@ -377,6 +391,7 @@
             Only one set of default garrisons will be present in offensive mode and will be the three closest to the
             attacking side
         </li>
+        <li>Developed by Winston [HR]</li>
     </ul>
 </div>
 
