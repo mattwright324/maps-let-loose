@@ -91,7 +91,7 @@ const mll = (function () {
             controls.checkSectors.prop('checked', controlState.sectors);
             controls.checkSectorSwap.prop('checked', controlState.swapSectors);
             controls.sectorRange.val(controlState.sectorValue);
-            controls.checkDrawingsVisible.prop('checked', controlState.drawings).trigger("change");
+            controls.checkDrawingsVisible.prop('checked', controlState.drawings);
 
             internal.roomsLoadMapAndSP(controlState.map, controlState.selectedSp);
         }
@@ -194,14 +194,16 @@ const mll = (function () {
         console.log("roomEditorUpdateControls(" + controlAbout + ")")
         if (roomsMode && roomsRole === 'editor') {
             console.log('sending editor-controls event')
-            socket.emit('editor-controls', {
+            const payload = {
                 roomId: controls.inputRoomId.val(),
                 editorKey: $("#editorKeyDisplay").val(),
                 state: {
                     controls: getControlsRoomState()
                 },
                 controlsChange: controlAbout
-            });
+            };
+            console.log(payload);
+            socket.emit('editor-controls', payload);
         }
     }
 
@@ -639,8 +641,8 @@ const mll = (function () {
             if (elements.joinPanel[0]) {
                 roomsMode = true;
                 console.log("Rooms Mode");
-                //socket = io('localhost:3000');
-                socket = io('https://maps-let-loose-websocket.herokuapp.com/');
+                socket = io('localhost:3000');
+                //socket = io('https://maps-let-loose-websocket.herokuapp.com/');
             } else {
                 roomsMode = false;
                 console.log("Solo Mode");
@@ -1192,14 +1194,14 @@ const mll = (function () {
 
                 internal.updateStatesAndRender();
                 roomEditorUpdateControls("btnEnableAll");
-            })
+            });
 
             controls.btnDisableAll.click(function () {
                 $(".sp-toggle.available").removeClass("selected");
 
                 internal.updateStatesAndRender();
                 roomEditorUpdateControls("btnDisableAll");
-            })
+            });
 
             let panning = false;
             controls.fabricCanvas.on('mouse:up', function (e) {
