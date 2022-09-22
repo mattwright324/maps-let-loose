@@ -705,7 +705,14 @@ const mll = (function () {
                     scaleY: otherObject.scaleY,
                     top: otherObject.top,
                     left: otherObject.left
-                })
+                });
+
+                if (roomsMode && roomsRole === 'viewer') {
+                    group.set({
+                        selectable: false,
+                        evented: false
+                    })
+                }
             }
 
             placed.push(group);
