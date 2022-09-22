@@ -40,6 +40,32 @@ const mll = (function () {
     let drawings = [];
     let resetSelectedPoints = false;
 
+    function updateZoomScale() {
+        const zoom = controls.fabricCanvas.getZoom();
+        let scale = (3 / zoom) - 2.5;
+        if (scale <= 1) {
+            scale = 1;
+        } else if (scale >= 2.25) {
+            scale = 2.25;
+        }
+
+        // console.log(zoom + " " + scale);
+
+        const doScale = controls.checkZoomScale.is(":checked");
+        for (let i = 0; i < placed.length; i++) {
+            const object = placed[i];
+            const meta = object.type;
+            const typeMeta = placedMeta[meta.type];
+            if (doScale && (typeMeta.zoomScale || (typeMeta.hasOwnProperty("zoomScaleWhen") && typeMeta.zoomScaleWhen()))) {
+                object.set({scaleX: scale, scaleY: scale});
+            } else {
+                object.set({scaleX: 1, scaleY: 1});
+            }
+        }
+
+        controls.fabricCanvas.requestRenderAll();
+    }
+
     function getSelectedSp() {
         const selected = [];
         $(".sp-toggle.available.selected").each(function (i, el) {
@@ -47,24 +73,6 @@ const mll = (function () {
             selected.push('' + toggle.data('x') + toggle.data('y'));
         })
         return selected;
-    }
-    function getControlsRoomState() {
-        return {
-            map: controls.comboMapSelect.val(),
-            grid: controls.checkGrid.is(":checked"),
-            defaultGarries: controls.checkDefaultGarries.is(":checked"),
-            placed: controls.checkPlacedGarries.is(":checked"),
-            spawnRadius: controls.checkGarryRadius.is(":checked"),
-            arty: controls.checkArty.is(":checked"),
-            flipArty: controls.checkArtyFlip.is(":checked"),
-            sp: controls.checkStrongpoints.is(":checked"),
-            spResource: controls.checkSpResource.is(":checked"),
-            selectedSp: getSelectedSp(),
-            sectors: controls.checkSectors.is(":checked"),
-            swapSectors: controls.checkSectorSwap.is(":checked"),
-            sectorValue: controls.sectorRange.val(),
-            drawings: controls.checkDrawingsVisible.is(":checked")
-        }
     }
 
     async function loadFromRoomState(message) {
@@ -190,6 +198,35 @@ const mll = (function () {
         }
     }
 
+    function getFullState() {
+        return {
+            state: {
+                controls: getControlsRoomState(),
+                elements: getElementsRoomState(),
+                drawings: drawings
+            }
+        }
+    }
+
+    function getControlsRoomState() {
+        return {
+            map: controls.comboMapSelect.val(),
+            grid: controls.checkGrid.is(":checked"),
+            defaultGarries: controls.checkDefaultGarries.is(":checked"),
+            placed: controls.checkPlacedGarries.is(":checked"),
+            spawnRadius: controls.checkGarryRadius.is(":checked"),
+            arty: controls.checkArty.is(":checked"),
+            flipArty: controls.checkArtyFlip.is(":checked"),
+            sp: controls.checkStrongpoints.is(":checked"),
+            spResource: controls.checkSpResource.is(":checked"),
+            selectedSp: getSelectedSp(),
+            sectors: controls.checkSectors.is(":checked"),
+            swapSectors: controls.checkSectorSwap.is(":checked"),
+            sectorValue: controls.sectorRange.val(),
+            drawings: controls.checkDrawingsVisible.is(":checked")
+        }
+    }
+
     function roomEditorUpdateControls(control) {
         const controlAbout = control instanceof jQuery ? control.attr("id") + "=" + (control.val() || control.is(":checked")) : control;
         console.log("roomEditorUpdateControls(" + controlAbout + ")")
@@ -208,34 +245,36 @@ const mll = (function () {
         }
     }
 
+    function getElementsRoomState() {
+        // images cannot be enlivened as easily as drawings
+        // storing only necessary data to recreate in the clients
+        const reducedElements = [];
+        for (let i = 0; i < placed.length; i++) {
+            const element = placed[i];
+            reducedElements.push({
+                angle: element.angle,
+                height: element.height,
+                left: element.left,
+                top: element.top,
+                type: element.type,
+                width: element.width,
+                scaleX: element.scaleX,
+                scaleY: element.scaleY
+            })
+        }
+
+        return reducedElements;
+    }
+
     function roomEditorUpdateElements() {
         if (roomsMode && roomsRole === 'editor') {
             console.log('sending editor-elements event');
-
-            // images cannot be enlivened as easily as drawings
-            // storing only necessary data to recreate in the clients
-            const reducedElements = [];
-            for (let i = 0; i < placed.length; i++) {
-                if (i >= 50) {
-                    break;
-                }
-
-                const element = placed[i];
-                reducedElements.push({
-                    angle: element.angle,
-                    height: element.height,
-                    left: element.left,
-                    top: element.top,
-                    type: element.type,
-                    width: element.width
-                })
-            }
 
             socket.emit('editor-elements', {
                 roomId: controls.inputRoomId.val(),
                 editorKey: $("#editorKeyDisplay").val(),
                 state: {
-                    elements: reducedElements
+                    elements: getElementsRoomState().slice(0, 50)
                 }
             });
         }
@@ -277,8 +316,8 @@ const mll = (function () {
                 const sectorBred = controls.checkSectorSwap.is(":checked");
                 const sectorsVisible = controls.checkSectors.is(":checked");
                 const radiusHidden = controls.checkGarryRadius.is(":checked");
-                const objectX = object.left + object.width / 2;
-                const objectY = object.top + object.height / 2;
+                const objectX = object.left;
+                const objectY = object.top;
 
                 if (radiusHidden) {
                     return './maps/garry-plain.png';
@@ -295,6 +334,9 @@ const mll = (function () {
                 }
 
                 return './maps/garry-blue-zone.png';
+            },
+            zoomScaleWhen: function() {
+                return controls.checkGarryRadius.is(":checked")
             }
         },
         airhead: {
@@ -302,6 +344,9 @@ const mll = (function () {
             resolveImg: function (object) {
                 const radiusHidden = controls.checkGarryRadius.is(":checked");
                 return './maps/airhead-' + (radiusHidden ? 'plain' : 'radius') + '.png'
+            },
+            zoomScaleWhen: function() {
+                return controls.checkGarryRadius.is(":checked")
             }
         },
         halftrack: {
@@ -310,7 +355,10 @@ const mll = (function () {
                 const radiusHidden = controls.checkGarryRadius.is(":checked");
                 return './maps/halftrack-' + (radiusHidden ? 'plain' : 'radius') + '.png'
             },
-            controlsVisibility: {mtr: true}
+            controlsVisibility: {mtr: true},
+            zoomScaleWhen: function() {
+                return controls.checkGarryRadius.is(":checked")
+            }
         },
         outpost: {
             wh: 122,
@@ -318,6 +366,9 @@ const mll = (function () {
                 const radiusHidden = controls.checkGarryRadius.is(":checked");
                 return './maps/outpost-' + object.type.modifier + "-" + (radiusHidden ? 'plain' : 'radius') + '.png'
             },
+            zoomScaleWhen: function() {
+                return controls.checkGarryRadius.is(":checked")
+            }
         },
         tank: {
             wh: 51,
@@ -328,7 +379,8 @@ const mll = (function () {
 
                 return './maps/tank-med.png'
             },
-            controlsVisibility: {mtr: true}
+            controlsVisibility: {mtr: true},
+            zoomScale: true
         },
         truck: {
             wh: 51,
@@ -339,24 +391,27 @@ const mll = (function () {
 
                 return './maps/truck-supply.png'
             },
-            controlsVisibility: {mtr: true}
+            controlsVisibility: {mtr: true},
+            zoomScale: true
         },
         'at-gun': {
             wh: 51,
             resolveImg: function (object) {
                 return './maps/at-gun-plain.png'
             },
-            controlsVisibility: {mtr: true}
+            controlsVisibility: {mtr: true},
+            zoomScale: true
         },
         enemy: {
             wh: 51,
             resolveImg: function (object) {
                 return './maps/enemy-' + object.type.modifier + '.png'
-            }
+            },
+            zoomScale: true
         }
     }
 
-    function fixSpawnSelectBoxes() {
+    function fixElementSelectBoxes() {
         const sel = new fabric.ActiveSelection(placed, {canvas: controls.fabricCanvas});
         controls.fabricCanvas.setActiveObject(sel).requestRenderAll();
         controls.fabricCanvas.discardActiveObject(sel).requestRenderAll();
@@ -381,17 +436,42 @@ const mll = (function () {
         cursorStyle: 'crosshair',
         actionHandler: fabric.controlsUtils.rotationWithSnapping,
         actionName: 'rotate',
-        render: renderIcon,
+        render: renderRotateIcon,
         cornerSize: 24,
         withConnection: true
     });
 
-    function renderIcon(ctx, left, top, styleOverride, fabricObject) {
+    function renderRotateIcon(ctx, left, top, styleOverride, fabricObject) {
         const size = this.cornerSize;
         ctx.save();
         ctx.translate(left, top);
         ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
         ctx.drawImage(rotateImg, -size / 2, -size / 2, size, size);
+        ctx.restore();
+    }
+
+    const resizeIcon = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'16\' height=\'16\' style=\'stroke:white;stroke-width:1px;\' class=\'bi bi-arrow-down-right-square\' viewBox=\'0 0 16 16\'%3E%3Cpath fill-rule=\'evenodd\' d=\'M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm5.854 3.146a.5.5 0 1 0-.708.708L9.243 9.95H6.475a.5.5 0 1 0 0 1h3.975a.5.5 0 0 0 .5-.5V6.475a.5.5 0 1 0-1 0v2.768L5.854 5.146z\'/%3E%3C/svg%3E';
+    const resizeImg = document.createElement("img");
+    resizeImg.src = resizeIcon;
+
+    fabric.Object.prototype.controls.br = new fabric.Control({
+        x: 1,
+        y: 1,
+        offsetY: 0,
+        cursorStyle: 'crosshair',
+        actionHandler: fabric.controlsUtils.scalingEqually,
+        actionName: 'scaling',
+        render: renderResizeIcon,
+        cornerSize: 24,
+        withConnection: true
+    });
+
+    function renderResizeIcon(ctx, left, top, styleOverride, fabricObject) {
+        const size = this.cornerSize;
+        ctx.save();
+        ctx.translate(left, top);
+        ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
+        ctx.drawImage(resizeImg, -size / 2, -size / 2, size, size);
         ctx.restore();
     }
 
@@ -546,11 +626,14 @@ const mll = (function () {
                 lockMovementX: true,
                 lockMovementY: true,
                 zIndex: zIndex[type],
-                top: e.absolutePointer.y - wh / 2,
-                left: e.absolutePointer.x - wh / 2,
+                originX: "center",
+                originY: "center",
+                top: e.absolutePointer.y,
+                left: e.absolutePointer.x,
                 width: wh,
                 height: wh,
             });
+            // img.filters.push(new fabric.Image.filters.HueRotation({rotation: 2 * Math.random() - 1}))
             img.type = {
                 id: uuid ? uuid : uuidv4(),
                 type: type,
@@ -561,7 +644,9 @@ const mll = (function () {
                 img.set({
                     angle: otherObject.angle,
                     top: otherObject.top,
-                    left: otherObject.left
+                    left: otherObject.left,
+                    //scaleX: otherObject.scaleX,
+                    //scaleY: otherObject.scaleY
                 })
                 if (roomsMode && roomsRole === 'viewer') {
                     img.set({
@@ -587,7 +672,8 @@ const mll = (function () {
             if (roomSendUpdate) {
                 internal.updateStatesAndRender();
             }
-            fixSpawnSelectBoxes();
+            fixElementSelectBoxes();
+            updateZoomScale();
 
             if (roomSendUpdate) {
                 roomEditorUpdateElements()
@@ -625,6 +711,7 @@ const mll = (function () {
             controls.checkSectorSwap = $("#swap-sector-color");
             controls.sectorRange = $("#sector-range");
             elements.contextMenu = $("#menu");
+            controls.checkZoomScale = $("#zoom-scale");
 
             elements.viewerPanel = $("#viewer-panel");
             elements.editorPanel = $("#editor-panel");
@@ -637,10 +724,15 @@ const mll = (function () {
             elements.joinError = $("#joinError");
             controls.btnCreateJoin = $("#submitJoin");
 
+            controls.btnExport = $("#export");
+            controls.btnImport = $("#import");
+            controls.importFileChooser = $("#importFileChooser");
+
             new ClipboardJS('.btn');
 
             if (elements.joinPanel[0]) {
                 roomsMode = true;
+
                 console.log("Rooms Mode");
                 //socket = io('localhost:3000');
                 socket = io('https://maps-let-loose-websocket.herokuapp.com/');
@@ -648,6 +740,10 @@ const mll = (function () {
                 roomsMode = false;
                 console.log("Solo Mode");
             }
+
+            controls.checkZoomScale.click(function () {
+                updateZoomScale();
+            })
 
             controls.btnCreateJoin.click(function () {
                 if (!roomsMode) {
@@ -669,6 +765,9 @@ const mll = (function () {
             });
 
             if (roomsMode) {
+                elements.menuPanel.hide();
+                elements.canvasPanel.hide();
+
                 controls.inputRoomId.val("Map-Session-" + Math.trunc(99999 * Math.random()))
 
                 socket.on('room-status', function (message) {
@@ -729,7 +828,7 @@ const mll = (function () {
                     elements.menuPanel.show();
                     if (message.role === 'editor') {
                         roomsRole = "editor";
-                        $(".menu-panel").show();
+                        $(".editor-div").show();
                         elements.editorPanel.show();
                         elements.viewerPanel.hide();
 
@@ -745,7 +844,7 @@ const mll = (function () {
                         internal.loadMap(filePrefix);
                     } else {
                         roomsRole = 'viewer'
-                        $(".menu-panel").hide();
+                        $(".editor-div").hide();
                         elements.editorPanel.hide();
                         elements.viewerPanel.show();
                     }
@@ -1026,6 +1125,7 @@ const mll = (function () {
             }
 
             controls.fabricCanvas.on('object:modified', function (e) {
+                console.log(e.target);
                 internal.updateStatesAndRender();
                 roomEditorUpdateElements();
             });
@@ -1222,7 +1322,8 @@ const mll = (function () {
                         .css("top", offset.top + e.pointer.y + "px")
                         .css("z-index", 100);
                     contextMenuEvent = e;
-                } else if (e.target && e.target.selectable === true && e.target.lockMovementX === false || e.transform && e.transform.action === 'rotate' ||
+                } else if (e.target && e.target.selectable === true && e.target.lockMovementX === false ||
+                    e.transform && (e.transform.action === 'rotate' || e.transform.action === 'scaling') ||
                     controls.fabricCanvas.isDrawingMode === true) {
                     // Dragging element
                     panning = false;
@@ -1251,7 +1352,8 @@ const mll = (function () {
                 opt.e.preventDefault();
                 opt.e.stopPropagation();
 
-                fixSpawnSelectBoxes();
+                fixElementSelectBoxes();
+                updateZoomScale();
             });
 
             elements.spImage = new Image();
@@ -1461,10 +1563,18 @@ const mll = (function () {
             });
 
             controls.btnSave.click(function () {
+                for (let i = 0; i < placed.length; i++) {
+                    placed[i].set({scaleX: 1, scaleY: 1});
+                }
+
+                controls.exportCanvas.renderAll();
+
                 $('<a>').attr({
                     href: controls.exportCanvas.toDataURL(),
                     download: controls.comboMapSelect.val() + "_Custom_MLL.png"
                 })[0].click();
+
+                updateZoomScale();
             });
 
             let lastRangeVal = controls.sectorRange.val();
@@ -1481,6 +1591,92 @@ const mll = (function () {
                 controls.fabricCanvas.setWidth(elements.canvasParent.clientWidth)
                 controls.fabricCanvas.setHeight(elements.canvasParent.clientHeight)
             }).observe(document.getElementById("canvas-container"));
+
+            controls.btnExport.on('click', async function () {
+                controls.btnExport.addClass("loading").addClass("disabled");
+
+                const zip = new JSZip();
+                console.log("Creating about.txt...")
+                zip.file("about.txt",
+                    "Downloaded by Maps Let Loose " + new Date().toLocaleString() + "\n\n" +
+                    "URL: " + window.location
+                );
+
+                console.log("Creating mll_config.json...");
+                zip.file("mll_config.json", JSON.stringify(getFullState(), null, 4));
+
+                const fileName = "mll_" + controls.comboMapSelect.val().toLowerCase() + "_" + moment().format("YYYYMMDD-HHmmss");
+                console.log("Saving as " + fileName);
+                zip.generateAsync({
+                    type: "blob",
+                    compression: "DEFLATE",
+                    compressionOptions: {
+                        level: 9
+                    }
+                }).then(function (content) {
+                    saveAs(content, fileName);
+
+                    controls.btnExport.removeClass("loading").removeClass("disabled");
+                });
+            });
+
+            // Drag & Drop listener
+            document.addEventListener("dragover", function (event) {
+                event.preventDefault();
+            });
+            document.documentElement.addEventListener('drop', async function (e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                let file = e.dataTransfer.files[0];
+                console.log("Loading file");
+                console.log(file);
+
+                importFile(file);
+            });
+
+            controls.importFileChooser.on('change', function (event) {
+                console.log(event);
+
+                let file = event.target.files[0];
+
+                if (file) {
+                    controls.inputValue.val(file.name);
+                } else {
+                    return;
+                }
+
+                importFile(file);
+            });
+
+            function importFile(file) {
+                console.log("Importing from file " + file.name);
+
+                if (roomsMode && roomsRole === "viewer") {
+                    console.log("Viewer cannot import, ignoring")
+                    return;
+                }
+
+                controls.btnImport.addClass("loading").addClass("disabled");
+
+                JSZip.loadAsync(file).then(function (content) {
+                    const file = content.file("mll_config.json");
+                    return file ? file.async("string") : null;
+                }).then(function (text) {
+                    if (!text) {
+                        console.log("file was empty?")
+                        return;
+                    }
+                    const content = JSON.parse(text);
+                    loadFromRoomState(content);
+
+                    roomEditorUpdateControls("importFile")
+                    roomEditorUpdateElements();
+                    roomEditorUpdateDrawings();
+
+                    controls.btnImport.removeClass("loading").removeClass("disabled");
+                });
+            }
 
             internal.pageReady();
         },
@@ -1609,6 +1805,7 @@ const mll = (function () {
             if (promises.length) {
                 Promise.all(promises).then(internal.render);
             } else {
+                updateZoomScale()
                 controls.fabricCanvas.renderAll();
                 controls.exportCanvas.renderAll();
             }
@@ -1617,6 +1814,7 @@ const mll = (function () {
         render: function () {
             console.log("render()");
 
+            updateZoomScale();
             controls.fabricCanvas.renderAll();
             controls.exportCanvas.renderAll();
         }

@@ -107,6 +107,14 @@ ul {
     height: 40px !important;
 }
 
+button .countdown, button .spinner {
+    display: none;
+}
+
+button.loading .countdown, button.loading .spinner {
+    display: initial;
+}
+
 /* Dark mode tweaks */
 html.dark .tag {
     background-color: royalblue;
