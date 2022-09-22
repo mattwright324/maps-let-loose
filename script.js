@@ -700,8 +700,8 @@ const mll = (function () {
             controls.checkDefaultGarries = $("#dg-visible");
             controls.checkPlacedGarries = $("#garry-visible");
             controls.checkGarryRadius = $("#garry-radius-visible");
-            controls.btnRemoveGarries = $("#removePlacedGarrisons");
-            controls.btnUndoLastGarry = $("#undoLastGarrison");
+            controls.btnRemoveAllElements = $("#remove-all-elements");
+            controls.btnUndoLastElement = $("#undo-last-element");
             controls.btnEnableAll = $("#enableAll");
             controls.btnDisableAll = $("#disableAll");
             controls.btnSave = $("#save");
@@ -1138,34 +1138,32 @@ const mll = (function () {
                 addMapElement(e, 'garry', null, true);
             });
 
-            controls.btnRemoveGarries.on('click', function () {
-                console.log('Remove all garries')
+            controls.btnRemoveAllElements.on('click', function () {
+                console.log('Remove all element')
 
                 while (placed.length > 0) {
-                    const garry = placed.pop();
+                    const element = placed.pop();
 
-                    controls.fabricCanvas.remove(garry);
-                    controls.exportCanvas.remove(garry);
+                    controls.fabricCanvas.remove(element);
+                    controls.exportCanvas.remove(element);
                 }
 
                 roomEditorUpdateElements()
             })
 
-            controls.btnUndoLastGarry.on('click', function () {
-                console.log('Undo last garry')
+            controls.btnUndoLastElement.on('click', function () {
+                console.log('Undo last element')
 
-                const garry = placed.pop();
-
-                if (garry) {
-                    controls.fabricCanvas.remove(garry);
-                    controls.exportCanvas.remove(garry);
+                const element = placed.pop();
+                if (element) {
+                    controls.fabricCanvas.remove(element);
+                    controls.exportCanvas.remove(element);
                 }
 
                 roomEditorUpdateElements()
             });
 
             const drawingModeEl = $('#drawing-mode'),
-                drawingOptionsEl = $('#drawing-mode-options'),
                 drawingColorEl = $('#drawing-color'),
                 drawingLineWidthEl = $('#drawing-line-width'),
                 clearEl = $('#clear-paths'),
@@ -1224,6 +1222,8 @@ const mll = (function () {
             });
 
             undoEl.click(function () {
+                console.log("Undo last drawing");
+
                 const path = drawings.pop();
                 controls.fabricCanvas.remove(path);
                 controls.exportCanvas.remove(path);
@@ -1232,6 +1232,8 @@ const mll = (function () {
             })
 
             clearEl.click(function () {
+                console.log("Clear all drawings");
+
                 while (drawings.length) {
                     const path = drawings.pop();
                     controls.fabricCanvas.remove(path);
