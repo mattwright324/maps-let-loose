@@ -49,13 +49,26 @@ const mll = (function () {
             scale = 2.25;
         }
 
-        // console.log(zoom + " " + scale);
-
         const doScale = controls.checkZoomScale.is(":checked");
         for (let i = 0; i < placed.length; i++) {
             const object = placed[i];
             const meta = object.type;
+            if (meta.type === "custom-radius") {
+                const textEl = idx(["type", "text"], object);
+                if (!textEl) {
+                    console.log("no text");
+                } else {
+                    // console.log(object);
+                    const meters = Math.trunc((10 * object.getScaledWidth()) / 19);
+                    textEl.set({
+                        text: meters + "m"
+                    })
+                }
+            }
             const typeMeta = placedMeta[meta.type];
+            if (!typeMeta) {
+                continue;
+            }
             if (doScale && (typeMeta.zoomScale || (typeMeta.hasOwnProperty("zoomScaleWhen") && typeMeta.zoomScaleWhen()))) {
                 object.set({scaleX: scale, scaleY: scale});
             } else {
@@ -138,7 +151,9 @@ const mll = (function () {
                         element.set({
                             angle: updated.angle,
                             top: updated.top,
-                            left: updated.left
+                            left: updated.left,
+                            scaleX: updated.scaleX,
+                            scaleY: updated.scaleY
                         })
                         if (roomsMode && roomsRole === 'viewer') {
                             element.set({
@@ -450,30 +465,34 @@ const mll = (function () {
         ctx.restore();
     }
 
-    const resizeIcon = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'16\' height=\'16\' style=\'stroke:white;stroke-width:1px;\' class=\'bi bi-arrow-down-right-square\' viewBox=\'0 0 16 16\'%3E%3Cpath fill-rule=\'evenodd\' d=\'M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm5.854 3.146a.5.5 0 1 0-.708.708L9.243 9.95H6.475a.5.5 0 1 0 0 1h3.975a.5.5 0 0 0 .5-.5V6.475a.5.5 0 1 0-1 0v2.768L5.854 5.146z\'/%3E%3C/svg%3E';
-    const resizeImg = document.createElement("img");
-    resizeImg.src = resizeIcon;
+    // const resizeIcon = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'16\' height=\'16\' style=\'stroke:white;stroke-width:1px;\' class=\'bi bi-arrow-down-right-square\' viewBox=\'0 0 16 16\'%3E%3Cpath fill-rule=\'evenodd\' d=\'M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm5.854 3.146a.5.5 0 1 0-.708.708L9.243 9.95H6.475a.5.5 0 1 0 0 1h3.975a.5.5 0 0 0 .5-.5V6.475a.5.5 0 1 0-1 0v2.768L5.854 5.146z\'/%3E%3C/svg%3E';
+    // const resizeImg = document.createElement("img");
+    // resizeImg.src = resizeIcon;
+    //
+    // fabric.Object.prototype.controls.br = new fabric.Control({
+    //     x: 0.5,
+    //     y: 0.5,
+    //     cursorStyle: 'crosshair',
+    //     actionHandler: fabric.controlsUtils.scalingEqually,
+    //     actionName: 'scaling',
+    //     render: renderResizeIcon,
+    //     cornerSize: 24,
+    //     centeredScaling: true,
+    //     withConnection: true
+    // });
+    //
+    // function renderResizeIcon(ctx, left, top, styleOverride, fabricObject) {
+    //     const size = this.cornerSize;
+    //     ctx.save();
+    //     ctx.translate(left, top);
+    //     ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
+    //     ctx.drawImage(resizeImg, -size / 2, -size / 2, size, size);
+    //     ctx.restore();
+    // }
 
-    fabric.Object.prototype.controls.br = new fabric.Control({
-        x: 1,
-        y: 1,
-        offsetY: 0,
-        cursorStyle: 'crosshair',
-        actionHandler: fabric.controlsUtils.scalingEqually,
-        actionName: 'scaling',
-        render: renderResizeIcon,
-        cornerSize: 24,
-        withConnection: true
-    });
-
-    function renderResizeIcon(ctx, left, top, styleOverride, fabricObject) {
-        const size = this.cornerSize;
-        ctx.save();
-        ctx.translate(left, top);
-        ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
-        ctx.drawImage(resizeImg, -size / 2, -size / 2, size, size);
-        ctx.restore();
-    }
+    fabric.Object.prototype.transparentCorners = false;
+    fabric.Object.prototype.cornerColor = 'blue';
+    fabric.Object.prototype.cornerStyle = 'circle';
 
     // Each point supports multiple coordinates to draw to tempCanvas
     // Each map has 25 sectors but 15 points
@@ -615,6 +634,102 @@ const mll = (function () {
         console.log('addSpawn(' + type + ', ' + modifier + ')')
         console.log(e);
 
+        if (type === "custom-radius") {
+            const text = new fabric.Text("", {
+                fontFamily: 'Calibri',
+                fontSize: 25,
+                stroke: "#00ff00",
+                textAlign: 'center',
+                originX: 'center',
+                originY: 'center',
+                top: -170
+            })
+            const circle = new fabric.Circle({
+                zIndex: 7,
+                fill: "transparent",
+                originX: "center",
+                originY: "center",
+                centeredScaling: true,
+                radius: 190,
+                stroke: "#00ff00",
+                strokeWidth: 2,
+                strokeDashArray: [10, 5]
+            });
+            const vertLine = new fabric.Line([15, 0, -15, 0], {
+                originX: "center",
+                originY: "center",
+                stroke: 'black',
+                strokeWidth: 2,
+            });
+            const horizLine = new fabric.Line([0, 15, 0, -15], {
+                originX: "center",
+                originY: "center",
+                stroke: 'black',
+                strokeWidth: 2,
+            });
+            const group = new fabric.Group([circle, text, vertLine, horizLine],{
+                selectable: true,
+                evented: true,
+                hasBorders: false,
+                lockMovementX: true,
+                lockMovementY: true,
+                originX: "center",
+                originY: "center",
+                centeredScaling: true,
+                width: 380,
+                height: 380,
+                zIndex: 7,
+                left: e.absolutePointer.x,
+                top: e.absolutePointer.y,
+                scaleX: 3.5036381745797236, // scale to 700m
+                scaleY: 3.5036381745797236,
+                type: {
+                    id: uuid ? uuid : uuidv4(),
+                    type: type,
+                    modifier: modifier,
+                    originalEvent: {absolutePointer: e.absolutePointer},
+                    text: text
+                }
+            });
+            group.setControlsVisibility({
+                mt: false, mb: false, ml: false, mr: false, bl: false, br: true, tl: false, tr: false, mtr: true
+            });
+
+            if (otherObject) {
+                text.set({
+                    text: otherObject.type.text.text
+                })
+                group.set({
+                    angle: otherObject.angle,
+                    scaleX: otherObject.scaleX,
+                    scaleY: otherObject.scaleY,
+                    top: otherObject.top,
+                    left: otherObject.left
+                });
+
+                if (roomsMode && roomsRole === 'viewer') {
+                    group.set({
+                        selectable: false,
+                        evented: false
+                    })
+                }
+            }
+
+            placed.push(group);
+
+            addAndOrder(group);
+            if (roomSendUpdate) {
+                internal.updateStatesAndRender();
+            }
+            fixElementSelectBoxes();
+            updateZoomScale();
+
+            if (roomSendUpdate) {
+                roomEditorUpdateElements()
+            }
+            return;
+        }
+
         fabric.Image.fromURL('', function (img) {
             console.log(img);
 
@@ -628,6 +743,7 @@ const mll = (function () {
                 zIndex: zIndex[type],
                 originX: "center",
                 originY: "center",
+                centeredScaling: true,
                 top: e.absolutePointer.y,
                 left: e.absolutePointer.x,
                 width: wh,
@@ -645,8 +761,6 @@ const mll = (function () {
                     angle: otherObject.angle,
                     top: otherObject.top,
                     left: otherObject.left,
-                    //scaleX: otherObject.scaleX,
-                    //scaleY: otherObject.scaleY
                 })
                 if (roomsMode && roomsRole === 'viewer') {
                     img.set({
@@ -1130,6 +1244,24 @@ const mll = (function () {
                 roomEditorUpdateElements();
             });
 
+            controls.fabricCanvas.on('object:scaling', function(e){
+                const object = e.target;
+                const meta = object.type;
+                if (meta.type === "custom-radius") {
+                    const textEl = idx(["type", "text"], object);
+                    if (!textEl) {
+                        console.log("no text");
+                    } else {
+                        // console.log(object);
+                        const meters = Math.trunc((10 * object.getScaledWidth()) / 19);
+                        textEl.set({
+                            text: meters + "m"
+                        })
+                    }
+                }
+            });
+
+
             controls.fabricCanvas.on('mouse:dblclick', function (e) {
                 if (roomsMode && roomsRole === 'viewer') {
                     return;
@@ -1311,6 +1443,7 @@ const mll = (function () {
                 panning = false;
             });
             controls.fabricCanvas.on('mouse:down', function (e) {
+                console.log(e);
                 elements.contextMenu.css("visibility", "hidden");
                 if (e.button === 3) {
                     if (roomsMode && roomsRole === 'viewer') {
@@ -1325,7 +1458,7 @@ const mll = (function () {
                         .css("z-index", 100);
                     contextMenuEvent = e;
                 } else if (e.target && e.target.selectable === true && e.target.lockMovementX === false ||
-                    e.transform && (e.transform.action === 'rotate' || e.transform.action === 'scaling') ||
+                    e.transform && (e.transform.action === 'rotate' || e.transform.action === 'scale') ||
                     controls.fabricCanvas.isDrawingMode === true) {
                     // Dragging element
                     panning = false;
@@ -1566,6 +1699,9 @@ const mll = (function () {
 
             controls.btnSave.click(function () {
                 for (let i = 0; i < placed.length; i++) {
+                    if (placed[i].type.type === "custom-radius") {
+                        continue;
+                    }
                     placed[i].set({scaleX: 1, scaleY: 1});
                 }
 
@@ -1769,7 +1905,11 @@ const mll = (function () {
             for (let i = 0; i < placed.length; i++) {
                 const object = placed[i];
                 promises.push(new Promise(function (resolve) {
-                    object.setSrc(placedMeta[object.type.type].resolveImg(object), resolve);
+                    const meta = placedMeta[object.type.type];
+                    if (!meta) {
+                        resolve();
+                    }
+                    object.setSrc(meta.resolveImg(object), resolve);
                 }));
             }
 
