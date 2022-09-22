@@ -642,7 +642,7 @@ const mll = (function () {
                 textAlign: 'center',
                 originX: 'center',
                 originY: 'center',
-                top: -170
+                top: 170
             })
             const circle = new fabric.Circle({
                 zIndex: 7,
