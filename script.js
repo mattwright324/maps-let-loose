@@ -352,6 +352,7 @@ const mll = (function () {
         "supply-drop": 9,
         "ammo-drop": 9,
         "precision-strike": 9,
+        "katyusha-strike": 9,
         tank: 9,
         truck: 9,
         'at-gun': 9,
@@ -455,6 +456,23 @@ const mll = (function () {
                 return "./maps/precision-strike.png"
             },
             zoomScale: false
+        },
+        "katyusha-strike": {
+            wh: 197,
+            resolveImg: function (object) {
+                return "./maps/katyusha-strike.png"
+            },
+            zoomScale: false
+        },
+        "strafing-run": {
+            wh: 380,
+            resolveImg: function (object) {
+                return "./maps/strafing-run.png"
+            },
+            set: {
+                snapAngle: 45,
+            },
+            controlsVisibility: {mtr: true},
         },
         tank: {
             wh: 51,
@@ -1150,7 +1168,7 @@ const mll = (function () {
                 }
             }
             if (placedMeta[type].set) {
-                img.setControlsVisibility(placedMeta[type].set);
+                img.set(placedMeta[type].set);
             }
             // disable rotation and resizing
             img.setControlsVisibility({
@@ -1616,9 +1634,9 @@ const mll = (function () {
                         name: "Add Marker",
                         icon: "bi bi-geo-alt",
                         items: {
-                            enemy_garrison: {name: "Enemy Garrison"},
+                            enemy_garrison: {name: "Enemy Garrison", icon: "bi bi-flag"},
                             enemy_infantry: {name: "Enemy Infantry"},
-                            enemy_outpost: {name: "Enemy Outpost"},
+                            enemy_outpost: {name: "Enemy Outpost", icon: "bi bi-triangle"},
                             enemy_tank: {name: "Enemy Tank"},
                             enemy_vehicle: {name: "Enemy Light Vehicle"},
                         }
@@ -1631,9 +1649,9 @@ const mll = (function () {
                             ammo_drop: {name: "Ammo Drop", icon: "bi bi-box2"},
                             recon_plane: {name: "Recon Plane", icon: "bi bi-camera", disabled: true},
                             precision_strike: {name: "Precision Strike", icon: "bi bi-arrow-down-circle"},
-                            strafing_run: {name: "Strafing Run", icon: "bi bi-file-arrow-up", disabled: true},
+                            strafing_run: {name: "Strafing Run", icon: "bi bi-file-arrow-up"},
                             bombing_run: {name: "Bombing Run", icon: "bi bi-file-arrow-up", disabled: true},
-                            katyusha_strike: {name: "Katyusha Strike", icon: "bi bi-arrow-down-circle", disabled: true},
+                            katyusha_strike: {name: "Katyusha Strike", icon: "bi bi-arrow-down-circle"},
                         }
                     },
                     objects: {
