@@ -20,6 +20,9 @@
     <script src="//cdn.jsdelivr.net/npm/jszip-utils@0.1.0/dist/jszip-utils.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/jszip@3.7.1/dist/jszip.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.contextMenu.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.contextMenu.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.ui.position.js"></script>
 
     <!-- Apps -->
     <link href="./styles.css?v={{ site.time | date_to_xmlschema }}" rel="stylesheet"/>
@@ -30,7 +33,7 @@
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-light mb-3" style="border-bottom: 1px solid rgba(127,127,127,0.1);">
-    <span class="container">
+    <span class="container-fluid">
         <div class="navbar-brand">
             <img src="./icon.png" alt="" class="d-inline-block align-text-top"><span style="padding-left: .75rem;">Maps Let Loose</span>
         </div>
@@ -62,7 +65,7 @@
 
 {{ content }}
 
-<div id="side-menu" class="container mb-5">
+<div id="side-menu" class="container-fluid mb-5">
     <div class="row">
         <div id="menu-panel" class="col col-lg-3" style="user-select: none">
             <div class="mb-3 editor-div">
@@ -340,60 +343,16 @@
         <div id="canvas-panel" class="col col-lg-9">
             <div id="canvas-container">
                 <canvas id="canvas" class="hasmenu drag-mode"></canvas>
-                <div id="menu" class="menu-x">
-                    <div class="menu-li submenu">
-                        Add Spawn
-                        <small>
-                            <a href="javascript:mll.menuAdd('garry')">Garrison</a> |
-                            <a href="javascript:mll.menuAdd('airhead')">Airhead</a> |
-                            <a href="javascript:mll.menuAdd('halftrack')">Halftrack</a>
-                        </small>
-                    </div>
-                    <div class="menu-li submenu">
-                        Add Outpost
-                        <small>
-                            <a href="javascript:mll.menuAdd('outpost', 'normal')">Normal</a> |
-                            <a href="javascript:mll.menuAdd('outpost', 'recon')">Recon</a>
-                        </small>
-                    </div>
-                    <div class="menu-li submenu">
-                        Add Tank
-                        <small>
-                            <a href="javascript:mll.menuAdd('tank', 'heavy')">Heavy</a> |
-                            <a href="javascript:mll.menuAdd('tank', 'med')">Medium</a> |
-                            <a href="javascript:mll.menuAdd('tank', 'light')">Light</a> |
-                            <a href="javascript:mll.menuAdd('tank', 'recon')">Recon</a>
-                        </small>
-                    </div>
-                    <div class="menu-li submenu">
-                        Add Truck
-                        <small>
-                            <a href="javascript:mll.menuAdd('truck', 'supply')">Supply</a> |
-                            <a href="javascript:mll.menuAdd('truck', 'transport')">Transport</a>
-                        </small>
-                    </div>
-                    <div class="menu-li" onclick="mll.menuAdd('at-gun')">Add AT Gun</div>
-                    <div class="menu-li submenu">
-                        Mark Enemy
-                        <small>
-                            <a href="javascript:mll.menuAdd('enemy', 'garry')">Garrison</a> |
-                            <a href="javascript:mll.menuAdd('enemy', 'op')">Outpost</a> |
-                            <a href="javascript:mll.menuAdd('enemy', 'infantry')">Infantry</a> |
-                            <a href="javascript:mll.menuAdd('enemy', 'tank')">Tank</a>
-                        </small>
-                    </div>
-                    <div class="menu-li" onclick="mll.menuAdd('custom-radius')">Add Custom Radius</div>
-                    <div class="menu-li" onclick="mll.menuAdd(null)">
-                        Cancel
-                    </div>
-                </div>
-
             </div>
+        </div>
+
+        <div id="extra-panel" class="col col-lg-3">
+
         </div>
     </div>
 </div>
 
-<div class="container mb-5">
+<div class="container-fluid mb-5">
     <h4>Additional details</h4>
     <ul>
         <li>There are 3^5 or 243 total potential objective configurations</li>
@@ -425,7 +384,7 @@
     </ul>
 </div>
 
-<div class="container mb-5">
+<div class="container-fluid mb-5">
     <h4>Map Downloads</h4>
     <p>
         Google Drive collections of all the tacmaps as well as modified versions made during this project.
@@ -455,7 +414,7 @@
     </ul>
 </div>
 
-<div class="container">
+<div class="container-fluid">
     <h4>Other resources</h4>
     <p>Links to other handy things Hell Let Loose related</p>
     <ul>
@@ -474,6 +433,9 @@
         <li><a target="_blank" href="https://worldwarways.web.app/#/">
             World War Ways - Interactive map driving directions
         </a></li>
+        <li><a target="_blank" href="https://www.hllca.org/">
+            HCA - Hell Let Loose Competitive Association
+        </a></li>
         <li><a target="_blank" href="https://hellletloose.fandom.com/wiki/Hell_Let_Loose_Wiki">
             Hell Let Loose Wiki (not up to date)
         </a></li>
@@ -483,7 +445,7 @@
     </ul>
 </div>
 
-<div class="ui container" style="padding-top:3%;padding-bottom:3%;color:darkgray;text-align:center">
+<div class="ui container-fluid" style="padding-top:3%;padding-bottom:3%;color:darkgray;text-align:center">
     mattwright324 | 2022 | <a href="/">home</a> | <a target="_blank" href="https://github.com/mattwright324">github</a>
     | <a target="_blank" href="https://github.com/mattwright324/maps-let-loose">maps-let-loose</a>
 </div>
