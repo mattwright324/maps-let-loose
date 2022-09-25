@@ -353,6 +353,8 @@ const mll = (function () {
         "ammo-drop": 9,
         "precision-strike": 9,
         "katyusha-strike": 9,
+        "strafing-run": 9,
+        "bombing-run": 9,
         tank: 9,
         truck: 9,
         'at-gun': 9,
@@ -469,9 +471,15 @@ const mll = (function () {
             resolveImg: function (object) {
                 return "./maps/strafing-run.png"
             },
-            set: {
-                snapAngle: 45,
+            set: {snapAngle: 45},
+            controlsVisibility: {mtr: true},
+        },
+        "bombing-run": {
+            wh: 380,
+            resolveImg: function (object) {
+                return "./maps/bombing-run.png"
             },
+            set: {snapAngle: 45},
             controlsVisibility: {mtr: true},
         },
         tank: {
@@ -1650,7 +1658,7 @@ const mll = (function () {
                             recon_plane: {name: "Recon Plane", icon: "bi bi-camera", disabled: true},
                             precision_strike: {name: "Precision Strike", icon: "bi bi-arrow-down-circle"},
                             strafing_run: {name: "Strafing Run", icon: "bi bi-file-arrow-up"},
-                            bombing_run: {name: "Bombing Run", icon: "bi bi-file-arrow-up", disabled: true},
+                            bombing_run: {name: "Bombing Run", icon: "bi bi-file-arrow-up"},
                             katyusha_strike: {name: "Katyusha Strike", icon: "bi bi-arrow-down-circle"},
                         }
                     },
