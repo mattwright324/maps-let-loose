@@ -1390,6 +1390,8 @@ const mll = (function () {
 
                         $("#warning-panel").show();
                         $("#warn-reason").text("Either you lost connection or the rooms server restarted and the room no longer exists. Try joining again or create a new one.");
+
+                        document.title = "Rooms - Maps Let Loose"
                     }
                 }
 
@@ -1410,6 +1412,8 @@ const mll = (function () {
                     $(".editor-key").val(message.editorKey);
                     $(".viewer-password").val(message.viewerPassword);
 
+                    document.title = message.roomId + " - Rooms - Maps Let Loose"
+
                     $("#warning-panel").hide();
                     elements.joinPanel.hide();
                     elements.menuPanel.show();
@@ -1425,8 +1429,6 @@ const mll = (function () {
                             "?roomId=" + encodeURI(message.roomId || "") +
                             "&viewerPassword=" + encodeURI(message.viewerPassword || "") +
                             "&join=true");
-
-                        document.title = message.roomId + " - Rooms - Maps Let Loose"
 
                         const map = idx(["state", "controls", "map"], message) || "Carentan";
                         controls.comboMapSelect.val(map)
