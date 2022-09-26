@@ -1686,6 +1686,7 @@ const mll = (function () {
                     },
                     objects: {
                         name: "Add Custom Object",
+                        icon: "bi bi-bounding-box-circles",
                         items: {
                             measure_radius: {name: "Measure Radius", icon: "bi bi-plus-circle-dotted"},
                             measure_line: {name: "Measure Line", icon: "bi bi-rulers"},
