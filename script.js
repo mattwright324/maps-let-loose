@@ -1185,6 +1185,11 @@ const mll = (function () {
             return;
         }
 
+        if (!placedMeta.hasOwnProperty(type)) {
+            console.warn("no meta properties for type " + type)
+            return;
+        }
+
         fabric.Image.fromURL('', function (img) {
             console.log(img);
 
@@ -1201,7 +1206,6 @@ const mll = (function () {
                 centeredScaling: true,
                 top: e.absolutePointer.y,
                 left: e.absolutePointer.x,
-                //snapAngle: 45,
                 width: wh,
                 height: wh,
             });
