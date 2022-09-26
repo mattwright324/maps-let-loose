@@ -583,6 +583,17 @@ const mll = (function () {
             set: {snapAngle: 45},
             controlsVisibility: {mtr: true},
         },
+        "supplies": {
+            wh: 51,
+            resolveImg: function (object) {
+                if (object.type.modifier) {
+                    return './maps/supplies-' + object.type.modifier + ".png";
+                }
+
+                return './maps/supplies-plain.png'
+            },
+            zoomScale: true
+        },
         tank: {
             wh: 51,
             resolveImg: function (object) {
@@ -1608,6 +1619,22 @@ const mll = (function () {
                 node_fuel: function () {
                     mll.menuAdd("node", "fuel")
                 },
+                // Placeable
+                supply_50: function () {
+                    mll.menuAdd("supplies", "50")
+                },
+                supply_50x2: function () {
+                    mll.menuAdd("supplies", "50x2")
+                },
+                supply_100: function () {
+                    mll.menuAdd("supplies", "100")
+                },
+                supply_150: function () {
+                    mll.menuAdd("supplies", "150")
+                },
+                supply_150x2: function () {
+                    mll.menuAdd("supplies", "150x2")
+                },
                 // Marker
                 enemy_garrison: function () {
                     mll.menuAdd("enemy", "garry")
@@ -1711,6 +1738,19 @@ const mll = (function () {
                             node_manpower: {name: "Manpower Node", icon: "bi bi-diamond"},
                             node_munition: {name: "Munitions Node", icon: "bi bi-diamond"},
                             node_fuel: {name: "Fuel Node", icon: "bi bi-diamond"},
+                        }
+                    },
+                    placeable: {
+                        name: "Add Placeable",
+                        items: {
+                            // ammo_box: {name: "Ammo Box"},
+                            // explosive_box: {name: "Explosive Box"},
+                            // bandage_box: {name: "Bandage Box"},
+                            supply_50: {name: "Supplies (50)", icon: "bi bi-tools"},
+                            supply_50x2: {name: "Supplies (50 x 2)", icon: "bi bi-tools"},
+                            supply_100: {name: "Supplies (100)", icon: "bi bi-tools"},
+                            supply_150: {name: "Supplies (150)", icon: "bi bi-tools"},
+                            supply_150x2: {name: "Supplies (150 x 2)", icon: "bi bi-tools"},
                         }
                     },
                     marker: {
@@ -2219,6 +2259,9 @@ const mll = (function () {
                 }
             })
             $(document).on('keyup', function (e) {
+                if (roomsMode && roomsRole === 'viewer') {
+                    return;
+                }
                 if ((e.ctrlKey || e.shiftKey) && e.keyCode === 37) {
                     console.log("Ctrl+" + e.keyCode)
                     controls.sectorRange.val(Number(controls.sectorRange.val()) - 1);
