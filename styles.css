@@ -54,6 +54,12 @@ canvas.draw-mode {
 #line-color-div span {
     margin-left: 5px;
 }
+#shape-color-div span {
+    margin-left: 5px;
+}
+#text-color-div span {
+    margin-left: 5px;
+}
 
 #sp-grid {
     display: grid;

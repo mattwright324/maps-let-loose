@@ -47,6 +47,7 @@ const mll = (function () {
     let placed = [];
     let drawings = [];
     let resetSelectedPoints = false;
+    let selectedElement;
 
     function updateZoomScale() {
         const zoom = controls.fabricCanvas.getZoom();
@@ -170,14 +171,63 @@ const mll = (function () {
                 for (let j = 0; j < elementState.length; j++) {
                     const updated = elementState[j];
                     const meta = updated.type;
-                    if (meta.id === meta.id) {
-                        element.set({
-                            angle: updated.angle,
-                            top: updated.top,
-                            left: updated.left,
-                            scaleX: updated.scaleX,
-                            scaleY: updated.scaleY,
-                        })
+                    if (element.type.id === meta.id) {
+                        if (meta.type === "measure-line") {
+                            element.set({
+                                x1: updated.x1,
+                                x2: updated.x2,
+                                y1: updated.y1,
+                                y2: updated.y2
+                            });
+                            const lineLength = distance(updated.x1, updated.y1, updated.x2, updated.y2);
+                            const meters = Math.trunc((100 * lineLength) / 190);
+                            const point = midpoint(updated.x1, updated.y1, updated.x2, updated.y2);
+                            element.type.text.set({
+                                left: point[0],
+                                top: point[1],
+                                text: meters + "m"
+                            })
+                            element.type.c1.set({
+                                left: element.get("x1"),
+                                top: element.get("y1"),
+                            })
+                            element.type.c2.set({
+                                left: element.get("x2"),
+                                top: element.get("y2"),
+                            })
+                        } else if (meta.type === "measure-radius") {
+                            console.log("updating measure-radius")
+                            console.log(element);
+                            element.type.text.set({
+                                text: updated.type.text.text
+                            });
+                            if (element.type.text2) {
+                                element.type.text2.set({
+                                    text: updated.type.text.text
+                                });
+                            }
+                            element.set({
+                                angle: updated.angle,
+                                scaleX: updated.scaleX,
+                                scaleY: updated.scaleY,
+                                top: updated.top,
+                                left: updated.left
+                            });
+                        } else {
+                            element.set({
+                                angle: updated.angle,
+                                top: updated.top,
+                                left: updated.left,
+                                scaleX: updated.scaleX,
+                                scaleY: updated.scaleY,
+                                text: updated.text,
+                                backgroundColor: updated.backgroundColor,
+                                fill: updated.fill,
+                                stroke: updated.stroke,
+                                opacity: updated.opacity,
+                            })
+                        }
+
                         if (roomsMode && roomsRole === 'viewer') {
                             element.set({
                                 selectable: false,
@@ -302,7 +352,11 @@ const mll = (function () {
                 x1: element.x1,
                 y1: element.y1,
                 x2: element.x2,
-                y2: element.y2
+                y2: element.y2,
+                backgroundColor: element.backgroundColor,
+                fill: element.fill,
+                stroke: element.stroke,
+                opacity: element.opacity,
             })
         }
 
@@ -574,31 +628,6 @@ const mll = (function () {
         ctx.restore();
     }
 
-    // const resizeIcon = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'16\' height=\'16\' style=\'stroke:white;stroke-width:1px;\' class=\'bi bi-arrow-down-right-square\' viewBox=\'0 0 16 16\'%3E%3Cpath fill-rule=\'evenodd\' d=\'M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm5.854 3.146a.5.5 0 1 0-.708.708L9.243 9.95H6.475a.5.5 0 1 0 0 1h3.975a.5.5 0 0 0 .5-.5V6.475a.5.5 0 1 0-1 0v2.768L5.854 5.146z\'/%3E%3C/svg%3E';
-    // const resizeImg = document.createElement("img");
-    // resizeImg.src = resizeIcon;
-    //
-    // fabric.Object.prototype.controls.br = new fabric.Control({
-    //     x: 0.5,
-    //     y: 0.5,
-    //     cursorStyle: 'crosshair',
-    //     actionHandler: fabric.controlsUtils.scalingEqually,
-    //     actionName: 'scaling',
-    //     render: renderResizeIcon,
-    //     cornerSize: 24,
-    //     centeredScaling: true,
-    //     withConnection: true
-    // });
-    //
-    // function renderResizeIcon(ctx, left, top, styleOverride, fabricObject) {
-    //     const size = this.cornerSize;
-    //     ctx.save();
-    //     ctx.translate(left, top);
-    //     ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
-    //     ctx.drawImage(resizeImg, -size / 2, -size / 2, size, size);
-    //     ctx.restore();
-    // }
-
     fabric.Object.prototype.transparentCorners = false;
     fabric.Object.prototype.cornerColor = 'blue';
     fabric.Object.prototype.cornerStyle = 'circle';
@@ -739,10 +768,69 @@ const mll = (function () {
         return rx <= x && rx2 >= x && ry <= y && ry2 >= y;
     }
 
-    function addMapElement(e, type, modifier, roomSendUpdate, uuid, otherObject) {
-        console.log('addMapElement(' + type + ', ' + modifier + ')')
+    function makeCircle(left, top, line1, line2, line3, line4) {
+        const c = new fabric.Circle({
+            type: {
+                type: "measure-line-circle",
+                allowDrag: true
+            },
+            left: left,
+            top: top,
+            strokeWidth: 5,
+            radius: 7,
+            fill: "#fff",
+            stroke: "#00ff00",
+            originX: "center",
+            originY: "center",
+            selectable: true,
+            evented: true,
+            zIndex: 9,
+            hasControls: false,
+            hasBorders: false,
+        });
+
+        c.line1 = line1;
+        c.line2 = line2;
+        c.line3 = line3;
+        c.line4 = line4;
+
+        return c;
+    }
+
+    function makeLine(coords) {
+        const line = new fabric.Line(coords, {
+            type: {
+                type: "measure-line"
+            },
+            stroke: "#00ff00",
+            strokeWidth: 5,
+            strokeDashArray: [10, 5],
+            strokeUniform: true,
+            selectable: true,
+            evented: true,
+            lockMovementX: true,
+            lockMovementY: true,
+            originX: "center",
+            originY: "center",
+            zIndex: 8,
+        });
+        line.setControlsVisibility({
+            mt: false, mb: false, ml: false, mr: false, bl: false, br: false, tl: false, tr: false, mtr: false
+        })
+        return line;
+    }
+
+    function addMapElement(e, type, modifier, roomSendUpdate, uuid, otherObject, resolve) {
+        if (!type) {
+            console.warn("Cannot add element without type");
+            return;
+        }
+
+        console.log(`addMapElement(${type}, ${modifier}, ${roomSendUpdate}, ${uuid}, ${otherObject})`)
         console.log(e);
 
+        let toAdd;
+        let alsoAdd = [];
         if (type === "measure-radius") {
             const text_top = new fabric.Text("700m", {
                 fontFamily: 'Calibri',
@@ -813,8 +901,9 @@ const mll = (function () {
                     type: type,
                     modifier: modifier,
                     originalEvent: {absolutePointer: e.absolutePointer},
+                    saveKeepScale: true,
                     text: text_bottom,
-                    text2: text_top
+                    text2: text_top,
                 }
             });
             group.setControlsVisibility({
@@ -844,79 +933,14 @@ const mll = (function () {
                 }
             }
 
-            placed.push(group);
-
-            addAndOrder(group);
-            if (roomSendUpdate) {
-                internal.updateStatesAndRender();
-            }
-            fixElementSelectBoxes();
-            updateZoomScale();
-
-            if (roomSendUpdate) {
-                roomEditorUpdateElements()
-            }
-            return;
-        }
-
-        function makeCircle(left, top, line1, line2, line3, line4) {
-            const c = new fabric.Circle({
-                type: {
-                    type: "measure-line-circle",
-                    allowDrag: true
-                },
-                left: left,
-                top: top,
-                strokeWidth: 5,
-                radius: 7,
-                fill: "#fff",
-                stroke: "#00ff00",
-                originX: "center",
-                originY: "center",
-                selectable: true,
-                evented: true,
-                zIndex: 9,
-                hasControls: false,
-                hasBorders: false,
-            });
-
-            c.line1 = line1;
-            c.line2 = line2;
-            c.line3 = line3;
-            c.line4 = line4;
-
-            return c;
-        }
-
-        function makeLine(coords) {
-            const line = new fabric.Line(coords, {
-                type: {
-                    type: "measure-line"
-                },
-                stroke: "#00ff00",
-                strokeWidth: 5,
-                strokeDashArray: [10, 5],
-                strokeUniform: true,
-                selectable: true,
-                evented: true,
-                lockMovementX: true,
-                lockMovementY: true,
-                originX: "center",
-                originY: "center",
-                zIndex: 8,
-            });
-            line.setControlsVisibility({
-                mt: false, mb: false, ml: false, mr: false, bl: false, br: false, tl: false, tr: false, mtr: false
-            })
-            return line;
-        }
-
-        if (type === "textbox" || type === "i-text") {
+            toAdd = group;
+        } else if (type === "textbox") {
             const itext = new fabric.IText("Hello world", {
                 type: {
                     id: uuid ? uuid : uuidv4(),
                     originalEvent: {absolutePointer: e.absolutePointer},
-                    type: "textbox"
+                    type: "textbox",
+                    customizable: true,
                 },
                 fontSize: 24,
                 fontFamily: "system-ui, -apple-system, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, \"Noto Sans\", \"Liberation Sans\", sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
@@ -924,8 +948,8 @@ const mll = (function () {
                 left: e.absolutePointer.x,
                 width: 380,
                 height: 380,
-                backgroundColor: "rgb(34,34,34)",
-                fill: "rgb(255,255,255)",
+                backgroundColor: "#222222",
+                fill: "#ffffff",
                 opacity: 0.8,
                 zIndex: 7,
                 hasBorders: false,
@@ -938,31 +962,24 @@ const mll = (function () {
 
             if (otherObject) {
                 itext.set({
-                    text: otherObject.text
+                    top: otherObject.top,
+                    left: otherObject.left,
+                    text: otherObject.text,
+                    backgroundColor: otherObject.backgroundColor,
+                    fill: otherObject.fill,
+                    opacity: otherObject.opacity,
                 })
             }
 
-            placed.push(itext);
-
-            addAndOrder(itext);
-            if (roomSendUpdate) {
-                internal.updateStatesAndRender();
-            }
-            fixElementSelectBoxes();
-            updateZoomScale();
-
-            if (roomSendUpdate) {
-                roomEditorUpdateElements()
-            }
-            return;
-        }
-
-        if (type === "rectangle") {
+            toAdd = itext;
+        } else if (type === "rectangle") {
             const rect = new fabric.Rect({
                 type: {
                     id: uuid ? uuid : uuidv4(),
                     originalEvent: {absolutePointer: e.absolutePointer},
-                    type: "rectangle"
+                    type: "rectangle",
+                    customizable: true,
+                    saveKeepScale: true,
                 },
                 top: e.absolutePointer.y,
                 left: e.absolutePointer.x,
@@ -987,38 +1004,28 @@ const mll = (function () {
                     width: otherObject.width,
                     height: otherObject.height,
                     scaleX: otherObject.scaleX,
-                    scaleY: otherObject.scaleY
+                    scaleY: otherObject.scaleY,
+                    fill: otherObject.fill,
+                    opacity: otherObject.opacity,
                 })
             }
 
-            placed.push(rect);
-
-            addAndOrder(rect);
-            if (roomSendUpdate) {
-                internal.updateStatesAndRender();
-            }
-            fixElementSelectBoxes();
-            updateZoomScale();
-
-            if (roomSendUpdate) {
-                roomEditorUpdateElements()
-            }
-            return;
-        }
-
-        if (type === "circle") {
+            toAdd = rect;
+        } else if (type === "circle") {
             const circle = new fabric.Circle({
                 type: {
                     id: uuid ? uuid : uuidv4(),
                     originalEvent: {absolutePointer: e.absolutePointer},
-                    type: "circle"
+                    type: "circle",
+                    customizable: true,
+                    saveKeepScale: true,
                 },
                 top: e.absolutePointer.y,
                 left: e.absolutePointer.x,
                 radius: 190,
                 originX: "center",
                 originY: "center",
-                centeredScaling: true,
+                //centeredScaling: true,
                 opacity: 0.25,
                 fill: "#0080FFFF",
                 zIndex: 7,
@@ -1038,26 +1045,14 @@ const mll = (function () {
                     width: otherObject.width,
                     height: otherObject.height,
                     scaleX: otherObject.scaleX,
-                    scaleY: otherObject.scaleY
+                    scaleY: otherObject.scaleY,
+                    fill: otherObject.fill,
+                    opacity: otherObject.opacity,
                 })
             }
 
-            placed.push(circle);
-
-            addAndOrder(circle);
-            if (roomSendUpdate) {
-                internal.updateStatesAndRender();
-            }
-            fixElementSelectBoxes();
-            updateZoomScale();
-
-            if (roomSendUpdate) {
-                roomEditorUpdateElements()
-            }
-            return;
-        }
-
-        if (type === "measure-line") {
+            toAdd = circle;
+        } else if (type === "measure-line") {
             const line = makeLine([
                 e.absolutePointer.x, e.absolutePointer.y,
                 e.absolutePointer.x + 380, e.absolutePointer.y
@@ -1083,6 +1078,8 @@ const mll = (function () {
                     originalEvent: {absolutePointer: e.absolutePointer},
                     type: "measure-line",
                     text: text,
+                    c1: c1,
+                    c2: c2,
                     also: [text, c1, c2],
                 }
             });
@@ -1112,12 +1109,23 @@ const mll = (function () {
                 })
             }
 
-            placed.push(line);
+            toAdd = line;
+            alsoAdd = [text, c1, c2];
+        }
 
-            addAndOrder(text);
-            addAndOrder(c1);
-            addAndOrder(c2);
-            addAndOrder(line);
+        if (toAdd) {
+            placed.push(toAdd);
+
+            if (alsoAdd.length) {
+                add(toAdd);
+                for (let i = 0; i < alsoAdd.length; i++) {
+                    add(alsoAdd[i]);
+                }
+                order();
+            } else {
+                addAndOrder(toAdd);
+            }
+
             if (roomSendUpdate) {
                 internal.updateStatesAndRender();
             }
@@ -1127,11 +1135,6 @@ const mll = (function () {
             if (roomSendUpdate) {
                 roomEditorUpdateElements()
             }
-            return;
-        }
-
-        if (!type) {
-            console.warn("Cannot add element without type");
             return;
         }
 
@@ -1201,11 +1204,19 @@ const mll = (function () {
         });
     }
 
-    function addAndOrder(object) {
+    function add(object) {
         controls.fabricCanvas.add(object);
-        controls.fabricCanvas.orderByZindex();
         controls.exportCanvas.add(object);
+    }
+
+    function order() {
+        controls.fabricCanvas.orderByZindex();
         controls.exportCanvas.orderByZindex();
+    }
+
+    function addAndOrder(object) {
+        add(object);
+        order();
     }
 
     const internal = {
@@ -1231,6 +1242,15 @@ const mll = (function () {
             controls.checkSectorSwap = $("#swap-sector-color");
             controls.sectorRange = $("#sector-range");
             controls.checkZoomScale = $("#zoom-scale");
+
+            elements.extraPanel = $("#extra-panel");
+            elements.noSelection = $("#no-selection");
+            elements.editShape = $("#edit-shape");
+            controls.textColor = $("#text-color");
+            elements.textColorDiv = $("#text-color-div");
+            controls.shapeBgColor = $("#shape-color");
+            controls.rangeBgOpacity = $("#shape-opacity");
+            elements.opacityValue = $("#shape-opacity-value");
 
             elements.viewerPanel = $("#viewer-panel");
             elements.editorPanel = $("#editor-panel");
@@ -1285,6 +1305,7 @@ const mll = (function () {
 
             if (roomsMode) {
                 elements.menuPanel.hide();
+                elements.extraPanel.hide();
                 elements.canvasPanel.hide();
 
                 controls.inputRoomId.val("Map-Session-" + Math.trunc(99999 * Math.random()))
@@ -1350,6 +1371,7 @@ const mll = (function () {
                         $(".editor-div").show();
                         elements.editorPanel.show();
                         elements.viewerPanel.hide();
+                        elements.extraPanel.show();
 
                         $("#shareLinkDisplay").val(
                             window.location.origin + window.location.pathname +
@@ -1655,7 +1677,7 @@ const mll = (function () {
                         items: {
                             supply_drop: {name: "Supply Drop", icon: "bi bi-box2"},
                             ammo_drop: {name: "Ammo Drop", icon: "bi bi-box2"},
-                            recon_plane: {name: "Recon Plane", icon: "bi bi-camera", disabled: true},
+                            // recon_plane: {name: "Recon Plane", icon: "bi bi-camera", disabled: true},
                             precision_strike: {name: "Precision Strike", icon: "bi bi-arrow-down-circle"},
                             strafing_run: {name: "Strafing Run", icon: "bi bi-file-arrow-up"},
                             bombing_run: {name: "Bombing Run", icon: "bi bi-file-arrow-up"},
@@ -1877,6 +1899,107 @@ const mll = (function () {
                 console.log(e.target);
                 internal.updateStatesAndRender();
                 roomEditorUpdateElements();
+            });
+
+            controls.fabricCanvas.on({
+                'selection:created': handleSelection,
+                'selection:updated': handleSelection
+            });
+
+            function handleSelection(e) {
+                elements.editShape.hide();
+                elements.noSelection.show();
+
+                const type = idx(["e", "type"], e);
+                if (!type) {
+                    // object select box fix will trigger selection event, ignore
+                    return;
+                }
+                if (type === "mousedown") {
+                    selectedElement = idx(["selected", 0], e);
+                    const customizable = idx(["type", "customizable"], selectedElement) || false;
+                    if (!customizable) {
+                        return;
+                    }
+
+                    console.log("customizable element selected");
+                    console.log(selectedElement);
+
+                    const elType = idx(["type", "type"], selectedElement);
+                    if (elType === "textbox") {
+                        elements.textColorDiv.show();
+                        controls.textColor.val((selectedElement.fill || "").substring(0, 7));
+                        controls.shapeBgColor.val((selectedElement.backgroundColor || "").substring(0, 7));
+                    } else {
+                        elements.textColorDiv.hide();
+                        controls.shapeBgColor.val((selectedElement.fill || "").substring(0, 7));
+                    }
+
+                    controls.rangeBgOpacity.val(selectedElement.opacity);
+                    elements.opacityValue.text(selectedElement.opacity);
+
+                    elements.noSelection.hide();
+                    elements.editShape.show();
+                }
+            }
+
+            controls.textColor.change(function () {
+                const elType = idx(["type", "type"], selectedElement);
+                if (elType !== "textbox") {
+                    console.log("no selected element or was not a textbox");
+                    return;
+                }
+
+                selectedElement.set({
+                    fill: controls.textColor.val()
+                });
+
+                internal.render();
+                roomEditorUpdateElements();
+            });
+
+            controls.shapeBgColor.change(function () {
+                if (!selectedElement) {
+                    console.log("no selected element");
+                    return;
+                }
+                const elType = idx(["type", "type"], selectedElement);
+
+                if (elType === "textbox") {
+                    selectedElement.set({
+                        backgroundColor: controls.shapeBgColor.val()
+                    });
+                } else {
+                    selectedElement.set({
+                        fill: controls.shapeBgColor.val()
+                    });
+                }
+
+                internal.render();
+                roomEditorUpdateElements();
+            })
+
+            controls.rangeBgOpacity.on('input', function () {
+                if (!selectedElement) {
+                    console.log("no selected element");
+                    return;
+                }
+
+                elements.opacityValue.text(controls.rangeBgOpacity.val());
+
+                selectedElement.set({
+                    opacity: controls.rangeBgOpacity.val()
+                });
+
+                internal.render();
+                roomEditorUpdateElements();
+            })
+
+            controls.fabricCanvas.on('selection:cleared', function (e) {
+                selectedElement = null;
+
+                elements.editShape.hide();
+                elements.noSelection.show();
             });
 
             controls.fabricCanvas.on('object:scaling', function (e) {
@@ -2348,7 +2471,8 @@ const mll = (function () {
 
             controls.btnSave.click(function () {
                 for (let i = 0; i < placed.length; i++) {
-                    if (placed[i].type.type === "measure-radius") {
+                    const element = placed[i];
+                    if (idx(["type", "saveKeepScale"], element)) {
                         continue;
                     }
                     placed[i].set({scaleX: 1, scaleY: 1});
@@ -2549,6 +2673,7 @@ const mll = (function () {
                 elements.sectorA.set({fill: sectorRed});
                 elements.sectorB.set({fill: sectorBlue});
             }
+
 
             // Update placed element images
             for (let i = 0; i < placed.length; i++) {

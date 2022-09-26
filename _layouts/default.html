@@ -279,14 +279,13 @@
                                     Shift+Drag to create straight lines
                                 </small>
 
-                                <div id="drawing-mode-options" style="margin: 5px 0;">
+                                <div style="margin: 5px 0;">
                                     <label for="drawing-line-width">Line width
                                         (<span id="line-width-value">7</span>)
                                     </label>
                                     <br>
                                     <input type="range" class="form-range" value="7" min="3" max="25"
                                            id="drawing-line-width"><br>
-
 
                                     <label for="drawing-color">Line color </label>
                                     <br>
@@ -348,8 +347,43 @@
 
         <div id="extra-panel" class="col col-lg-3">
             <div class="mb-3 editor-div">
-                <h4>Modify Element</h4>
-                <p>Modify a selected element</p>
+                <h4>Customize Element</h4>
+                <small class="text-muted" id="no-selection">
+                    No customizable element selected.
+                </small>
+
+                <div id="edit-shape" style="display: none">
+                    <label for="drawing-line-width">Opacity
+                        (<span id="shape-opacity-value">7</span>)
+                    </label>
+                    <br>
+                    <input id="shape-opacity" type="range" class="form-range" value="0.25" min="0" max="1" step="0.05">
+                    <br>
+
+                    <label for="shape-color">Background color </label>
+                    <br>
+                    <div id="shape-color-div" class="d-flex align-items-center">
+                        <input type="color" value="#0080ff" id="shape-color">
+                        <span>or quick</span>
+                        <span class="color blue"
+                              onclick="$('#shape-color').val('#0080ff').trigger('change')"></span>
+                        <span class="color red"
+                              onclick="$('#shape-color').val('#ff8080').trigger('change')"></span>
+                    </div>
+                    <br>
+                    <div id="text-color-div" class="text" style="display: none">
+                        <label for="text-color">Text color </label>
+                        <br>
+                        <div class="d-flex align-items-center">
+                            <input type="color" id="text-color" value="#ffffff">
+                            <span>or quick</span>
+                            <span class="color" style="background-color:#ffffff"
+                                  onclick="$('#text-color').val('#ffffff').trigger('change')"></span>
+                            <span class="color" style="background-color:#000000"
+                                  onclick="$('#text-color').val('#000000').trigger('change')"></span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
