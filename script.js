@@ -150,7 +150,7 @@ const mll = (function () {
         return selected;
     }
 
-    async function loadFromRoomState(message) {
+    async function loadFromRoomState(message, spCallback) {
         if (!message || !message.state) {
             console.warn('message or state was null')
             return;
@@ -176,7 +176,7 @@ const mll = (function () {
             controls.sectorRange.val(controlState.sectorValue);
             controls.checkDrawingsVisible.prop('checked', controlState.drawings);
 
-            internal.roomsLoadMapAndSP(controlState.map, controlState.selectedSp);
+            internal.roomsLoadMapAndSP(controlState.map, controlState.selectedSp, spCallback);
         }
 
         const elementState = message.state.elements;
@@ -1336,8 +1336,8 @@ const mll = (function () {
                 roomsMode = true;
 
                 console.log("Rooms Mode");
-                socket = io('localhost:3000');
-                //socket = io('https://maps-let-loose-websocket.herokuapp.com/');
+                //socket = io('localhost:3000');
+                socket = io('https://maps-let-loose-websocket.herokuapp.com/');
             } else {
                 roomsMode = false;
                 console.log("Solo Mode");
@@ -1399,6 +1399,7 @@ const mll = (function () {
                         console.warn('server restart, room no longer exists')
 
                         $("#viewer-panel").hide();
+                        $("#extra-panel").hide();
                         $("#editor-panel").hide();
                         $("#menu-panel").hide();
                         $("#canvas-panel").hide();
@@ -1486,6 +1487,7 @@ const mll = (function () {
                     socket.emit('leave-room');
 
                     $("#viewer-panel").hide();
+                    $("#extra-panel").hide();
                     $("#editor-panel").hide();
                     $("#menu-panel").hide();
                     $("#canvas-panel").hide();
@@ -2410,6 +2412,11 @@ const mll = (function () {
                 resetSelectedPoints = false;
 
                 internal.updateStatesAndRender();
+
+                if (elements.spImage.spCallback) {
+                    elements.spImage.spCallback();
+                    delete elements.spImage.spCallback;
+                }
             }
 
             function initStrongpointData(filePrefix) {
@@ -2497,7 +2504,7 @@ const mll = (function () {
                 elements.spImage.src = './maps/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
             }
 
-            internal.roomsLoadMapAndSP = function (filePrefix, selectedSp) {
+            internal.roomsLoadMapAndSP = function (filePrefix, selectedSp, spCallback) {
                 resetSelectedPoints = true;
 
                 console.log("Rooms loading " + filePrefix);
@@ -2531,6 +2538,7 @@ const mll = (function () {
                 ];
                 Promise.all(promises).then(internal.render);
 
+                elements.spImage.spCallback = spCallback;
                 elements.spImage.roomsSelectedSp = selectedSp;
                 elements.spImage.src = './maps/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
             }
@@ -2677,11 +2685,11 @@ const mll = (function () {
                         return;
                     }
                     const content = JSON.parse(text);
-                    loadFromRoomState(content);
-
-                    roomEditorUpdateControls("importFile")
-                    roomEditorUpdateElements();
-                    roomEditorUpdateDrawings();
+                    loadFromRoomState(content, function () {
+                        roomEditorUpdateControls("importFile")
+                        roomEditorUpdateElements();
+                        roomEditorUpdateDrawings();
+                    });
 
                     controls.btnImport.removeClass("loading").removeClass("disabled");
                 });
