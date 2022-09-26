@@ -873,7 +873,8 @@ const mll = (function () {
             zIndex: 8,
         });
         line.setControlsVisibility({
-            mt: false, mb: false, ml: false, mr: false, bl: false, br: false, tl: false, tr: false, mtr: false
+            mt: false, mb: false, ml: false, mr: false, bl: false, br: false, tl: false, tr: false, mtr: false,
+            moveObject: false
         })
         return line;
     }
