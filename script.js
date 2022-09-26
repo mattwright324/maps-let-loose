@@ -94,6 +94,53 @@ const mll = (function () {
         controls.fabricCanvas.requestRenderAll();
     }
 
+    function calculateLineArea(line) {
+        const minx = Math.min(line.x1, line.x2);
+        const maxx = Math.max(line.x1, line.x2);
+        const miny = Math.min(line.y1, line.y2);
+        const maxy = Math.max(line.y1, line.y2);
+        const width = (maxx - minx) || 1;
+        const height = (maxy - miny) || 1;
+
+        return width * height;
+    }
+
+    function changeZIndexBySize() {
+        const objectAreas = {}
+        for (let i = 0; i < placed.length; i++) {
+            const element = placed[i];
+            const type = idx(["type", "type"], element);
+            const area = Math.round(type === "measure-line" ? calculateLineArea(element) :
+                element.getScaledWidth() * element.getScaledHeight());
+
+            if (objectAreas.hasOwnProperty(area)) {
+                objectAreas[area].push(element);
+            } else {
+                objectAreas[area] = [element];
+            }
+        }
+        //console.log(objectAreas);
+        const sizes = Object.keys(objectAreas).sort(function (a, b) {return a - b;}).reverse();
+        //console.log(sizes);
+        for (let i = 0; i < sizes.length; i++) {
+            const elements = objectAreas[sizes[i]];
+            for (let j = 0; j < elements.length; j++) {
+                const zIndex = 10 + i;
+                const element = elements[j];
+                elements[j].set({zIndex: zIndex});
+
+                if (element.type.also) {
+                    for (let k = 0; k < element.type.also.length; k++) {
+                        element.type.also[k].set({zIndex: zIndex});
+                    }
+                }
+            }
+        }
+
+        controls.fabricCanvas.orderByZindex();
+        controls.exportCanvas.orderByZindex();
+    }
+
     function getSelectedSp() {
         const selected = [];
         $(".sp-toggle.available.selected").each(function (i, el) {
@@ -2722,6 +2769,7 @@ const mll = (function () {
             if (promises.length) {
                 Promise.all(promises).then(internal.render);
             } else {
+                changeZIndexBySize();
                 updateZoomScale()
                 controls.fabricCanvas.renderAll();
                 controls.exportCanvas.renderAll();
@@ -2731,6 +2779,7 @@ const mll = (function () {
         render: function () {
             console.log("render()");
 
+            changeZIndexBySize();
             updateZoomScale();
             controls.fabricCanvas.renderAll();
             controls.exportCanvas.renderAll();
