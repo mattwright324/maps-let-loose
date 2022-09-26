@@ -20,6 +20,9 @@
     <script src="//cdn.jsdelivr.net/npm/jszip-utils@0.1.0/dist/jszip-utils.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/jszip@3.7.1/dist/jszip.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.contextMenu.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.contextMenu.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.ui.position.js"></script>
 
     <!-- Apps -->
     <link href="./styles.css?v={{ site.time | date_to_xmlschema }}" rel="stylesheet"/>
@@ -62,7 +65,7 @@
 
 {{ content }}
 
-<div id="side-menu" class="container mb-5">
+<div id="side-menu" class="container-fluid mb-5">
     <div class="row">
         <div id="menu-panel" class="col col-lg-3" style="user-select: none">
             <div class="mb-3 editor-div">
@@ -276,14 +279,13 @@
                                     Shift+Drag to create straight lines
                                 </small>
 
-                                <div id="drawing-mode-options" style="margin: 5px 0;">
+                                <div style="margin: 5px 0;">
                                     <label for="drawing-line-width">Line width
                                         (<span id="line-width-value">7</span>)
                                     </label>
                                     <br>
                                     <input type="range" class="form-range" value="7" min="3" max="25"
                                            id="drawing-line-width"><br>
-
 
                                     <label for="drawing-color">Line color </label>
                                     <br>
@@ -337,57 +339,53 @@
             </div>
         </div>
 
-        <div id="canvas-panel" class="col col-lg-9">
+        <div id="canvas-panel" class="col col-lg-6">
             <div id="canvas-container">
                 <canvas id="canvas" class="hasmenu drag-mode"></canvas>
-                <div id="menu" class="menu-x">
-                    <div class="menu-li submenu">
-                        Add Spawn
-                        <small>
-                            <a href="javascript:mll.menuAdd('garry')">Garrison</a> |
-                            <a href="javascript:mll.menuAdd('airhead')">Airhead</a> |
-                            <a href="javascript:mll.menuAdd('halftrack')">Halftrack</a>
-                        </small>
+            </div>
+        </div>
+
+        <div id="extra-panel" class="col col-lg-3">
+            <div class="mb-3 editor-div">
+                <h4>Customize Element</h4>
+                <small class="text-muted" id="no-selection">
+                    No customizable element selected.
+                    <br>
+                    Customizable objects include rectangles, circles, and textboxes.
+                </small>
+
+                <div id="edit-shape" style="display: none">
+                    <label for="drawing-line-width">Opacity
+                        (<span id="shape-opacity-value">7</span>)
+                    </label>
+                    <br>
+                    <input id="shape-opacity" type="range" class="form-range" value="0.25" min="0" max="1" step="0.05">
+                    <br>
+
+                    <label for="shape-color">Background color </label>
+                    <br>
+                    <div id="shape-color-div" class="d-flex align-items-center">
+                        <input type="color" value="#0080ff" id="shape-color">
+                        <span>or quick</span>
+                        <span class="color blue"
+                              onclick="$('#shape-color').val('#0080ff').trigger('change')"></span>
+                        <span class="color red"
+                              onclick="$('#shape-color').val('#ff8080').trigger('change')"></span>
                     </div>
-                    <div class="menu-li submenu">
-                        Add Outpost
-                        <small>
-                            <a href="javascript:mll.menuAdd('outpost', 'normal')">Normal</a> |
-                            <a href="javascript:mll.menuAdd('outpost', 'recon')">Recon</a>
-                        </small>
-                    </div>
-                    <div class="menu-li submenu">
-                        Add Tank
-                        <small>
-                            <a href="javascript:mll.menuAdd('tank', 'heavy')">Heavy</a> |
-                            <a href="javascript:mll.menuAdd('tank', 'med')">Medium</a> |
-                            <a href="javascript:mll.menuAdd('tank', 'light')">Light</a> |
-                            <a href="javascript:mll.menuAdd('tank', 'recon')">Recon</a>
-                        </small>
-                    </div>
-                    <div class="menu-li submenu">
-                        Add Truck
-                        <small>
-                            <a href="javascript:mll.menuAdd('truck', 'supply')">Supply</a> |
-                            <a href="javascript:mll.menuAdd('truck', 'transport')">Transport</a>
-                        </small>
-                    </div>
-                    <div class="menu-li" onclick="mll.menuAdd('at-gun')">Add AT Gun</div>
-                    <div class="menu-li submenu">
-                        Mark Enemy
-                        <small>
-                            <a href="javascript:mll.menuAdd('enemy', 'garry')">Garrison</a> |
-                            <a href="javascript:mll.menuAdd('enemy', 'op')">Outpost</a> |
-                            <a href="javascript:mll.menuAdd('enemy', 'infantry')">Infantry</a> |
-                            <a href="javascript:mll.menuAdd('enemy', 'tank')">Tank</a>
-                        </small>
-                    </div>
-                    <div class="menu-li" onclick="mll.menuAdd('custom-radius')">Add Custom Radius</div>
-                    <div class="menu-li" onclick="mll.menuAdd(null)">
-                        Cancel
+                    <br>
+                    <div id="text-color-div" class="text" style="display: none">
+                        <label for="text-color">Text color </label>
+                        <br>
+                        <div class="d-flex align-items-center">
+                            <input type="color" id="text-color" value="#ffffff">
+                            <span>or quick</span>
+                            <span class="color" style="background-color:#ffffff"
+                                  onclick="$('#text-color').val('#ffffff').trigger('change')"></span>
+                            <span class="color" style="background-color:#000000"
+                                  onclick="$('#text-color').val('#000000').trigger('change')"></span>
+                        </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -420,6 +418,9 @@
         <li>
             Only one set of default garrisons will be present in offensive mode and will be the three closest to the
             attacking side
+        </li>
+        <li>
+            Measurements are based on 190 pixels being close enough to 200m or one grid square
         </li>
         <li>Developed by Winston [HR]</li>
     </ul>
@@ -473,6 +474,12 @@
         </a></li>
         <li><a target="_blank" href="https://worldwarways.web.app/#/">
             World War Ways - Interactive map driving directions
+        </a></li>
+        <li><a target="_blank" href="https://www.hllca.org/">
+            HCA - Hell Let Loose Competitive Association
+        </a></li>
+        <li><a target="_blank" href="https://helo-system.de/">
+            HeLO System - HLL Competitive Clan Ranking
         </a></li>
         <li><a target="_blank" href="https://hellletloose.fandom.com/wiki/Hell_Let_Loose_Wiki">
             Hell Let Loose Wiki (not up to date)

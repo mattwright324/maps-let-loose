@@ -54,6 +54,12 @@ canvas.draw-mode {
 #line-color-div span {
     margin-left: 5px;
 }
+#shape-color-div span {
+    margin-left: 5px;
+}
+#text-color-div span {
+    margin-left: 5px;
+}
 
 #sp-grid {
     display: grid;
@@ -113,6 +119,33 @@ button .countdown, button .spinner {
 
 button.loading .countdown, button.loading .spinner {
     display: initial;
+}
+
+.context-menu-list .context-menu-disabled {
+    background-color: rgb(54, 54, 54);
+    color: lightgray;
+}
+
+.context-menu-list, .context-menu-list * {
+    background-color: inherit;
+    color: inherit;
+    border: none;
+}
+
+.context-menu-submenu::after {
+    border-color: transparent transparent transparent #fff;
+}
+
+.context-menu-item.context-menu-hover {
+    background-color: gray;
+}
+
+.context-menu-submenu .context-menu-list {
+    background-color: rgb(34, 34, 34);
+}
+
+.context-menu-submenu .context-menu-item.context-menu-hover {
+    background-color: gray;
 }
 
 /* Dark mode tweaks */

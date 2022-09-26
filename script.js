@@ -8,6 +8,14 @@ const mll = (function () {
         return p.reduce((xs, x) => (xs && xs[x]) ? xs[x] : null, o)
     }
 
+    function distance(x1, y1, x2, y2) {
+        return Math.hypot(x2 - x1, y2 - y1) * 2;
+    }
+
+    function midpoint(x1, y1, x2, y2) {
+        return [(x1 + x2) / 2, (y1 + y2) / 2];
+    }
+
     function uuidv4() {
         return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
             (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
@@ -39,6 +47,7 @@ const mll = (function () {
     let placed = [];
     let drawings = [];
     let resetSelectedPoints = false;
+    let selectedElement;
 
     function updateZoomScale() {
         const zoom = controls.fabricCanvas.getZoom();
@@ -53,16 +62,22 @@ const mll = (function () {
         for (let i = 0; i < placed.length; i++) {
             const object = placed[i];
             const meta = object.type;
-            if (meta.type === "custom-radius") {
+            if (meta.type === "measure-radius") {
                 const textEl = idx(["type", "text"], object);
+                const textEl2 = idx(["type", "text2"], object);
                 if (!textEl) {
                     console.log("no text");
                 } else {
-                    // console.log(object);
-                    const meters = Math.trunc((10 * object.getScaledWidth()) / 19);
+                    const meters = Math.trunc((100 * object.getScaledWidth()) / 190);
                     textEl.set({
                         text: meters + "m"
-                    })
+                    });
+
+                    if (textEl2) {
+                        textEl2.set({
+                            text: meters + "m"
+                        });
+                    }
                 }
             }
             const typeMeta = placedMeta[meta.type];
@@ -79,6 +94,53 @@ const mll = (function () {
         controls.fabricCanvas.requestRenderAll();
     }
 
+    function calculateLineArea(line) {
+        const minx = Math.min(line.x1, line.x2);
+        const maxx = Math.max(line.x1, line.x2);
+        const miny = Math.min(line.y1, line.y2);
+        const maxy = Math.max(line.y1, line.y2);
+        const width = (maxx - minx) || 1;
+        const height = (maxy - miny) || 1;
+
+        return width * height;
+    }
+
+    function changeZIndexBySize() {
+        const objectAreas = {}
+        for (let i = 0; i < placed.length; i++) {
+            const element = placed[i];
+            const type = idx(["type", "type"], element);
+            const area = Math.round(type === "measure-line" ? calculateLineArea(element) :
+                element.getScaledWidth() * element.getScaledHeight());
+
+            if (objectAreas.hasOwnProperty(area)) {
+                objectAreas[area].push(element);
+            } else {
+                objectAreas[area] = [element];
+            }
+        }
+        //console.log(objectAreas);
+        const sizes = Object.keys(objectAreas).sort(function (a, b) {return a - b;}).reverse();
+        //console.log(sizes);
+        for (let i = 0; i < sizes.length; i++) {
+            const elements = objectAreas[sizes[i]];
+            for (let j = 0; j < elements.length; j++) {
+                const zIndex = 10 + i;
+                const element = elements[j];
+                elements[j].set({zIndex: zIndex});
+
+                if (element.type.also) {
+                    for (let k = 0; k < element.type.also.length; k++) {
+                        element.type.also[k].set({zIndex: zIndex});
+                    }
+                }
+            }
+        }
+
+        controls.fabricCanvas.orderByZindex();
+        controls.exportCanvas.orderByZindex();
+    }
+
     function getSelectedSp() {
         const selected = [];
         $(".sp-toggle.available.selected").each(function (i, el) {
@@ -88,7 +150,7 @@ const mll = (function () {
         return selected;
     }
 
-    async function loadFromRoomState(message) {
+    async function loadFromRoomState(message, spCallback) {
         if (!message || !message.state) {
             console.warn('message or state was null')
             return;
@@ -114,7 +176,7 @@ const mll = (function () {
             controls.sectorRange.val(controlState.sectorValue);
             controls.checkDrawingsVisible.prop('checked', controlState.drawings);
 
-            internal.roomsLoadMapAndSP(controlState.map, controlState.selectedSp);
+            internal.roomsLoadMapAndSP(controlState.map, controlState.selectedSp, spCallback);
         }
 
         const elementState = message.state.elements;
@@ -135,6 +197,14 @@ const mll = (function () {
                     console.log('removing ' + element.type.id)
                     controls.fabricCanvas.remove(element);
                     controls.exportCanvas.remove(element);
+
+                    if (element.type && element.type.also) {
+                        const also = element.type.also;
+                        for (let j = 0; j < also.length; j++) {
+                            controls.fabricCanvas.remove(also[j]);
+                            controls.exportCanvas.remove(also[j]);
+                        }
+                    }
                 } else {
                     newPlaced.push(element);
                     currentIds.push(element.type.id);
@@ -147,14 +217,64 @@ const mll = (function () {
                 const element = placed[i];
                 for (let j = 0; j < elementState.length; j++) {
                     const updated = elementState[j];
-                    if (element.type.id === updated.type.id) {
-                        element.set({
-                            angle: updated.angle,
-                            top: updated.top,
-                            left: updated.left,
-                            scaleX: updated.scaleX,
-                            scaleY: updated.scaleY
-                        })
+                    const meta = updated.type;
+                    if (element.type.id === meta.id) {
+                        if (meta.type === "measure-line") {
+                            element.set({
+                                x1: updated.x1,
+                                x2: updated.x2,
+                                y1: updated.y1,
+                                y2: updated.y2
+                            });
+                            const lineLength = distance(updated.x1, updated.y1, updated.x2, updated.y2);
+                            const meters = Math.trunc((100 * lineLength) / 190);
+                            const point = midpoint(updated.x1, updated.y1, updated.x2, updated.y2);
+                            element.type.text.set({
+                                left: point[0],
+                                top: point[1],
+                                text: meters + "m"
+                            })
+                            element.type.c1.set({
+                                left: element.get("x1"),
+                                top: element.get("y1"),
+                            })
+                            element.type.c2.set({
+                                left: element.get("x2"),
+                                top: element.get("y2"),
+                            })
+                        } else if (meta.type === "measure-radius") {
+                            console.log("updating measure-radius")
+                            console.log(element);
+                            element.type.text.set({
+                                text: updated.type.text.text
+                            });
+                            if (element.type.text2) {
+                                element.type.text2.set({
+                                    text: updated.type.text.text
+                                });
+                            }
+                            element.set({
+                                angle: updated.angle,
+                                scaleX: updated.scaleX,
+                                scaleY: updated.scaleY,
+                                top: updated.top,
+                                left: updated.left
+                            });
+                        } else {
+                            element.set({
+                                angle: updated.angle,
+                                top: updated.top,
+                                left: updated.left,
+                                scaleX: updated.scaleX,
+                                scaleY: updated.scaleY,
+                                text: updated.text,
+                                backgroundColor: updated.backgroundColor,
+                                fill: updated.fill,
+                                stroke: updated.stroke,
+                                opacity: updated.opacity,
+                            })
+                        }
+
                         if (roomsMode && roomsRole === 'viewer') {
                             element.set({
                                 selectable: false,
@@ -274,7 +394,16 @@ const mll = (function () {
                 type: element.type,
                 width: element.width,
                 scaleX: element.scaleX,
-                scaleY: element.scaleY
+                scaleY: element.scaleY,
+                text: element.text,
+                x1: element.x1,
+                y1: element.y1,
+                x2: element.x2,
+                y2: element.y2,
+                backgroundColor: element.backgroundColor,
+                fill: element.fill,
+                stroke: element.stroke,
+                opacity: element.opacity,
             })
         }
 
@@ -319,6 +448,14 @@ const mll = (function () {
         garry: 8,
         airhead: 9,
         halftrack: 9,
+        node: 9,
+        "repair-station": 9,
+        "supply-drop": 9,
+        "ammo-drop": 9,
+        "precision-strike": 9,
+        "katyusha-strike": 9,
+        "strafing-run": 9,
+        "bombing-run": 9,
         tank: 9,
         truck: 9,
         'at-gun': 9,
@@ -350,7 +487,7 @@ const mll = (function () {
 
                 return './maps/garry-blue-zone.png';
             },
-            zoomScaleWhen: function() {
+            zoomScaleWhen: function () {
                 return controls.checkGarryRadius.is(":checked")
             }
         },
@@ -360,7 +497,7 @@ const mll = (function () {
                 const radiusHidden = controls.checkGarryRadius.is(":checked");
                 return './maps/airhead-' + (radiusHidden ? 'plain' : 'radius') + '.png'
             },
-            zoomScaleWhen: function() {
+            zoomScaleWhen: function () {
                 return controls.checkGarryRadius.is(":checked")
             }
         },
@@ -371,7 +508,7 @@ const mll = (function () {
                 return './maps/halftrack-' + (radiusHidden ? 'plain' : 'radius') + '.png'
             },
             controlsVisibility: {mtr: true},
-            zoomScaleWhen: function() {
+            zoomScaleWhen: function () {
                 return controls.checkGarryRadius.is(":checked")
             }
         },
@@ -381,9 +518,81 @@ const mll = (function () {
                 const radiusHidden = controls.checkGarryRadius.is(":checked");
                 return './maps/outpost-' + object.type.modifier + "-" + (radiusHidden ? 'plain' : 'radius') + '.png'
             },
-            zoomScaleWhen: function() {
+            zoomScaleWhen: function () {
                 return controls.checkGarryRadius.is(":checked")
             }
+        },
+        node: {
+            wh: 122,
+            resolveImg: function (object) {
+                if (object.type.modifier) {
+                    return './maps/node-' + object.type.modifier + ".png";
+                }
+
+                return './maps/tank-batch.png'
+            }
+        },
+        "repair-station": {
+            wh: 122,
+            resolveImg: function (object) {
+                return "./maps/repair-station.png"
+            },
+            zoomScale: false
+        },
+        "supply-drop": {
+            wh: 51,
+            resolveImg: function (object) {
+                return "./maps/supply-drop.png"
+            },
+            zoomScale: false
+        },
+        "ammo-drop": {
+            wh: 51,
+            resolveImg: function (object) {
+                return "./maps/ammo-drop.png"
+            },
+            zoomScale: false
+        },
+        "precision-strike": {
+            wh: 122,
+            resolveImg: function (object) {
+                return "./maps/precision-strike.png"
+            },
+            zoomScale: false
+        },
+        "katyusha-strike": {
+            wh: 197,
+            resolveImg: function (object) {
+                return "./maps/katyusha-strike.png"
+            },
+            zoomScale: false
+        },
+        "strafing-run": {
+            wh: 380,
+            resolveImg: function (object) {
+                return "./maps/strafing-run.png"
+            },
+            set: {snapAngle: 45},
+            controlsVisibility: {mtr: true},
+        },
+        "bombing-run": {
+            wh: 380,
+            resolveImg: function (object) {
+                return "./maps/bombing-run.png"
+            },
+            set: {snapAngle: 45},
+            controlsVisibility: {mtr: true},
+        },
+        "supplies": {
+            wh: 51,
+            resolveImg: function (object) {
+                if (object.type.modifier) {
+                    return './maps/supplies-' + object.type.modifier + ".png";
+                }
+
+                return './maps/supplies-plain.png'
+            },
+            zoomScale: true
         },
         tank: {
             wh: 51,
@@ -427,7 +636,19 @@ const mll = (function () {
     }
 
     function fixElementSelectBoxes() {
-        const sel = new fabric.ActiveSelection(placed, {canvas: controls.fabricCanvas});
+        const toFix = [];
+        for (let i = 0; i < placed.length; i++) {
+            const object = placed[i];
+            toFix.push(object);
+
+            if (object.type && object.type.also) {
+                const also = object.type.also;
+                for (let j = 0; j < also.length; j++) {
+                    toFix.push(also[j]);
+                }
+            }
+        }
+        const sel = new fabric.ActiveSelection(toFix, {canvas: controls.fabricCanvas});
         controls.fabricCanvas.setActiveObject(sel).requestRenderAll();
         controls.fabricCanvas.discardActiveObject(sel).requestRenderAll();
     }
@@ -464,31 +685,6 @@ const mll = (function () {
         ctx.drawImage(rotateImg, -size / 2, -size / 2, size, size);
         ctx.restore();
     }
-
-    // const resizeIcon = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'16\' height=\'16\' style=\'stroke:white;stroke-width:1px;\' class=\'bi bi-arrow-down-right-square\' viewBox=\'0 0 16 16\'%3E%3Cpath fill-rule=\'evenodd\' d=\'M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm5.854 3.146a.5.5 0 1 0-.708.708L9.243 9.95H6.475a.5.5 0 1 0 0 1h3.975a.5.5 0 0 0 .5-.5V6.475a.5.5 0 1 0-1 0v2.768L5.854 5.146z\'/%3E%3C/svg%3E';
-    // const resizeImg = document.createElement("img");
-    // resizeImg.src = resizeIcon;
-    //
-    // fabric.Object.prototype.controls.br = new fabric.Control({
-    //     x: 0.5,
-    //     y: 0.5,
-    //     cursorStyle: 'crosshair',
-    //     actionHandler: fabric.controlsUtils.scalingEqually,
-    //     actionName: 'scaling',
-    //     render: renderResizeIcon,
-    //     cornerSize: 24,
-    //     centeredScaling: true,
-    //     withConnection: true
-    // });
-    //
-    // function renderResizeIcon(ctx, left, top, styleOverride, fabricObject) {
-    //     const size = this.cornerSize;
-    //     ctx.save();
-    //     ctx.translate(left, top);
-    //     ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
-    //     ctx.drawImage(resizeImg, -size / 2, -size / 2, size, size);
-    //     ctx.restore();
-    // }
 
     fabric.Object.prototype.transparentCorners = false;
     fabric.Object.prototype.cornerColor = 'blue';
@@ -630,20 +826,92 @@ const mll = (function () {
         return rx <= x && rx2 >= x && ry <= y && ry2 >= y;
     }
 
-    function addMapElement(e, type, modifier, roomSendUpdate, uuid, otherObject) {
-        console.log('addSpawn(' + type + ', ' + modifier + ')')
+    function makeCircle(left, top, line1, line2, line3, line4) {
+        const c = new fabric.Circle({
+            type: {
+                type: "measure-line-circle",
+                allowDrag: true
+            },
+            left: left,
+            top: top,
+            strokeWidth: 5,
+            radius: 7,
+            fill: "#fff",
+            stroke: "#00ff00",
+            originX: "center",
+            originY: "center",
+            selectable: true,
+            evented: true,
+            zIndex: 9,
+            hasControls: false,
+            hasBorders: false,
+        });
+
+        c.line1 = line1;
+        c.line2 = line2;
+        c.line3 = line3;
+        c.line4 = line4;
+
+        return c;
+    }
+
+    function makeLine(coords) {
+        const line = new fabric.Line(coords, {
+            type: {
+                type: "measure-line"
+            },
+            stroke: "#00ff00",
+            strokeWidth: 5,
+            strokeDashArray: [10, 5],
+            strokeUniform: true,
+            selectable: true,
+            evented: true,
+            lockMovementX: true,
+            lockMovementY: true,
+            originX: "center",
+            originY: "center",
+            zIndex: 8,
+        });
+        line.setControlsVisibility({
+            mt: false, mb: false, ml: false, mr: false, bl: false, br: false, tl: false, tr: false, mtr: false,
+            moveObject: false
+        })
+        return line;
+    }
+
+    function addMapElement(e, type, modifier, roomSendUpdate, uuid, otherObject, resolve) {
+        if (!type) {
+            console.warn("Cannot add element without type");
+            return;
+        }
+
+        console.log(`addMapElement(${type}, ${modifier}, ${roomSendUpdate}, ${uuid}, ${otherObject})`)
         console.log(e);
 
-        if (type === "custom-radius") {
-            const text = new fabric.Text("", {
+        let toAdd;
+        let alsoAdd = [];
+        if (type === "measure-radius") {
+            const text_top = new fabric.Text("700m", {
                 fontFamily: 'Calibri',
-                fontSize: 25,
+                fontSize: 18,
                 stroke: "#00ff00",
                 textAlign: 'center',
                 originX: 'center',
                 originY: 'center',
-                top: 170
-            })
+                lockScalingX: true,
+                lockScalingY: true,
+                top: 180
+            });
+            const text_bottom = new fabric.Text("700m", {
+                fontFamily: 'Calibri',
+                fontSize: 18,
+                stroke: "#00ff00",
+                textAlign: 'center',
+                originX: 'center',
+                originY: 'center',
+                lockUniScaling: true,
+                top: -180
+            });
             const circle = new fabric.Circle({
                 zIndex: 7,
                 fill: "transparent",
@@ -652,22 +920,25 @@ const mll = (function () {
                 centeredScaling: true,
                 radius: 190,
                 stroke: "#00ff00",
-                strokeWidth: 2,
-                strokeDashArray: [10, 5]
+                strokeWidth: 5,
+                strokeDashArray: [10, 5],
+                strokeUniform: true,
             });
-            const vertLine = new fabric.Line([15, 0, -15, 0], {
+            const vertLine = new fabric.Line([7, 0, -7, 0], {
                 originX: "center",
                 originY: "center",
                 stroke: 'black',
-                strokeWidth: 2,
+                strokeUniform: true,
+                strokeWidth: 1.5,
             });
-            const horizLine = new fabric.Line([0, 15, 0, -15], {
+            const horizLine = new fabric.Line([0, 7, 0, -7], {
                 originX: "center",
                 originY: "center",
                 stroke: 'black',
-                strokeWidth: 2,
+                strokeWidth: 1.5,
+                strokeUniform: true,
             });
-            const group = new fabric.Group([circle, text, vertLine, horizLine],{
+            const group = new fabric.Group([circle, text_top, text_bottom, vertLine, horizLine], {
                 selectable: true,
                 evented: true,
                 hasBorders: false,
@@ -676,6 +947,7 @@ const mll = (function () {
                 originX: "center",
                 originY: "center",
                 centeredScaling: true,
+                strokeUniform: true,
                 width: 380,
                 height: 380,
                 zIndex: 7,
@@ -688,17 +960,22 @@ const mll = (function () {
                     type: type,
                     modifier: modifier,
                     originalEvent: {absolutePointer: e.absolutePointer},
-                    text: text
+                    saveKeepScale: true,
+                    text: text_bottom,
+                    text2: text_top,
                 }
             });
             group.setControlsVisibility({
-                mt: false, mb: false, ml: false, mr: false, bl: false, br: true, tl: false, tr: false, mtr: true
+                mt: false, mb: false, ml: false, mr: false, bl: true, br: true, tl: false, tr: false, mtr: true
             });
 
             if (otherObject) {
-                text.set({
+                text_top.set({
                     text: otherObject.type.text.text
-                })
+                });
+                text_bottom.set({
+                    text: otherObject.type.text.text
+                });
                 group.set({
                     angle: otherObject.angle,
                     scaleX: otherObject.scaleX,
@@ -715,9 +992,199 @@ const mll = (function () {
                 }
             }
 
-            placed.push(group);
+            toAdd = group;
+        } else if (type === "textbox") {
+            const itext = new fabric.IText("Hello world", {
+                type: {
+                    id: uuid ? uuid : uuidv4(),
+                    originalEvent: {absolutePointer: e.absolutePointer},
+                    type: "textbox",
+                    customizable: true,
+                },
+                fontSize: 24,
+                fontFamily: "system-ui, -apple-system, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, \"Noto Sans\", \"Liberation Sans\", sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+                top: e.absolutePointer.y,
+                left: e.absolutePointer.x,
+                width: 380,
+                height: 380,
+                backgroundColor: "#222222",
+                fill: "#ffffff",
+                opacity: 0.8,
+                zIndex: 7,
+                hasBorders: false,
+                lockMovementX: true,
+                lockMovementY: true,
+            });
+            itext.setControlsVisibility({
+                mt: false, mb: false, ml: false, mr: false, bl: false, br: false, tl: false, tr: false, mtr: true
+            })
 
-            addAndOrder(group);
+            if (otherObject) {
+                itext.set({
+                    top: otherObject.top,
+                    left: otherObject.left,
+                    text: otherObject.text,
+                    backgroundColor: otherObject.backgroundColor,
+                    fill: otherObject.fill,
+                    opacity: otherObject.opacity,
+                })
+            }
+
+            toAdd = itext;
+        } else if (type === "rectangle") {
+            const rect = new fabric.Rect({
+                type: {
+                    id: uuid ? uuid : uuidv4(),
+                    originalEvent: {absolutePointer: e.absolutePointer},
+                    type: "rectangle",
+                    customizable: true,
+                    saveKeepScale: true,
+                },
+                top: e.absolutePointer.y,
+                left: e.absolutePointer.x,
+                width: 380,
+                height: 380,
+                opacity: 0.25,
+                fill: "#0080FFFF",
+                zIndex: 7,
+                hasBorders: false,
+                lockMovementX: true,
+                lockMovementY: true,
+            });
+            rect.setControlsVisibility({
+                mt: true, mb: true, ml: true, mr: true, bl: true, br: true, tl: false, tr: false, mtr: true
+            })
+
+            if (otherObject) {
+                rect.set({
+                    angle: otherObject.angle,
+                    top: otherObject.top,
+                    left: otherObject.left,
+                    width: otherObject.width,
+                    height: otherObject.height,
+                    scaleX: otherObject.scaleX,
+                    scaleY: otherObject.scaleY,
+                    fill: otherObject.fill,
+                    opacity: otherObject.opacity,
+                })
+            }
+
+            toAdd = rect;
+        } else if (type === "circle") {
+            const circle = new fabric.Circle({
+                type: {
+                    id: uuid ? uuid : uuidv4(),
+                    originalEvent: {absolutePointer: e.absolutePointer},
+                    type: "circle",
+                    customizable: true,
+                    saveKeepScale: true,
+                },
+                top: e.absolutePointer.y,
+                left: e.absolutePointer.x,
+                radius: 190,
+                originX: "center",
+                originY: "center",
+                //centeredScaling: true,
+                opacity: 0.25,
+                fill: "#0080FFFF",
+                zIndex: 7,
+                hasBorders: false,
+                lockMovementX: true,
+                lockMovementY: true,
+            });
+            circle.setControlsVisibility({
+                mt: true, mb: true, ml: true, mr: true, bl: true, br: true, tl: false, tr: false, mtr: true
+            })
+
+            if (otherObject) {
+                circle.set({
+                    angle: otherObject.angle,
+                    top: otherObject.top,
+                    left: otherObject.left,
+                    width: otherObject.width,
+                    height: otherObject.height,
+                    scaleX: otherObject.scaleX,
+                    scaleY: otherObject.scaleY,
+                    fill: otherObject.fill,
+                    opacity: otherObject.opacity,
+                })
+            }
+
+            toAdd = circle;
+        } else if (type === "measure-line") {
+            const line = makeLine([
+                e.absolutePointer.x, e.absolutePointer.y,
+                e.absolutePointer.x + 380, e.absolutePointer.y
+            ]);
+            const c1 = makeCircle(line.get("x1"), line.get("y1"), null, line);
+            const c2 = makeCircle(line.get("x2"), line.get("y2"), line, null);
+            const text = new fabric.Text("400m", {
+                selectable: false,
+                evented: false,
+                lockMovementX: true,
+                lockMovementY: true,
+                top: e.absolutePointer.y,
+                left: e.absolutePointer.x + 380 / 2,
+                fontSize: 18,
+                backgroundColor: "rgb(34,34,34)",
+                fill: "rgb(255,255,255)",
+                zIndex: 9,
+                opacity: 0.8,
+            });
+            line.set({
+                type: {
+                    id: uuid ? uuid : uuidv4(),
+                    originalEvent: {absolutePointer: e.absolutePointer},
+                    type: "measure-line",
+                    text: text,
+                    c1: c1,
+                    c2: c2,
+                    also: [text, c1, c2],
+                }
+            });
+
+            if (otherObject) {
+                line.set({
+                    x1: otherObject.x1,
+                    x2: otherObject.x2,
+                    y1: otherObject.y1,
+                    y2: otherObject.y2
+                });
+                const lineLength = distance(line.x1, line.y1, line.x2, line.y2);
+                const meters = Math.trunc((100 * lineLength) / 190);
+                const point = midpoint(line.x1, line.y1, line.x2, line.y2);
+                line.type.text.set({
+                    left: point[0],
+                    top: point[1],
+                    text: meters + "m"
+                })
+                c1.set({
+                    left: line.get("x1"),
+                    top: line.get("y1"),
+                })
+                c2.set({
+                    left: line.get("x2"),
+                    top: line.get("y2"),
+                })
+            }
+
+            toAdd = line;
+            alsoAdd = [text, c1, c2];
+        }
+
+        if (toAdd) {
+            placed.push(toAdd);
+
+            if (alsoAdd.length) {
+                add(toAdd);
+                for (let i = 0; i < alsoAdd.length; i++) {
+                    add(alsoAdd[i]);
+                }
+                order();
+            } else {
+                addAndOrder(toAdd);
+            }
+
             if (roomSendUpdate) {
                 internal.updateStatesAndRender();
             }
@@ -727,6 +1194,11 @@ const mll = (function () {
             if (roomSendUpdate) {
                 roomEditorUpdateElements()
             }
+            return;
+        }
+
+        if (!placedMeta.hasOwnProperty(type)) {
+            console.warn("no meta properties for type " + type)
             return;
         }
 
@@ -770,7 +1242,7 @@ const mll = (function () {
                 }
             }
             if (placedMeta[type].set) {
-                img.setControlsVisibility(placedMeta[type].set);
+                img.set(placedMeta[type].set);
             }
             // disable rotation and resizing
             img.setControlsVisibility({
@@ -795,11 +1267,19 @@ const mll = (function () {
         });
     }
 
-    function addAndOrder(object) {
+    function add(object) {
         controls.fabricCanvas.add(object);
-        controls.fabricCanvas.orderByZindex();
         controls.exportCanvas.add(object);
+    }
+
+    function order() {
+        controls.fabricCanvas.orderByZindex();
         controls.exportCanvas.orderByZindex();
+    }
+
+    function addAndOrder(object) {
+        add(object);
+        order();
     }
 
     const internal = {
@@ -824,8 +1304,16 @@ const mll = (function () {
             controls.checkSectors = $("#sector-visible");
             controls.checkSectorSwap = $("#swap-sector-color");
             controls.sectorRange = $("#sector-range");
-            elements.contextMenu = $("#menu");
             controls.checkZoomScale = $("#zoom-scale");
+
+            elements.extraPanel = $("#extra-panel");
+            elements.noSelection = $("#no-selection");
+            elements.editShape = $("#edit-shape");
+            controls.textColor = $("#text-color");
+            elements.textColorDiv = $("#text-color-div");
+            controls.shapeBgColor = $("#shape-color");
+            controls.rangeBgOpacity = $("#shape-opacity");
+            elements.opacityValue = $("#shape-opacity-value");
 
             elements.viewerPanel = $("#viewer-panel");
             elements.editorPanel = $("#editor-panel");
@@ -880,6 +1368,7 @@ const mll = (function () {
 
             if (roomsMode) {
                 elements.menuPanel.hide();
+                elements.extraPanel.hide();
                 elements.canvasPanel.hide();
 
                 controls.inputRoomId.val("Map-Session-" + Math.trunc(99999 * Math.random()))
@@ -910,6 +1399,7 @@ const mll = (function () {
                         console.warn('server restart, room no longer exists')
 
                         $("#viewer-panel").hide();
+                        $("#extra-panel").hide();
                         $("#editor-panel").hide();
                         $("#menu-panel").hide();
                         $("#canvas-panel").hide();
@@ -917,6 +1407,8 @@ const mll = (function () {
 
                         $("#warning-panel").show();
                         $("#warn-reason").text("Either you lost connection or the rooms server restarted and the room no longer exists. Try joining again or create a new one.");
+
+                        document.title = "Rooms - Maps Let Loose"
                     }
                 }
 
@@ -937,6 +1429,8 @@ const mll = (function () {
                     $(".editor-key").val(message.editorKey);
                     $(".viewer-password").val(message.viewerPassword);
 
+                    document.title = message.roomId + " - Rooms - Maps Let Loose"
+
                     $("#warning-panel").hide();
                     elements.joinPanel.hide();
                     elements.menuPanel.show();
@@ -945,6 +1439,7 @@ const mll = (function () {
                         $(".editor-div").show();
                         elements.editorPanel.show();
                         elements.viewerPanel.hide();
+                        elements.extraPanel.show();
 
                         $("#shareLinkDisplay").val(
                             window.location.origin + window.location.pathname +
@@ -992,6 +1487,7 @@ const mll = (function () {
                     socket.emit('leave-room');
 
                     $("#viewer-panel").hide();
+                    $("#extra-panel").hide();
                     $("#editor-panel").hide();
                     $("#menu-panel").hide();
                     $("#canvas-panel").hide();
@@ -1058,7 +1554,7 @@ const mll = (function () {
             controls.fabricCanvas = new fabric.Canvas(elements.canvas.get(0), {
                 selection: false,
                 fireRightClick: true,
-                stopContextMenu: true,
+                stopContextMenu: false,
                 preserveObjectStacking: true,
                 scale: 1,
                 moveCursor: 'default',
@@ -1070,6 +1566,234 @@ const mll = (function () {
                 source: '',
                 repeat: 'repeat'
             }, controls.fabricCanvas.renderAll.bind(controls.fabricCanvas))
+
+            const menuActions = {
+                garrison: function () {
+                    mll.menuAdd("garry")
+                },
+                // Spawn
+                airhead: function () {
+                    mll.menuAdd("airhead")
+                },
+                halftrack: function () {
+                    mll.menuAdd("halftrack")
+                },
+                outpost: function () {
+                    mll.menuAdd("outpost", "normal")
+                },
+                recon_op: function () {
+                    mll.menuAdd("outpost", "recon")
+                },
+                // Vehicle
+                tank_heavy: function () {
+                    mll.menuAdd("tank", "heavy")
+                },
+                tank_medium: function () {
+                    mll.menuAdd("tank", "med")
+                },
+                tank_light: function () {
+                    mll.menuAdd("tank", "light")
+                },
+                tank_recon: function () {
+                    mll.menuAdd("tank", "recon")
+                },
+                truck_supply: function () {
+                    mll.menuAdd("truck", "supply")
+                },
+                truck_transport: function () {
+                    mll.menuAdd("truck", "transport")
+                },
+                // Buildable
+                at_gun: function () {
+                    mll.menuAdd("at-gun")
+                },
+                repair_station: function () {
+                    mll.menuAdd("repair-station")
+                },
+                node_batch: function () {
+                    mll.menuAdd("node", "batch")
+                },
+                node_manpower: function () {
+                    mll.menuAdd("node", "manpower")
+                },
+                node_munition: function () {
+                    mll.menuAdd("node", "munition")
+                },
+                node_fuel: function () {
+                    mll.menuAdd("node", "fuel")
+                },
+                // Placeable
+                supply_50: function () {
+                    mll.menuAdd("supplies", "50")
+                },
+                supply_50x2: function () {
+                    mll.menuAdd("supplies", "50x2")
+                },
+                supply_100: function () {
+                    mll.menuAdd("supplies", "100")
+                },
+                supply_150: function () {
+                    mll.menuAdd("supplies", "150")
+                },
+                supply_150x2: function () {
+                    mll.menuAdd("supplies", "150x2")
+                },
+                // Marker
+                enemy_garrison: function () {
+                    mll.menuAdd("enemy", "garry")
+                },
+                enemy_infantry: function () {
+                    mll.menuAdd("enemy", "infantry")
+                },
+                enemy_outpost: function () {
+                    mll.menuAdd("enemy", "op")
+                },
+                enemy_tank: function () {
+                    mll.menuAdd("enemy", "tank")
+                },
+                enemy_vehicle: function () {
+                    mll.menuAdd("enemy", "vehicle")
+                },
+                // Command Ability
+                supply_drop: function () {
+                    mll.menuAdd("supply-drop");
+                },
+                ammo_drop: function () {
+                    mll.menuAdd("ammo-drop");
+                },
+                reinforce: function () {
+                    mll.menuAdd("reinforce");
+                },
+                recon_plane: function () {
+                    mll.menuAdd("recon-plane");
+                },
+                precision_strike: function () {
+                    mll.menuAdd("precision-strike");
+                },
+                strafing_run: function () {
+                    mll.menuAdd("strafing-run");
+                },
+                bombing_run: function () {
+                    mll.menuAdd("bombing-run");
+                },
+                katyusha_strike: function () {
+                    mll.menuAdd("katyusha-strike");
+                },
+                // Custom
+                measure_radius: function () {
+                    mll.menuAdd("measure-radius")
+                },
+                measure_line: function () {
+                    mll.menuAdd("measure-line")
+                },
+                rectangle: function () {
+                    mll.menuAdd("rectangle")
+                },
+                circle: function () {
+                    mll.menuAdd("circle")
+                },
+                textbox: function () {
+                    mll.menuAdd("textbox")
+                },
+            };
+
+            $.contextMenu({
+                selector: "canvas",
+                callback: function (key, options) {
+                    console.log(key);
+                    console.log(options);
+
+                    if (menuActions.hasOwnProperty(key)) {
+                        menuActions[key]();
+                    }
+                },
+                animation: {duration: 5, show: 'fadeIn', hide: 'fadeOut'},
+                items: {
+                    garrison: {name: "Add Garrison", icon: "bi bi-flag"},
+                    spawn: {
+                        name: "Add Spawn",
+                        items: {
+                            airhead: {name: "Airhead", icon: "bi bi-triangle-fill"},
+                            halftrack: {name: "Halftrack"},
+                            outpost: {name: "Outpost", icon: "bi bi-triangle"},
+                            recon_op: {name: "Recon Outpost", icon: "bi bi-triangle-half"}
+                        }
+                    },
+                    vehicle: {
+                        name: "Add Vehicle",
+                        icon: "bi bi-truck",
+                        items: {
+                            tank_heavy: {name: "Heavy Tank", icon: "bi bi-three-dots"},
+                            tank_medium: {name: "Medium Tank"},
+                            tank_light: {name: "Light Tank", icon: "bi bi-dot"},
+                            tank_recon: {name: "Recon Tank", icon: "bi bi-camera"},
+                            truck_supply: {name: "Supply Truck"},
+                            truck_transport: {name: "Transport Truck"},
+                        }
+                    },
+                    buildable: {
+                        name: "Add Buildable",
+                        icon: "bi bi-hammer",
+                        items: {
+                            at_gun: {name: "AT Gun"},
+                            repair_station: {name: "Repair Station", icon: "bi bi-wrench"},
+                            node_batch: {name: "Batch of Nodes", icon: "bi bi-x-diamond"},
+                            node_manpower: {name: "Manpower Node", icon: "bi bi-diamond"},
+                            node_munition: {name: "Munitions Node", icon: "bi bi-diamond"},
+                            node_fuel: {name: "Fuel Node", icon: "bi bi-diamond"},
+                        }
+                    },
+                    placeable: {
+                        name: "Add Placeable",
+                        items: {
+                            // ammo_box: {name: "Ammo Box"},
+                            // explosive_box: {name: "Explosive Box"},
+                            // bandage_box: {name: "Bandage Box"},
+                            supply_50: {name: "Supplies (50)", icon: "bi bi-tools"},
+                            supply_50x2: {name: "Supplies (50 x 2)", icon: "bi bi-tools"},
+                            supply_100: {name: "Supplies (100)", icon: "bi bi-tools"},
+                            supply_150: {name: "Supplies (150)", icon: "bi bi-tools"},
+                            supply_150x2: {name: "Supplies (150 x 2)", icon: "bi bi-tools"},
+                        }
+                    },
+                    marker: {
+                        name: "Add Marker",
+                        icon: "bi bi-geo-alt",
+                        items: {
+                            enemy_garrison: {name: "Enemy Garrison", icon: "bi bi-flag"},
+                            enemy_infantry: {name: "Enemy Infantry"},
+                            enemy_outpost: {name: "Enemy Outpost", icon: "bi bi-triangle"},
+                            enemy_tank: {name: "Enemy Tank"},
+                            enemy_vehicle: {name: "Enemy Light Vehicle"},
+                        }
+                    },
+                    ability: {
+                        name: "Add Command Ability",
+                        icon: "bi bi-telephone-outbound",
+                        items: {
+                            supply_drop: {name: "Supply Drop", icon: "bi bi-box2"},
+                            ammo_drop: {name: "Ammo Drop", icon: "bi bi-box2"},
+                            // recon_plane: {name: "Recon Plane", icon: "bi bi-camera", disabled: true},
+                            precision_strike: {name: "Precision Strike", icon: "bi bi-arrow-down-circle"},
+                            strafing_run: {name: "Strafing Run", icon: "bi bi-file-arrow-up"},
+                            bombing_run: {name: "Bombing Run", icon: "bi bi-file-arrow-up"},
+                            katyusha_strike: {name: "Katyusha Strike", icon: "bi bi-arrow-down-circle"},
+                        }
+                    },
+                    objects: {
+                        name: "Add Custom Object",
+                        icon: "bi bi-bounding-box-circles",
+                        items: {
+                            measure_radius: {name: "Measure Radius", icon: "bi bi-plus-circle-dotted"},
+                            measure_line: {name: "Measure Line", icon: "bi bi-rulers"},
+                            rectangle: {name: "Rectangle", icon: "bi bi-square"},
+                            circle: {name: "Circle", icon: "bi bi-circle"},
+                            textbox: {name: "Textbox", icon: "bi bi-textarea-t"}
+                        }
+                    },
+                    cancel: {name: "Cancel"}
+                }
+            })
 
             const eCanvas = document.createElement("canvas");
             controls.exportCanvas = new fabric.Canvas(eCanvas, {
@@ -1214,6 +1938,13 @@ const mll = (function () {
 
                 controls.fabricCanvas.remove(target);
                 controls.exportCanvas.remove(target);
+                if (target.type && target.type.also) {
+                    const also = target.type.also;
+                    for (let j = 0; j < also.length; j++) {
+                        controls.fabricCanvas.remove(also[j]);
+                        controls.exportCanvas.remove(also[j]);
+                    }
+                }
                 controls.fabricCanvas.requestRenderAll();
                 controls.exportCanvas.requestRenderAll();
 
@@ -1221,7 +1952,7 @@ const mll = (function () {
             }
 
             function renderIcon(ctx, left, top, styleOverride, fabricObject) {
-                var size = this.cornerSize;
+                const size = this.cornerSize;
                 ctx.save();
                 ctx.translate(left, top);
                 ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
@@ -1230,7 +1961,7 @@ const mll = (function () {
             }
 
             function renderIconDrag(ctx, left, top, styleOverride, fabricObject) {
-                var size = this.cornerSize;
+                const size = this.cornerSize;
                 ctx.save();
                 ctx.translate(left, top);
                 ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
@@ -1238,29 +1969,158 @@ const mll = (function () {
                 ctx.restore();
             }
 
+            controls.fabricCanvas.on('object:moving', function (e) {
+                const p = e.target;
+                if (p && p.type && p.type.type === "measure-line-circle") {
+                    p.line1 && p.line1.set({'x2': p.left, 'y2': p.top});
+                    p.line2 && p.line2.set({'x1': p.left, 'y1': p.top});
+                    p.line3 && p.line3.set({'x1': p.left, 'y1': p.top});
+                    p.line4 && p.line4.set({'x1': p.left, 'y1': p.top});
+
+                    const line = (p.line1 || p.line2 || p.line3 || p.line4);
+                    const lineLength = distance(line.x1, line.y1, line.x2, line.y2);
+                    const meters = Math.trunc((100 * lineLength) / 190);
+                    const point = midpoint(line.x1, line.y1, line.x2, line.y2);
+                    line.type.text.set({
+                        left: point[0],
+                        top: point[1],
+                        text: meters + "m"
+                    })
+
+                    controls.fabricCanvas.requestRenderAll();
+                }
+            });
+
             controls.fabricCanvas.on('object:modified', function (e) {
+                console.log("object:modified")
                 console.log(e.target);
                 internal.updateStatesAndRender();
                 roomEditorUpdateElements();
             });
 
-            controls.fabricCanvas.on('object:scaling', function(e){
+            controls.fabricCanvas.on({
+                'selection:created': handleSelection,
+                'selection:updated': handleSelection
+            });
+
+            function handleSelection(e) {
+                elements.editShape.hide();
+                elements.noSelection.show();
+
+                const type = idx(["e", "type"], e);
+                if (!type) {
+                    // object select box fix will trigger selection event, ignore
+                    return;
+                }
+                if (type === "mousedown") {
+                    selectedElement = idx(["selected", 0], e);
+                    const customizable = idx(["type", "customizable"], selectedElement) || false;
+                    if (!customizable) {
+                        return;
+                    }
+
+                    console.log("customizable element selected");
+                    console.log(selectedElement);
+
+                    const elType = idx(["type", "type"], selectedElement);
+                    if (elType === "textbox") {
+                        elements.textColorDiv.show();
+                        controls.textColor.val((selectedElement.fill || "").substring(0, 7));
+                        controls.shapeBgColor.val((selectedElement.backgroundColor || "").substring(0, 7));
+                    } else {
+                        elements.textColorDiv.hide();
+                        controls.shapeBgColor.val((selectedElement.fill || "").substring(0, 7));
+                    }
+
+                    controls.rangeBgOpacity.val(selectedElement.opacity);
+                    elements.opacityValue.text(selectedElement.opacity);
+
+                    elements.noSelection.hide();
+                    elements.editShape.show();
+                }
+            }
+
+            controls.textColor.change(function () {
+                const elType = idx(["type", "type"], selectedElement);
+                if (elType !== "textbox") {
+                    console.log("no selected element or was not a textbox");
+                    return;
+                }
+
+                selectedElement.set({
+                    fill: controls.textColor.val()
+                });
+
+                internal.render();
+                roomEditorUpdateElements();
+            });
+
+            controls.shapeBgColor.change(function () {
+                if (!selectedElement) {
+                    console.log("no selected element");
+                    return;
+                }
+                const elType = idx(["type", "type"], selectedElement);
+
+                if (elType === "textbox") {
+                    selectedElement.set({
+                        backgroundColor: controls.shapeBgColor.val()
+                    });
+                } else {
+                    selectedElement.set({
+                        fill: controls.shapeBgColor.val()
+                    });
+                }
+
+                internal.render();
+                roomEditorUpdateElements();
+            })
+
+            controls.rangeBgOpacity.on('input', function () {
+                if (!selectedElement) {
+                    console.log("no selected element");
+                    return;
+                }
+
+                elements.opacityValue.text(controls.rangeBgOpacity.val());
+
+                selectedElement.set({
+                    opacity: controls.rangeBgOpacity.val()
+                });
+
+                internal.render();
+                roomEditorUpdateElements();
+            })
+
+            controls.fabricCanvas.on('selection:cleared', function (e) {
+                selectedElement = null;
+
+                elements.editShape.hide();
+                elements.noSelection.show();
+            });
+
+            controls.fabricCanvas.on('object:scaling', function (e) {
                 const object = e.target;
                 const meta = object.type;
-                if (meta.type === "custom-radius") {
+                if (meta.type === "measure-radius") {
                     const textEl = idx(["type", "text"], object);
+                    const textEl2 = idx(["type", "text2"], object);
                     if (!textEl) {
                         console.log("no text");
                     } else {
-                        // console.log(object);
-                        const meters = Math.trunc((10 * object.getScaledWidth()) / 19);
+                        const meters = Math.trunc((100 * object.getScaledWidth()) / 190);
                         textEl.set({
                             text: meters + "m"
-                        })
+                        });
+
+                        if (textEl2) {
+                            textEl2.set({
+                                text: meters + "m"
+                            });
+                        }
                     }
                 }
             });
-
 
             controls.fabricCanvas.on('mouse:dblclick', function (e) {
                 if (roomsMode && roomsRole === 'viewer') {
@@ -1278,6 +2138,14 @@ const mll = (function () {
 
                     controls.fabricCanvas.remove(element);
                     controls.exportCanvas.remove(element);
+
+                    if (element.type && element.type.also) {
+                        const also = element.type.also;
+                        for (let j = 0; j < also.length; j++) {
+                            controls.fabricCanvas.remove(also[j]);
+                            controls.exportCanvas.remove(also[j]);
+                        }
+                    }
                 }
 
                 roomEditorUpdateElements()
@@ -1290,6 +2158,14 @@ const mll = (function () {
                 if (element) {
                     controls.fabricCanvas.remove(element);
                     controls.exportCanvas.remove(element);
+
+                    if (element.type && element.type.also) {
+                        const also = element.type.also;
+                        for (let j = 0; j < also.length; j++) {
+                            controls.fabricCanvas.remove(also[j]);
+                            controls.exportCanvas.remove(also[j]);
+                        }
+                    }
                 }
 
                 roomEditorUpdateElements()
@@ -1386,6 +2262,9 @@ const mll = (function () {
                 }
             })
             $(document).on('keyup', function (e) {
+                if (roomsMode && roomsRole === 'viewer') {
+                    return;
+                }
                 if ((e.ctrlKey || e.shiftKey) && e.keyCode === 37) {
                     console.log("Ctrl+" + e.keyCode)
                     controls.sectorRange.val(Number(controls.sectorRange.val()) - 1);
@@ -1444,21 +2323,16 @@ const mll = (function () {
             });
             controls.fabricCanvas.on('mouse:down', function (e) {
                 console.log(e);
-                elements.contextMenu.css("visibility", "hidden");
                 if (e.button === 3) {
                     if (roomsMode && roomsRole === 'viewer') {
                         return;
                     }
 
-                    const offset = controls.fabricCanvas._offset;
-                    // Right click context menu
-                    elements.contextMenu.css("visibility", "visible")
-                        .css("left", offset.left + e.pointer.x + 'px')
-                        .css("top", offset.top + e.pointer.y + "px")
-                        .css("z-index", 100);
                     contextMenuEvent = e;
+                } else if (e.target && e.target.type && e.target.type.allowDrag) {
+                    panning = false;
                 } else if (e.target && e.target.selectable === true && e.target.lockMovementX === false ||
-                    e.transform && (e.transform.action === 'rotate' || e.transform.action === 'scale') ||
+                    e.transform && (e.transform.action === 'rotate' || e.transform.action.indexOf('scale') !== -1) ||
                     controls.fabricCanvas.isDrawingMode === true) {
                     // Dragging element
                     panning = false;
@@ -1476,8 +2350,6 @@ const mll = (function () {
             // Look into https://stackoverflow.com/a/45131912/2650847
 
             controls.fabricCanvas.on('mouse:wheel', function (opt) {
-                elements.contextMenu.css("visibility", "hidden")
-
                 var delta = opt.e.deltaY;
                 var zoom = controls.fabricCanvas.getZoom();
                 zoom *= 0.999 ** delta;
@@ -1540,6 +2412,11 @@ const mll = (function () {
                 resetSelectedPoints = false;
 
                 internal.updateStatesAndRender();
+
+                if (elements.spImage.spCallback) {
+                    elements.spImage.spCallback();
+                    delete elements.spImage.spCallback;
+                }
             }
 
             function initStrongpointData(filePrefix) {
@@ -1627,7 +2504,7 @@ const mll = (function () {
                 elements.spImage.src = './maps/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
             }
 
-            internal.roomsLoadMapAndSP = function (filePrefix, selectedSp) {
+            internal.roomsLoadMapAndSP = function (filePrefix, selectedSp, spCallback) {
                 resetSelectedPoints = true;
 
                 console.log("Rooms loading " + filePrefix);
@@ -1661,6 +2538,7 @@ const mll = (function () {
                 ];
                 Promise.all(promises).then(internal.render);
 
+                elements.spImage.spCallback = spCallback;
                 elements.spImage.roomsSelectedSp = selectedSp;
                 elements.spImage.src = './maps/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
             }
@@ -1699,7 +2577,8 @@ const mll = (function () {
 
             controls.btnSave.click(function () {
                 for (let i = 0; i < placed.length; i++) {
-                    if (placed[i].type.type === "custom-radius") {
+                    const element = placed[i];
+                    if (idx(["type", "saveKeepScale"], element)) {
                         continue;
                     }
                     placed[i].set({scaleX: 1, scaleY: 1});
@@ -1806,11 +2685,11 @@ const mll = (function () {
                         return;
                     }
                     const content = JSON.parse(text);
-                    loadFromRoomState(content);
-
-                    roomEditorUpdateControls("importFile")
-                    roomEditorUpdateElements();
-                    roomEditorUpdateDrawings();
+                    loadFromRoomState(content, function () {
+                        roomEditorUpdateControls("importFile")
+                        roomEditorUpdateElements();
+                        roomEditorUpdateDrawings();
+                    });
 
                     controls.btnImport.removeClass("loading").removeClass("disabled");
                 });
@@ -1901,6 +2780,7 @@ const mll = (function () {
                 elements.sectorB.set({fill: sectorBlue});
             }
 
+
             // Update placed element images
             for (let i = 0; i < placed.length; i++) {
                 const object = placed[i];
@@ -1947,6 +2827,7 @@ const mll = (function () {
             if (promises.length) {
                 Promise.all(promises).then(internal.render);
             } else {
+                changeZIndexBySize();
                 updateZoomScale()
                 controls.fabricCanvas.renderAll();
                 controls.exportCanvas.renderAll();
@@ -1956,6 +2837,7 @@ const mll = (function () {
         render: function () {
             console.log("render()");
 
+            changeZIndexBySize();
             updateZoomScale();
             controls.fabricCanvas.renderAll();
             controls.exportCanvas.renderAll();
@@ -1966,7 +2848,6 @@ const mll = (function () {
 
     return {
         menuAdd: function (type, modifier) {
-            elements.contextMenu.css("visibility", "hidden");
             console.log('menuAdd(' + type + ')')
 
             if (!type) {
