@@ -51,6 +51,9 @@ canvas.draw-mode {
 .color.red {
     background-color: #ff8080;
 }
+.color.selected {
+    border: 3px dashed lawngreen;
+}
 #line-color-div span {
     margin-left: 5px;
 }
