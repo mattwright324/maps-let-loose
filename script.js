@@ -84,10 +84,16 @@ const mll = (function () {
             if (!typeMeta) {
                 continue;
             }
+            const baseScale = typeMeta.customScale || 1;
             if (doScale && (typeMeta.zoomScale || (typeMeta.hasOwnProperty("zoomScaleWhen") && typeMeta.zoomScaleWhen()))) {
-                object.set({scaleX: scale, scaleY: scale});
+                const max = typeMeta.maxZoom || 2.25;
+                let adjusted = baseScale + (scale - 1);
+                if (adjusted > max) {
+                    adjusted = max;
+                }
+                object.set({scaleX: adjusted, scaleY: adjusted});
             } else {
-                object.set({scaleX: 1, scaleY: 1});
+                object.set({scaleX: baseScale, scaleY: baseScale});
             }
         }
 
@@ -272,7 +278,12 @@ const mll = (function () {
                                 fill: updated.fill,
                                 stroke: updated.stroke,
                                 opacity: updated.opacity,
-                            })
+                            });
+                        }
+
+                        const side = idx(["type", "side"], updated);
+                        if (side) {
+                            element.type.side = updated.type.side;
                         }
 
                         if (roomsMode && roomsRole === 'viewer') {
@@ -449,6 +460,7 @@ const mll = (function () {
         airhead: 9,
         halftrack: 9,
         node: 9,
+        class: 9,
         "repair-station": 9,
         "supply-drop": 9,
         "ammo-drop": 9,
@@ -600,11 +612,24 @@ const mll = (function () {
                 if (object.type.modifier) {
                     return './maps/tank-' + object.type.modifier + ".png";
                 }
-
                 return './maps/tank-med.png'
             },
             controlsVisibility: {mtr: true},
-            zoomScale: true
+            zoomScale: true,
+            customizable: "asset",
+        },
+        class: {
+            wh: 51,
+            resolveImg: function (object) {
+                if (object.type.modifier) {
+                    return './maps/class-' + object.type.modifier + ".png";
+                }
+                return './maps/class-rifleman.png'
+            },
+            customScale: 0.5,
+            maxZoom: 1,
+            zoomScale: true,
+            customizable: "asset",
         },
         truck: {
             wh: 51,
@@ -999,7 +1024,7 @@ const mll = (function () {
                     id: uuid ? uuid : uuidv4(),
                     originalEvent: {absolutePointer: e.absolutePointer},
                     type: "textbox",
-                    customizable: true,
+                    customizable: "shape",
                 },
                 fontSize: 24,
                 fontFamily: "system-ui, -apple-system, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, \"Noto Sans\", \"Liberation Sans\", sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
@@ -1037,7 +1062,7 @@ const mll = (function () {
                     id: uuid ? uuid : uuidv4(),
                     originalEvent: {absolutePointer: e.absolutePointer},
                     type: "rectangle",
-                    customizable: true,
+                    customizable: "shape",
                     saveKeepScale: true,
                 },
                 top: e.absolutePointer.y,
@@ -1076,7 +1101,7 @@ const mll = (function () {
                     id: uuid ? uuid : uuidv4(),
                     originalEvent: {absolutePointer: e.absolutePointer},
                     type: "circle",
-                    customizable: true,
+                    customizable: "shape",
                     saveKeepScale: true,
                 },
                 top: e.absolutePointer.y,
@@ -1233,7 +1258,12 @@ const mll = (function () {
                     angle: otherObject.angle,
                     top: otherObject.top,
                     left: otherObject.left,
-                })
+                });
+
+                const side = idx(["type", "side"], otherObject);
+                if (side) {
+                    img.type.side = otherObject.type.side;
+                }
                 if (roomsMode && roomsRole === 'viewer') {
                     img.set({
                         selectable: false,
@@ -1309,6 +1339,7 @@ const mll = (function () {
             elements.extraPanel = $("#extra-panel");
             elements.noSelection = $("#no-selection");
             elements.editShape = $("#edit-shape");
+            elements.editAsset = $("#edit-asset");
             controls.textColor = $("#text-color");
             elements.textColorDiv = $("#text-color-div");
             controls.shapeBgColor = $("#shape-color");
@@ -1603,6 +1634,43 @@ const mll = (function () {
                 truck_transport: function () {
                     mll.menuAdd("truck", "transport")
                 },
+                // Player Class
+                class_commander: function () {
+                    mll.menuAdd("class", "commander")
+                },
+                class_officer: function () {
+                    mll.menuAdd("class", "officer")
+                },
+                class_rifleman: function () {
+                    mll.menuAdd("class", "rifleman")
+                },
+                class_assault: function () {
+                    mll.menuAdd("class", "assault")
+                },
+                class_auto_rifleman: function () {
+                    mll.menuAdd("class", "auto-rifleman")
+                },
+                class_medic: function () {
+                    mll.menuAdd("class", "medic")
+                },
+                class_support: function () {
+                    mll.menuAdd("class", "support")
+                },
+                class_machine_gunner: function () {
+                    mll.menuAdd("class", "machine-gunner")
+                },
+                class_anti_tank: function () {
+                    mll.menuAdd("class", "anti-tank")
+                },
+                class_engineer: function () {
+                    mll.menuAdd("class", "engineer")
+                },
+                class_spotter: function () {
+                    mll.menuAdd("class", "spotter")
+                },
+                class_sniper: function () {
+                    mll.menuAdd("class", "sniper")
+                },
                 // Buildable
                 at_gun: function () {
                     mll.menuAdd("at-gun")
@@ -1729,6 +1797,24 @@ const mll = (function () {
                             tank_recon: {name: "Recon Tank", icon: "bi bi-camera"},
                             truck_supply: {name: "Supply Truck"},
                             truck_transport: {name: "Transport Truck"},
+                        }
+                    },
+                    infatry_class: {
+                        name: "Add Player Class",
+                        icon: "bi bi-person-circle",
+                        items: {
+                            class_commander: {name: "Commander", icon: "bi bi-diagram-2-fill"},
+                            class_officer: {name: "Officer", icon: "bi bi-chevron-double-down"},
+                            class_rifleman: {name: "Rifleman", icon: "bi bi-x-lg"},
+                            class_assault: {name: "Assault", icon: "bi bi-lightning-charge"},
+                            class_auto_rifleman: {name: "Automatic Rifleman", icon: "bi bi-chevron-bar-contract"},
+                            class_medic: {name: "Medic", icon: "bi bi-plus-lg"},
+                            class_support: {name: "Support", icon: "bi bi-record-circle"},
+                            class_machine_gunner: {name: "Machine Gunner"},
+                            class_anti_tank: {name: "Anti-Tank", icon: "bi bi-chevron-double-up"},
+                            class_engineer: {name: "Engineer"},
+                            class_spotter: {name: "Spotter", icon: "bi bi-triangle-half"},
+                            class_sniper: {name: "Sniper", icon: "bi bi-bullseye"},
                         }
                     },
                     buildable: {
@@ -2005,6 +2091,7 @@ const mll = (function () {
 
             function handleSelection(e) {
                 elements.editShape.hide();
+                elements.editAsset.hide();
                 elements.noSelection.show();
 
                 const type = idx(["e", "type"], e);
@@ -2014,7 +2101,9 @@ const mll = (function () {
                 }
                 if (type === "mousedown") {
                     selectedElement = idx(["selected", 0], e);
-                    const customizable = idx(["type", "customizable"], selectedElement) || false;
+                    const type = idx(["type", "type"], selectedElement);
+                    const meta = idx([type, "customizable"], placedMeta);
+                    const customizable = idx(["type", "customizable"], selectedElement) || meta;
                     if (!customizable) {
                         return;
                     }
@@ -2022,23 +2111,54 @@ const mll = (function () {
                     console.log("customizable element selected");
                     console.log(selectedElement);
 
-                    const elType = idx(["type", "type"], selectedElement);
-                    if (elType === "textbox") {
-                        elements.textColorDiv.show();
-                        controls.textColor.val((selectedElement.fill || "").substring(0, 7));
-                        controls.shapeBgColor.val((selectedElement.backgroundColor || "").substring(0, 7));
+                    if (customizable === "shape") {
+                        const elType = idx(["type", "type"], selectedElement);
+                        if (elType === "textbox") {
+                            elements.textColorDiv.show();
+                            controls.textColor.val((selectedElement.fill || "").substring(0, 7));
+                            controls.shapeBgColor.val((selectedElement.backgroundColor || "").substring(0, 7));
+                        } else {
+                            elements.textColorDiv.hide();
+                            controls.shapeBgColor.val((selectedElement.fill || "").substring(0, 7));
+                        }
+
+                        controls.rangeBgOpacity.val(selectedElement.opacity);
+                        elements.opacityValue.text(selectedElement.opacity);
+
+                        elements.noSelection.hide();
+                        elements.editShape.show();
                     } else {
-                        elements.textColorDiv.hide();
-                        controls.shapeBgColor.val((selectedElement.fill || "").substring(0, 7));
+                        $(".asset-side").removeClass("selected");
+                        const filters = selectedElement.filters;
+                        if (filters && filters.length) {
+                            $(".asset-side.red").addClass("selected");
+                        } else {
+                            $(".asset-side.blue").addClass("selected");
+                        }
+
+                        elements.noSelection.hide();
+                        elements.editAsset.show();
                     }
-
-                    controls.rangeBgOpacity.val(selectedElement.opacity);
-                    elements.opacityValue.text(selectedElement.opacity);
-
-                    elements.noSelection.hide();
-                    elements.editShape.show();
                 }
             }
+
+            $(document).on('click', '.asset-side', function (e) {
+                $(".asset-side").removeClass("selected");
+                const clicked = $(e.target);
+                clicked.addClass("selected");
+                if (!selectedElement) {
+                    return;
+                }
+
+                if (clicked.hasClass("blue")) {
+                    selectedElement.type.side = "friendly";
+                } else {
+                    selectedElement.type.side = "enemy";
+                }
+
+                internal.updateStatesAndRender();
+                roomEditorUpdateElements();
+            })
 
             controls.textColor.change(function () {
                 const elType = idx(["type", "type"], selectedElement);
@@ -2096,6 +2216,7 @@ const mll = (function () {
                 selectedElement = null;
 
                 elements.editShape.hide();
+                elements.editAsset.hide();
                 elements.noSelection.show();
             });
 
@@ -2780,7 +2901,7 @@ const mll = (function () {
                 elements.sectorB.set({fill: sectorBlue});
             }
 
-
+            const applyFilters = [];
             // Update placed element images
             for (let i = 0; i < placed.length; i++) {
                 const object = placed[i];
@@ -2789,6 +2910,17 @@ const mll = (function () {
                     if (!meta) {
                         resolve();
                     }
+                    if (meta.customizable === "asset") {
+                        console.log(object);
+                        if (object.type.side === "enemy") {
+                            // blue to red
+                            object.filters = [new fabric.Image.filters.HueRotation({rotation: 0.8097437437027739})];
+                        } else {
+                            object.filters = [];
+                        }
+                        applyFilters.push(object);
+                    }
+
                     object.setSrc(meta.resolveImg(object), resolve);
                 }));
             }
@@ -2825,17 +2957,22 @@ const mll = (function () {
             }
 
             if (promises.length) {
-                Promise.all(promises).then(internal.render);
+                Promise.all(promises).then(function () {
+                    internal.render(applyFilters);
+                });
             } else {
-                changeZIndexBySize();
-                updateZoomScale()
-                controls.fabricCanvas.renderAll();
-                controls.exportCanvas.renderAll();
+                internal.render(applyFilters);
             }
         },
 
-        render: function () {
+        render: function (applyFilters) {
             console.log("render()");
+
+            if (applyFilters && applyFilters.length) {
+                for (let i = 0; i < applyFilters.length; i++) {
+                    applyFilters[i].applyFilters();
+                }
+            }
 
             changeZIndexBySize();
             updateZoomScale();
