@@ -381,22 +381,46 @@
                     <div id="shape-color-div" class="d-flex align-items-center">
                         <input type="color" value="#0080ff" id="shape-color">
                         <span>or quick</span>
-                        <span class="color blue" title="Blue"
-                              onclick="$('#shape-color').val('#0080ff').trigger('change');$('#shape-opacity').val(0.25).trigger('input');"></span>
-                        <span class="color red" title="Red"
-                              onclick="$('#shape-color').val('#ff8080').trigger('change');$('#shape-opacity').val(0.25).trigger('input');"></span>
-                        <span class="color" style="background-color:#ffffff" title="White"
-                              onclick="$('#shape-color').val('#ffffff').trigger('change');$('#shape-opacity').val(0.55).trigger('input');"></span>
-                        <span class="color" style="background-color:#8000ff" title="Purple"
-                              onclick="$('#shape-color').val('#8000ff').trigger('change');$('#shape-opacity').val(0.25).trigger('input');"></span>
-                        <span class="color" style="background-color:#c0c0c0" title="Gray"
-                              onclick="$('#shape-color').val('#c0c0c0').trigger('change');$('#shape-opacity').val(0.55).trigger('input');"></span>
-                        <span class="color" style="background-color:#ffff80" title="Yellow"
-                              onclick="$('#shape-color').val('#ffff80').trigger('change');$('#shape-opacity').val(0.25).trigger('input');"></span>
-                        <span class="color" style="background-color:#ff8000" title="Orange"
-                              onclick="$('#shape-color').val('#ff8000').trigger('change');$('#shape-opacity').val(0.25).trigger('input');"></span>
-                        <span class="color" style="background-color:#00ff00" title="Green"
-                              onclick="$('#shape-color').val('#00ff00').trigger('change');$('#shape-opacity').val(0.25).trigger('input');"></span>
+                        <script>
+                            function setColorsAndOpacity(shapeColor, shapeOpacity, textColor) {
+                                const inputShapeColor = $("#shape-color");
+                                const inputTextColor = $("#text-color");
+                                const inputShapeOpacity = $('#shape-opacity');
+
+                                if (shapeColor !== inputShapeColor.val()) {
+                                    inputShapeColor.val(shapeColor).trigger('change');
+                                }
+
+                                if (inputTextColor.is(":visible")) {
+                                    if (textColor !== inputTextColor.val()) {
+                                        inputTextColor.val(textColor).trigger('change');
+                                    }
+                                    if (inputShapeOpacity !== 0.8) {
+                                        inputShapeOpacity.val(0.8).trigger('input');
+                                    }
+                                } else {
+                                    if (inputShapeOpacity !== shapeOpacity) {
+                                        inputShapeOpacity.val(shapeOpacity).trigger('input');
+                                    }
+                                }
+                            }
+                        </script>
+                        <span class="color blue" title="Blue" style="color: #ffffff"
+                              onclick="setColorsAndOpacity('#0080ff', 0.25, '#ffffff')">T</span>
+                        <span class="color red" title="Red" style="color: #ffffff"
+                              onclick="setColorsAndOpacity('#ff8080', 0.25, '#ffffff')">T</span>
+                        <span class="color" style="background-color:#ffffff; color: #000000" title="White"
+                              onclick="setColorsAndOpacity('#ffffff', 0.55, '#000000')">T</span>
+                        <span class="color" style="background-color:#8000ff; color: #ffffff" title="Purple"
+                              onclick="setColorsAndOpacity('#8000ff', 0.25, '#ffffff')">T</span>
+                        <span class="color" style="background-color:#c0c0c0; color: #000000" title="Gray"
+                              onclick="setColorsAndOpacity('#c0c0c0', 0.55, '#000000')">T</span>
+                        <span class="color" style="background-color:#ffff80; color: #000000" title="Yellow"
+                              onclick="setColorsAndOpacity('#ffff80', 0.25, '#000000')">T</span>
+                        <span class="color" style="background-color:#ff8000; color: #000000" title="Orange"
+                              onclick="setColorsAndOpacity('#ff8000', 0.25, '#000000')">T</span>
+                        <span class="color" style="background-color:#00ff00; color: #000000" title="Green"
+                              onclick="setColorsAndOpacity('#00ff00', 0.25, '#000000')">T</span>
                     </div>
                     <br>
                     <div id="text-color-div" class="text" style="display: none">
@@ -414,7 +438,7 @@
                 </div>
 
                 <div id="edit-asset" style="display: none">
-                    <label for="text-color">Asset side</label>
+                    <label>Side (friendly/enemy)</label>
                     <br>
                     <span class="color blue asset-side selected" title="Friendly" id="assetFriendly"></span>
                     <span class="color red asset-side" title="Enemy" id="assetEnemy"></span>

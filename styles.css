@@ -44,6 +44,7 @@ canvas.draw-mode {
     height: 30px;
     border-radius: 5px;
     cursor: pointer;
+    text-align: center;
 }
 .color.blue {
     background-color: #0080ff;
