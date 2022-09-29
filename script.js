@@ -2499,7 +2499,7 @@ const mll = (function () {
 
                             let zoom = controls.fabricCanvas.getZoom();
                             if (prevDiff > 8) {
-                                console.log(curDiff)
+                                //console.log(curDiff)
                                 if (curDiff > prevDiff) {
                                     zoom += 0.015;
                                 }
@@ -2509,15 +2509,9 @@ const mll = (function () {
                             }
                             if (zoom > 1.6) zoom = 1.6;
                             if (zoom < 0.15) zoom = 0.15;
-                            console.log(zoom);
+                            //console.log(zoom);
                             controls.fabricCanvas.zoomToPoint(point, zoom);
 
-                            // let scaleDiff = (e.self.scale - 1) / 10 + 1;
-                            // let zoom = controls.fabricCanvas.getZoom() * scaleDiff;
-                            // if (zoom > 10) zoom = 10;
-                            // if (zoom < 0.01) zoom = 0.01;
-                            //
-                            // console.log(controls.fabricCanvas.getZoom());
                             pausePanning = false;
                             prevDiff = curDiff;
                         }
