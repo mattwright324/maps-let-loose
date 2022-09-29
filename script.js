@@ -919,14 +919,6 @@ const mll = (function () {
         console.log(`addMapElement(${type}, ${modifier}, ${roomSendUpdate}, ${uuid}, ${otherObject})`)
         console.log(e);
 
-        if (e.e.touches && e.e.touches.length) {
-            const touch = e.e.touches[0]
-            e.absolutePointer = {
-                x: touch.clientX,
-                y: touch.clientY
-            }
-        }
-
         let toAdd;
         let alsoAdd = [];
         if (type === "measure-radius") {
@@ -2456,7 +2448,10 @@ const mll = (function () {
                 panning = false;
             });
             controls.fabricCanvas.on('mouse:down', function (e) {
-                if (e.e.touches) {return;}
+                if (e.e.touches) {
+                    contextMenuEvent = e; // store absolutePointer for mobile longpress
+                    return;
+                }
                 console.log(e);
                 if (e.button === 3) {
                     if (roomsMode && roomsRole === 'viewer') {
@@ -2553,10 +2548,6 @@ const mll = (function () {
                     return;
 
                     if (e.e.type === "touchstart") {
-                        console.log(e);
-
-                        contextMenuEvent = e;
-
                         $("canvas").trigger(jQuery.Event("contextmenu", {}))
                     }
                 }
@@ -2575,6 +2566,8 @@ const mll = (function () {
                 fixElementSelectBoxes();
                 updateZoomScale();
             });
+
+            // TODO https://codepen.io/durga598/pen/gXQjdw?editors=0010
 
             elements.spImage = new Image();
             elements.spImage.onload = loadStrongpoints;
