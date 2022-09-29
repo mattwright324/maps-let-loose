@@ -146,7 +146,6 @@ const mll = (function () {
         }
 
         controls.fabricCanvas.orderByZindex();
-        controls.exportCanvas.orderByZindex();
     }
 
     function getSelectedSp() {
@@ -340,7 +339,6 @@ const mll = (function () {
                 });
             });
             controls.fabricCanvas.orderByZindex();
-            controls.exportCanvas.orderByZindex();
 
             internal.render();
         }
@@ -1312,7 +1310,6 @@ const mll = (function () {
 
     function order() {
         controls.fabricCanvas.orderByZindex();
-        controls.exportCanvas.orderByZindex();
     }
 
     function addAndOrder(object) {
@@ -2041,7 +2038,6 @@ const mll = (function () {
                     }
                 }
                 controls.fabricCanvas.requestRenderAll();
-                controls.exportCanvas.requestRenderAll();
 
                 roomEditorUpdateElements();
             }
@@ -2354,7 +2350,6 @@ const mll = (function () {
 
                 controls.fabricCanvas.orderByZindex();
                 controls.exportCanvas.add(e.path);
-                controls.exportCanvas.orderByZindex();
 
                 roomEditorUpdateDrawings();
             });
@@ -2417,7 +2412,7 @@ const mll = (function () {
                 }
             }
 
-            $(document).on('click', '.sp-toggle', function (e) {
+            $(document).on('click tap', '.sp-toggle', function (e) {
                 const toggle = $(e.target);
                 if (toggle.hasClass("unavailable")) {
                     return;
@@ -2453,7 +2448,10 @@ const mll = (function () {
                 panning = false;
             });
             controls.fabricCanvas.on('mouse:down', function (e) {
-                if (e.e.touches) {return;}
+                if (e.e.touches) {
+                    contextMenuEvent = e; // store absolutePointer for mobile longpress
+                    return;
+                }
                 console.log(e);
                 if (e.button === 3) {
                     if (roomsMode && roomsRole === 'viewer') {
@@ -2522,7 +2520,9 @@ const mll = (function () {
                 },
                 'touch:drag': function (e) {
                     if (!e.e.touches) {return;}
-                    if (controls.fabricCanvas.isDrawingMode === true) {
+                    if (e.target && e.target.selectable === true && e.target.lockMovementX === false ||
+                        e.transform && (e.transform.action === 'rotate' || e.transform.action.indexOf('scale') !== -1) ||
+                        controls.fabricCanvas.isDrawingMode === true) {
                         return;
                     }
                     if (pausePanning !== true && e.self.x && e.self.y) {
@@ -2531,8 +2531,10 @@ const mll = (function () {
                         xChange = currentX - lastX;
                         yChange = currentY - lastY;
 
-                        if ((Math.abs(currentX - lastX) <= 50) && (Math.abs(currentY - lastY) <= 50)) {
-                            var delta = new fabric.Point(xChange, yChange);
+                        const distX = Math.abs(currentX - lastX);
+                        const distY = Math.abs(currentY - lastY);
+                        if ((distX > 1 || distY > 1) && distX <= 50 && distY <= 50) {
+                            const delta = new fabric.Point(xChange, yChange);
                             controls.fabricCanvas.relativePan(delta);
                         }
 
@@ -2542,7 +2544,12 @@ const mll = (function () {
                 },
                 'touch:longpress': function (e) {
                     if (!e.e.touches) {return;}
-                    console.log(e);
+
+                    return;
+
+                    if (e.e.type === "touchstart") {
+                        $("canvas").trigger(jQuery.Event("contextmenu", {}))
+                    }
                 }
             });
 
@@ -2559,6 +2566,8 @@ const mll = (function () {
                 fixElementSelectBoxes();
                 updateZoomScale();
             });
+
+            // TODO https://codepen.io/durga598/pen/gXQjdw?editors=0010
 
             elements.spImage = new Image();
             elements.spImage.onload = loadStrongpoints;
@@ -2781,7 +2790,7 @@ const mll = (function () {
                     placed[i].set({scaleX: 1, scaleY: 1});
                 }
 
-                controls.exportCanvas.renderAll();
+
 
                 $('<a>').attr({
                     href: controls.exportCanvas.toDataURL(),
@@ -2808,6 +2817,9 @@ const mll = (function () {
 
             controls.btnExport.on('click', async function () {
                 controls.btnExport.addClass("loading").addClass("disabled");
+
+                controls.exportCanvas.renderAll();
+                controls.exportCanvas.orderByZindex();
 
                 const zip = new JSZip();
                 console.log("Creating about.txt...")
@@ -3054,7 +3066,6 @@ const mll = (function () {
             changeZIndexBySize();
             updateZoomScale();
             controls.fabricCanvas.renderAll();
-            controls.exportCanvas.renderAll();
         }
     }
 
