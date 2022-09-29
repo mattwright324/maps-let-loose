@@ -126,7 +126,9 @@ const mll = (function () {
             }
         }
         //console.log(objectAreas);
-        const sizes = Object.keys(objectAreas).sort(function (a, b) {return a - b;}).reverse();
+        const sizes = Object.keys(objectAreas).sort(function (a, b) {
+            return a - b;
+        }).reverse();
         //console.log(sizes);
         for (let i = 0; i < sizes.length; i++) {
             const elements = objectAreas[sizes[i]];
@@ -501,7 +503,9 @@ const mll = (function () {
             },
             zoomScaleWhen: function () {
                 return controls.checkGarryRadius.is(":checked")
-            }
+            },
+            customizable: "asset",
+            filterRotation: -0.45,
         },
         airhead: {
             wh: 122,
@@ -522,7 +526,9 @@ const mll = (function () {
             controlsVisibility: {mtr: true},
             zoomScaleWhen: function () {
                 return controls.checkGarryRadius.is(":checked")
-            }
+            },
+            customizable: "asset",
+            filterRotation: -0.45,
         },
         outpost: {
             wh: 122,
@@ -604,7 +610,9 @@ const mll = (function () {
 
                 return './maps/supplies-plain.png'
             },
-            zoomScale: true
+            zoomScale: true,
+            customizable: "asset",
+            filterRotation: -0.45,
         },
         tank: {
             wh: 51,
@@ -1587,6 +1595,7 @@ const mll = (function () {
                 fireRightClick: true,
                 stopContextMenu: false,
                 preserveObjectStacking: true,
+                enableRetinaScaling: false,
                 scale: 1,
                 moveCursor: 'default',
                 hoverCursor: 'default',
@@ -2440,9 +2449,11 @@ const mll = (function () {
 
             let panning = false;
             controls.fabricCanvas.on('mouse:up', function (e) {
+                if (e.e.touches) {return;}
                 panning = false;
             });
             controls.fabricCanvas.on('mouse:down', function (e) {
+                if (e.e.touches) {return;}
                 console.log(e);
                 if (e.button === 3) {
                     if (roomsMode && roomsRole === 'viewer') {
@@ -2462,20 +2473,85 @@ const mll = (function () {
                 }
             });
             controls.fabricCanvas.on('mouse:move', function (e) {
-                if (panning && e && e.e) {
+                if (e.e.touches) {return;}
+                if (panning && e && e.e && e.e.movementX) {
                     console.log(panning);
                     var delta = new fabric.Point(e.e.movementX, e.e.movementY);
                     controls.fabricCanvas.relativePan(delta);
                 }
             });
+
             // Look into https://stackoverflow.com/a/45131912/2650847
+            let pausePanning = false, zoomStartScale, currentX, currentY, xChange, yChange, lastX, lastY, prevDiff, zooming = false;
+            controls.fabricCanvas.on({
+                'touch:gesture': function (e) {
+                    if (!e.e.touches) {return;}
+                    try {
+                        if (e.e.touches && e.e.touches.length == 2 && !pausePanning) {
+                            // console.log(e);
+                            pausePanning = true;
+
+                            const touch1 = e.e.touches[0];
+                            const touch2 = e.e.touches[1];
+                            const mid = midpoint(touch1.clientX, touch1.clientY, touch2.clientX, touch2.clientY);
+                            const curDiff = Math.abs(e.e.touches[0].clientX - e.e.touches[1].clientX);
+                            const point = new fabric.Point(mid[0], mid[1]);
+
+                            let zoom = controls.fabricCanvas.getZoom();
+                            if (prevDiff > 8) {
+                                //console.log(curDiff)
+                                if (curDiff > prevDiff) {
+                                    zoom += 0.015;
+                                }
+                                if (curDiff < prevDiff) {
+                                    zoom -= 0.015;
+                                }
+                            }
+                            if (zoom > 1.6) zoom = 1.6;
+                            if (zoom < 0.15) zoom = 0.15;
+                            //console.log(zoom);
+                            controls.fabricCanvas.zoomToPoint(point, zoom);
+
+                            pausePanning = false;
+                            prevDiff = curDiff;
+                        }
+                    } catch (e) {
+                        pausePanning = false;
+                        console.error(e);
+                    }
+                },
+                'touch:drag': function (e) {
+                    if (!e.e.touches) {return;}
+                    if (controls.fabricCanvas.isDrawingMode === true) {
+                        return;
+                    }
+                    if (pausePanning !== true && e.self.x && e.self.y) {
+                        currentX = e.self.x;
+                        currentY = e.self.y;
+                        xChange = currentX - lastX;
+                        yChange = currentY - lastY;
+
+                        if ((Math.abs(currentX - lastX) <= 50) && (Math.abs(currentY - lastY) <= 50)) {
+                            var delta = new fabric.Point(xChange, yChange);
+                            controls.fabricCanvas.relativePan(delta);
+                        }
+
+                        lastX = e.self.x;
+                        lastY = e.self.y;
+                    }
+                },
+                'touch:longpress': function (e) {
+                    if (!e.e.touches) {return;}
+                    console.log(e);
+                }
+            });
 
             controls.fabricCanvas.on('mouse:wheel', function (opt) {
                 var delta = opt.e.deltaY;
                 var zoom = controls.fabricCanvas.getZoom();
                 zoom *= 0.999 ** delta;
                 if (zoom > 10) zoom = 10;
-                if (zoom < 0.01) zoom = 0.01;
+                if (zoom < 0.15) zoom = 0.15;
                 controls.fabricCanvas.zoomToPoint({x: opt.e.offsetX, y: opt.e.offsetY}, zoom);
                 opt.e.preventDefault();
                 opt.e.stopPropagation();
@@ -2914,7 +2990,8 @@ const mll = (function () {
                         console.log(object);
                         if (object.type.side === "enemy") {
                             // blue to red
-                            object.filters = [new fabric.Image.filters.HueRotation({rotation: 0.8097437437027739})];
+                            const rotation = meta.filterRotation || 0.8097437437027739;
+                            object.filters = [new fabric.Image.filters.HueRotation({rotation: rotation})];
                         } else {
                             object.filters = [];
                         }
