@@ -55,6 +55,9 @@ canvas.draw-mode {
 .color.selected {
     border: 3px dashed lawngreen;
 }
+#text-color-div, #shape-color-div, #line-color-div {
+    flex-wrap: wrap;
+}
 #line-color-div span {
     margin-left: 5px;
 }
@@ -245,8 +248,7 @@ html.dark .progress-bar {
 
 @media only screen and (max-width: 768px) {
     #canvas-container {
-        height: 400px;
-        user-input: none;
+        height: 450px;
     }
 }
 @media only screen and (min-width: 769px) {
