@@ -146,7 +146,6 @@ const mll = (function () {
         }
 
         controls.fabricCanvas.orderByZindex();
-        controls.exportCanvas.orderByZindex();
     }
 
     function getSelectedSp() {
@@ -340,7 +339,6 @@ const mll = (function () {
                 });
             });
             controls.fabricCanvas.orderByZindex();
-            controls.exportCanvas.orderByZindex();
 
             internal.render();
         }
@@ -921,6 +919,14 @@ const mll = (function () {
         console.log(`addMapElement(${type}, ${modifier}, ${roomSendUpdate}, ${uuid}, ${otherObject})`)
         console.log(e);
 
+        if (e.e.touches && e.e.touches.length) {
+            const touch = e.e.touches[0]
+            e.absolutePointer = {
+                x: touch.clientX,
+                y: touch.clientY
+            }
+        }
+
         let toAdd;
         let alsoAdd = [];
         if (type === "measure-radius") {
@@ -1312,7 +1318,6 @@ const mll = (function () {
 
     function order() {
         controls.fabricCanvas.orderByZindex();
-        controls.exportCanvas.orderByZindex();
     }
 
     function addAndOrder(object) {
@@ -2041,7 +2046,6 @@ const mll = (function () {
                     }
                 }
                 controls.fabricCanvas.requestRenderAll();
-                controls.exportCanvas.requestRenderAll();
 
                 roomEditorUpdateElements();
             }
@@ -2354,7 +2358,6 @@ const mll = (function () {
 
                 controls.fabricCanvas.orderByZindex();
                 controls.exportCanvas.add(e.path);
-                controls.exportCanvas.orderByZindex();
 
                 roomEditorUpdateDrawings();
             });
@@ -2417,7 +2420,7 @@ const mll = (function () {
                 }
             }
 
-            $(document).on('click', '.sp-toggle', function (e) {
+            $(document).on('click tap', '.sp-toggle', function (e) {
                 const toggle = $(e.target);
                 if (toggle.hasClass("unavailable")) {
                     return;
@@ -2522,7 +2525,9 @@ const mll = (function () {
                 },
                 'touch:drag': function (e) {
                     if (!e.e.touches) {return;}
-                    if (controls.fabricCanvas.isDrawingMode === true) {
+                    if (e.target && e.target.selectable === true && e.target.lockMovementX === false ||
+                        e.transform && (e.transform.action === 'rotate' || e.transform.action.indexOf('scale') !== -1) ||
+                        controls.fabricCanvas.isDrawingMode === true) {
                         return;
                     }
                     if (pausePanning !== true && e.self.x && e.self.y) {
@@ -2531,8 +2536,10 @@ const mll = (function () {
                         xChange = currentX - lastX;
                         yChange = currentY - lastY;
 
-                        if ((Math.abs(currentX - lastX) <= 50) && (Math.abs(currentY - lastY) <= 50)) {
-                            var delta = new fabric.Point(xChange, yChange);
+                        const distX = Math.abs(currentX - lastX);
+                        const distY = Math.abs(currentY - lastY);
+                        if ((distX > 1 || distY > 1) && distX <= 50 && distY <= 50) {
+                            const delta = new fabric.Point(xChange, yChange);
                             controls.fabricCanvas.relativePan(delta);
                         }
 
@@ -2542,7 +2549,16 @@ const mll = (function () {
                 },
                 'touch:longpress': function (e) {
                     if (!e.e.touches) {return;}
-                    console.log(e);
+
+                    return;
+
+                    if (e.e.type === "touchstart") {
+                        console.log(e);
+
+                        contextMenuEvent = e;
+
+                        $("canvas").trigger(jQuery.Event("contextmenu", {}))
+                    }
                 }
             });
 
@@ -2781,7 +2797,7 @@ const mll = (function () {
                     placed[i].set({scaleX: 1, scaleY: 1});
                 }
 
-                controls.exportCanvas.renderAll();
+
 
                 $('<a>').attr({
                     href: controls.exportCanvas.toDataURL(),
@@ -2808,6 +2824,9 @@ const mll = (function () {
 
             controls.btnExport.on('click', async function () {
                 controls.btnExport.addClass("loading").addClass("disabled");
+
+                controls.exportCanvas.renderAll();
+                controls.exportCanvas.orderByZindex();
 
                 const zip = new JSZip();
                 console.log("Creating about.txt...")
@@ -3054,7 +3073,6 @@ const mll = (function () {
             changeZIndexBySize();
             updateZoomScale();
             controls.fabricCanvas.renderAll();
-            controls.exportCanvas.renderAll();
         }
     }
 
