@@ -1,20 +1,33 @@
 # Maps Let Loose
 
-A tool to quickly create custom tacmaps for Hell Let Loose.
+Quickly create advanced custom tacmaps for Hell Let Loose.
 
-- Full quality 1920x1920 tacmaps
-- Toggle every strongpoint on and off, individually and all at once
-- Toggle the grid
-- Toggle and change friendly and enemy sectors
-- Toggle offensive default garrisons for both directions
-- Add, move, and remove garrisons, outposts, halftracks, airheads, tanks, trucks, markers
-    - Toggle radius on and off
-    - Rotate halftracks
-    - Dynamic garrisons when sectors are visible and changing
-- Toggle artillery range to see location, min (100m), and max (1600m) range
-  - You can hit the last row a bit more often than you might think!
-- All client side for very fast image generation
-- Export your creation as a high quality png (1920x1920)
+- https://mattw.io/maps-let-loose/
+
+![](readme.png)
+
+How can I use this tool?
+
+- Plan out garrison locations with 200m radiuses visible
+- See offensive default garrison locations to know where to attack
+- See maximum artillery ranges and which last points you can and can't hit
+- Measure distances for AT sniping
+- Create rooms to edit tacmaps live with a group of people
+- Strategize upcoming matches and scenarios with a wide variety of assets to add to the map
+    - Garrisons, OPs, Airheads, Halftracks, Tanks, Trucks, AT Guns, Markers, Player classes, Repair stations, Nodes, Supplies, Commander abilities, Measurement tools, Shapes, Textboxes, and Drawings
+
+What other features are there?
+
+- Toggle all the strongpoints and their resource icons on and off
+- Toggle the map grid on and off
+- Toggle tanks and player classes blue and red to indicate friendly/enemy
+- Save the map as a high quality 1920x1920 PNG
+- Export your current map config as a zip file and reimport to work on it later
+- Freely draw on the map in any color
+- Some smaller elements will scale larger when zoomed out
+- Mostly mobile-friendly so you can use it if you don't have a second monitor
+- Rooms can be configured with a custom password or no password at all
+- Rooms expire after 2 hours of inactivity, plenty to last the majority of matches
 
 ## Build
 
