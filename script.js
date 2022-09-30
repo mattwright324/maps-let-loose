@@ -484,20 +484,20 @@ const mll = (function () {
                 const objectY = object.top;
 
                 if (radiusHidden) {
-                    return './maps/garry-plain.png';
+                    return './assets/garry-plain.png';
                 } else if (sectorsVisible &&
                     (!sectorBred && rectContainsPoint(elements.sectorA, objectX, objectY) ||
                         sectorBred && rectContainsPoint(elements.sectorB, objectX, objectY))) {
-                    return './maps/garry-red-zone.png';
+                    return './assets/garry-red-zone.png';
                 } else if (sectorsVisible &&
                     (sectorBred && rectContainsPoint(elements.sectorA, objectX, objectY) ||
                         !sectorBred && rectContainsPoint(elements.sectorB, objectX, objectY))) {
-                    return './maps/garry-blue-zone.png';
+                    return './assets/garry-blue-zone.png';
                 } else if (sectorsVisible) {
-                    return './maps/garry-invalid.png';
+                    return './assets/garry-invalid.png';
                 }
 
-                return './maps/garry-blue-zone.png';
+                return './assets/garry-blue-zone.png';
             },
             zoomScaleWhen: function () {
                 return controls.checkGarryRadius.is(":checked")
@@ -509,7 +509,7 @@ const mll = (function () {
             wh: 122,
             resolveImg: function (object) {
                 const radiusHidden = controls.checkGarryRadius.is(":checked");
-                return './maps/airhead-' + (radiusHidden ? 'plain' : 'radius') + '.png'
+                return './assets/airhead-' + (radiusHidden ? 'plain' : 'radius') + '.png'
             },
             zoomScaleWhen: function () {
                 return controls.checkGarryRadius.is(":checked")
@@ -519,7 +519,7 @@ const mll = (function () {
             wh: 122,
             resolveImg: function (object) {
                 const radiusHidden = controls.checkGarryRadius.is(":checked");
-                return './maps/halftrack-' + (radiusHidden ? 'plain' : 'radius') + '.png'
+                return './assets/halftrack-' + (radiusHidden ? 'plain' : 'radius') + '.png'
             },
             controlsVisibility: {mtr: true},
             zoomScaleWhen: function () {
@@ -532,7 +532,7 @@ const mll = (function () {
             wh: 122,
             resolveImg: function (object) {
                 const radiusHidden = controls.checkGarryRadius.is(":checked");
-                return './maps/outpost-' + object.type.modifier + "-" + (radiusHidden ? 'plain' : 'radius') + '.png'
+                return './assets/outpost-' + object.type.modifier + "-" + (radiusHidden ? 'plain' : 'radius') + '.png'
             },
             zoomScaleWhen: function () {
                 return controls.checkGarryRadius.is(":checked")
@@ -542,51 +542,51 @@ const mll = (function () {
             wh: 122,
             resolveImg: function (object) {
                 if (object.type.modifier) {
-                    return './maps/node-' + object.type.modifier + ".png";
+                    return './assets/node-' + object.type.modifier + ".png";
                 }
 
-                return './maps/tank-batch.png'
+                return './assets/tank-batch.png'
             }
         },
         "repair-station": {
             wh: 122,
             resolveImg: function (object) {
-                return "./maps/repair-station.png"
+                return "./assets/repair-station.png"
             },
             zoomScale: false
         },
         "supply-drop": {
             wh: 51,
             resolveImg: function (object) {
-                return "./maps/supply-drop.png"
+                return "./assets/supply-drop.png"
             },
             zoomScale: false
         },
         "ammo-drop": {
             wh: 51,
             resolveImg: function (object) {
-                return "./maps/ammo-drop.png"
+                return "./assets/ammo-drop.png"
             },
             zoomScale: false
         },
         "precision-strike": {
             wh: 122,
             resolveImg: function (object) {
-                return "./maps/precision-strike.png"
+                return "./assets/precision-strike.png"
             },
             zoomScale: false
         },
         "katyusha-strike": {
             wh: 197,
             resolveImg: function (object) {
-                return "./maps/katyusha-strike.png"
+                return "./assets/katyusha-strike.png"
             },
             zoomScale: false
         },
         "strafing-run": {
             wh: 380,
             resolveImg: function (object) {
-                return "./maps/strafing-run.png"
+                return "./assets/strafing-run.png"
             },
             set: {snapAngle: 45},
             controlsVisibility: {mtr: true},
@@ -594,7 +594,7 @@ const mll = (function () {
         "bombing-run": {
             wh: 380,
             resolveImg: function (object) {
-                return "./maps/bombing-run.png"
+                return "./assets/bombing-run.png"
             },
             set: {snapAngle: 45},
             controlsVisibility: {mtr: true},
@@ -603,10 +603,10 @@ const mll = (function () {
             wh: 51,
             resolveImg: function (object) {
                 if (object.type.modifier) {
-                    return './maps/supplies-' + object.type.modifier + ".png";
+                    return './assets/supplies-' + object.type.modifier + ".png";
                 }
 
-                return './maps/supplies-plain.png'
+                return './assets/supplies-plain.png'
             },
             zoomScale: true,
             customizable: "asset",
@@ -616,9 +616,9 @@ const mll = (function () {
             wh: 51,
             resolveImg: function (object) {
                 if (object.type.modifier) {
-                    return './maps/tank-' + object.type.modifier + ".png";
+                    return './assets/tank-' + object.type.modifier + ".png";
                 }
-                return './maps/tank-med.png'
+                return './assets/tank-med.png'
             },
             controlsVisibility: {mtr: true},
             zoomScale: true,
@@ -628,9 +628,9 @@ const mll = (function () {
             wh: 51,
             resolveImg: function (object) {
                 if (object.type.modifier) {
-                    return './maps/class-' + object.type.modifier + ".png";
+                    return './assets/class-' + object.type.modifier + ".png";
                 }
-                return './maps/class-rifleman.png'
+                return './assets/class-rifleman.png'
             },
             customScale: 0.5,
             maxZoom: 1,
@@ -641,10 +641,10 @@ const mll = (function () {
             wh: 51,
             resolveImg: function (object) {
                 if (object.type.modifier) {
-                    return './maps/truck-' + object.type.modifier + ".png";
+                    return './assets/truck-' + object.type.modifier + ".png";
                 }
 
-                return './maps/truck-supply.png'
+                return './assets/truck-supply.png'
             },
             controlsVisibility: {mtr: true},
             zoomScale: true
@@ -652,7 +652,7 @@ const mll = (function () {
         'at-gun': {
             wh: 51,
             resolveImg: function (object) {
-                return './maps/at-gun-plain.png'
+                return './assets/at-gun-plain.png'
             },
             controlsVisibility: {mtr: true},
             zoomScale: true
@@ -660,7 +660,7 @@ const mll = (function () {
         enemy: {
             wh: 51,
             resolveImg: function (object) {
-                return './maps/enemy-' + object.type.modifier + '.png'
+                return './assets/enemy-' + object.type.modifier + '.png'
             },
             zoomScale: true
         }
@@ -1930,7 +1930,7 @@ const mll = (function () {
 
                 addAndOrder(img);
             });
-            fabric.Image.fromURL('./maps/plain-grid.png', function (img) {
+            fabric.Image.fromURL('./assets/plain-grid.png', function (img) {
                 elements.grid = img;
                 img.set({
                     selectable: false,
@@ -2472,8 +2472,8 @@ const mll = (function () {
             });
             controls.fabricCanvas.on('mouse:move', function (e) {
                 if (e.e.touches) {return;}
-                if (panning && e && e.e && e.e.movementX) {
-                    var delta = new fabric.Point(e.e.movementX, e.e.movementY);
+                if (panning && e && e.e && (e.e.movementX || e.e.movementY)) {
+                    const delta = new fabric.Point(e.e.movementX, e.e.movementY);
                     controls.fabricCanvas.relativePan(delta);
                 }
             });
@@ -2703,11 +2703,11 @@ const mll = (function () {
 
                 console.log("Loading " + filePrefix)
 
-                elements.map.setSrc('./maps/no-grid/' + filePrefix + '_NoGrid.png', internal.render);
-                elements.defaultgarries.setSrc('./maps/defaultgarries/' + filePrefix + '_defaultgarries.png', internal.render)
+                elements.map.setSrc('./assets/no-grid/' + filePrefix + '_NoGrid.png', internal.render);
+                elements.defaultgarries.setSrc('./assets/defaultgarries/' + filePrefix + '_defaultgarries.png', internal.render)
                 let artySuffix = controls.checkArtyFlip.is(":checked") ? 2 : 1;
-                elements.arty.setSrc('./maps/arty/' + filePrefix + '_Arty' + artySuffix + '.png', internal.render)
-                elements.spImage.src = './maps/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
+                elements.arty.setSrc('./assets/arty/' + filePrefix + '_Arty' + artySuffix + '.png', internal.render)
+                elements.spImage.src = './assets/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
             }
 
             internal.roomsLoadMapAndSP = function (filePrefix, selectedSp, spCallback) {
@@ -2717,7 +2717,7 @@ const mll = (function () {
 
                 const promises = [
                     new Promise(function (resolve) {
-                        const imgSrc = './maps/no-grid/' + filePrefix + '_NoGrid.png';
+                        const imgSrc = './assets/no-grid/' + filePrefix + '_NoGrid.png';
                         if (elements.map.src !== imgSrc) {
                             elements.map.setSrc(imgSrc, resolve);
                         } else {
@@ -2725,7 +2725,7 @@ const mll = (function () {
                         }
                     }),
                     new Promise(function (resolve) {
-                        const imgSrc = './maps/defaultgarries/' + filePrefix + '_defaultgarries.png';
+                        const imgSrc = './assets/defaultgarries/' + filePrefix + '_defaultgarries.png';
                         if (elements.defaultgarries.src !== imgSrc) {
                             elements.defaultgarries.setSrc(imgSrc, resolve);
                         } else {
@@ -2734,7 +2734,7 @@ const mll = (function () {
                     }),
                     new Promise(function (resolve) {
                         const artySuffix = controls.checkArtyFlip.is(":checked") ? 2 : 1;
-                        const imgSrc = './maps/arty/' + filePrefix + '_Arty' + artySuffix + '.png';
+                        const imgSrc = './assets/arty/' + filePrefix + '_Arty' + artySuffix + '.png';
                         if (elements.arty.src !== imgSrc) {
                             elements.arty.setSrc(imgSrc, resolve);
                         } else {
@@ -2746,7 +2746,7 @@ const mll = (function () {
 
                 elements.spImage.spCallback = spCallback;
                 elements.spImage.roomsSelectedSp = selectedSp;
-                elements.spImage.src = './maps/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
+                elements.spImage.src = './assets/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
             }
 
             controls.comboMapSelect.change(function () {
@@ -2764,7 +2764,7 @@ const mll = (function () {
                     return;
                 }
                 const filePrefix = controls.comboMapSelect.val();
-                elements.spImage.src = './maps/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
+                elements.spImage.src = './assets/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
             })
             if (!roomsMode) {
                 controls.comboMapSelect.trigger('change');
@@ -2946,7 +2946,7 @@ const mll = (function () {
             }
 
             let artySuffix = controls.checkArtyFlip.is(":checked") ? 2 : 1;
-            elements.arty.setSrc('./maps/arty/' + filePrefix + '_Arty' + artySuffix + '.png', internal.render);
+            elements.arty.setSrc('./assets/arty/' + filePrefix + '_Arty' + artySuffix + '.png', internal.render);
 
             for (let i = 0; i < drawings.length; i++) {
                 const path = drawings[i];
