@@ -2473,14 +2473,13 @@ const mll = (function () {
             controls.fabricCanvas.on('mouse:move', function (e) {
                 if (e.e.touches) {return;}
                 if (panning && e && e.e && e.e.movementX) {
-                    console.log(panning);
                     var delta = new fabric.Point(e.e.movementX, e.e.movementY);
                     controls.fabricCanvas.relativePan(delta);
                 }
             });
 
             // Look into https://stackoverflow.com/a/45131912/2650847
-            let pausePanning = false, zoomStartScale, currentX, currentY, xChange, yChange, lastX, lastY, prevDiff, zooming = false;
+            let pausePanning = false, currentX, currentY, xChange, yChange, lastX, lastY, prevDiff;
             controls.fabricCanvas.on({
                 'touch:gesture': function (e) {
                     if (!e.e.touches) {return;}
@@ -2492,7 +2491,8 @@ const mll = (function () {
                             const touch1 = e.e.touches[0];
                             const touch2 = e.e.touches[1];
                             const mid = midpoint(touch1.clientX, touch1.clientY, touch2.clientX, touch2.clientY);
-                            const curDiff = Math.abs(e.e.touches[0].clientX - e.e.touches[1].clientX);
+                            const curDiff = Math.max(Math.abs(touch1.clientX - touch2.clientX),
+                                Math.abs(touch1.clientY - touch2.clientY));
                             const point = new fabric.Point(mid[0], mid[1]);
 
                             let zoom = controls.fabricCanvas.getZoom();
