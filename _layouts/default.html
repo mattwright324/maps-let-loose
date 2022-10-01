@@ -63,6 +63,27 @@
     </span>
 </nav>
 
+<style>
+    #mobileContextModal .btn-link {
+        width: 100%;
+        text-decoration: none;
+    }
+    #mobileContextModal .accordion * {
+        background-color: transparent;
+        border-radius: 0;
+    }
+</style>
+<div class="modal fade" id="mobileContextModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog  modal-dialog-scrollable modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body" style="padding: 0;" id="mobileContextBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {{ content }}
 
 <div id="side-menu" class="container-fluid mb-5">
