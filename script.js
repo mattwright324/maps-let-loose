@@ -2782,6 +2782,9 @@ const mll = (function () {
             });
 
             controls.btnSave.click(function () {
+                controls.exportCanvas.renderAll();
+                controls.exportCanvas.orderByZindex();
+
                 for (let i = 0; i < placed.length; i++) {
                     const element = placed[i];
                     if (idx(["type", "saveKeepScale"], element)) {
@@ -2789,8 +2792,6 @@ const mll = (function () {
                     }
                     placed[i].set({scaleX: 1, scaleY: 1});
                 }
-
-
 
                 $('<a>').attr({
                     href: controls.exportCanvas.toDataURL(),
@@ -2817,9 +2818,6 @@ const mll = (function () {
 
             controls.btnExport.on('click', async function () {
                 controls.btnExport.addClass("loading").addClass("disabled");
-
-                controls.exportCanvas.renderAll();
-                controls.exportCanvas.orderByZindex();
 
                 const zip = new JSZip();
                 console.log("Creating about.txt...")
