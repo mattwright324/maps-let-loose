@@ -176,6 +176,7 @@ const mll = (function () {
             controls.checkGarryRadius.prop('checked', controlState.spawnRadius);
             controls.checkArty.prop('checked', controlState.arty);
             controls.checkArtyFlip.prop('checked', controlState.flipArty);
+            controls.checkInaccessible.prop('checked', controlState.inaccessible);
             controls.checkStrongpoints.prop('checked', controlState.sp);
             controls.checkSpResource.prop('checked', controlState.spResource);
             controls.checkSectors.prop('checked', controlState.sectors);
@@ -363,6 +364,7 @@ const mll = (function () {
             spawnRadius: controls.checkGarryRadius.is(":checked"),
             arty: controls.checkArty.is(":checked"),
             flipArty: controls.checkArtyFlip.is(":checked"),
+            inaccessible: controls.checkInaccessible.is(":checked"),
             sp: controls.checkStrongpoints.is(":checked"),
             spResource: controls.checkSpResource.is(":checked"),
             selectedSp: getSelectedSp(),
@@ -1323,6 +1325,7 @@ const mll = (function () {
             controls.checkGrid = $("#grid-visible");
             controls.checkArty = $("#arty-visible");
             controls.checkArtyFlip = $("#flip-arty");
+            controls.checkInaccessible = $("#inaccessible-visible");
             controls.checkStrongpoints = $("#sp-visible");
             controls.checkSpResource = $("#sp-resource-visible");
             elements.strongpointGrid = $("#sp-grid");
@@ -2007,6 +2010,28 @@ const mll = (function () {
 
                 addAndOrder(img);
             });
+            fabric.Image.fromURL('', function (img) {
+                elements.inaccessible = img;
+
+                img.set({
+                    selectable: false,
+                    evented: false,
+                    visible: false,
+                    zIndex: zIndex.arty_range
+                });
+
+                addAndOrder(img);
+            });
+            fabric.Image.fromURL('./assets/accessibility/Accessible_Key.png', function (img) {
+                elements.inaccessibleKey = img;
+                img.set({
+                    selectable: false,
+                    evented: false,
+                    visible: false,
+                    zIndex: zIndex.arty_range
+                });
+                addAndOrder(img);
+            });
             elements.strongpoints = [[], [], [], [], []]
             for (let x = 0; x < 5; x++) {
                 for (let y = 0; y < 5; y++) {
@@ -2543,6 +2568,9 @@ const mll = (function () {
                             // console.log(e);
                             pausePanning = true;
 
+                            controls.fabricCanvas.discardActiveObject(controls.fabricCanvas.getObjects())
+                                .requestRenderAll();
+
                             const touch1 = e.e.touches[0];
                             const touch2 = e.e.touches[1];
                             const mid = midpoint(touch1.clientX, touch1.clientY, touch2.clientX, touch2.clientY);
@@ -2575,6 +2603,9 @@ const mll = (function () {
                 },
                 'touch:drag': function (e) {
                     if (!e.e.touches) {return;}
+                    if (e.e.type !== "touchmove") {
+                        return;
+                    }
                     if (e.target && e.target.selectable === true && e.target.lockMovementX === false ||
                         e.transform && (e.transform.action === 'rotate' || e.transform.action.indexOf('scale') !== -1) ||
                         controls.fabricCanvas.isDrawingMode === true) {
@@ -2591,6 +2622,8 @@ const mll = (function () {
                         if ((distX > 1 || distY > 1) && distX <= 50 && distY <= 50) {
                             const delta = new fabric.Point(xChange, yChange);
                             controls.fabricCanvas.relativePan(delta);
+
+                            console.log(e);
                         }
 
                         lastX = e.self.x;
@@ -2758,9 +2791,10 @@ const mll = (function () {
                 console.log("Loading " + filePrefix)
 
                 elements.map.setSrc('./assets/no-grid/' + filePrefix + '_NoGrid.png', internal.render);
-                elements.defaultgarries.setSrc('./assets/defaultgarries/' + filePrefix + '_defaultgarries.png', internal.render)
+                elements.defaultgarries.setSrc('./assets/defaultgarries/' + filePrefix + '_defaultgarries.png', internal.render);
                 let artySuffix = controls.checkArtyFlip.is(":checked") ? 2 : 1;
-                elements.arty.setSrc('./assets/arty/' + filePrefix + '_Arty' + artySuffix + '.png', internal.render)
+                elements.arty.setSrc('./assets/arty/' + filePrefix + '_Arty' + artySuffix + '.png', internal.render);
+                elements.inaccessible.setSrc('./assets/accessibility/' + filePrefix + "_Accessible.png", internal.render);
                 elements.spImage.src = './assets/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
             }
 
@@ -2782,6 +2816,14 @@ const mll = (function () {
                         const imgSrc = './assets/defaultgarries/' + filePrefix + '_defaultgarries.png';
                         if (elements.defaultgarries.src !== imgSrc) {
                             elements.defaultgarries.setSrc(imgSrc, resolve);
+                        } else {
+                            resolve();
+                        }
+                    }),
+                    new Promise(function (resolve) {
+                        const imgSrc = './assets/accessibility/' + filePrefix + '_Accessible.png';
+                        if (elements.inaccessible.src !== imgSrc) {
+                            elements.inaccessible.setSrc(imgSrc, resolve);
                         } else {
                             resolve();
                         }
@@ -2824,9 +2866,9 @@ const mll = (function () {
                 controls.comboMapSelect.trigger('change');
             }
 
-            [controls.checkGrid, controls.checkArty, controls.checkStrongpoints, controls.checkDefaultGarries,
-                controls.checkSectors, controls.checkSectorSwap, controls.checkPlacedGarries, controls.checkGarryRadius,
-                controls.checkArtyFlip, controls.checkSpResource, controls.checkDrawingsVisible
+            [controls.checkGrid, controls.checkArty, controls.checkStrongpoints, controls.checkInaccessible,
+                controls.checkDefaultGarries, controls.checkSectors, controls.checkSectorSwap, controls.checkPlacedGarries,
+                controls.checkGarryRadius, controls.checkArtyFlip, controls.checkSpResource, controls.checkDrawingsVisible
             ].forEach(function (control) {
                 control.change(function () {
                     internal.updateStatesAndRender();
@@ -2999,6 +3041,11 @@ const mll = (function () {
 
             let artySuffix = controls.checkArtyFlip.is(":checked") ? 2 : 1;
             elements.arty.setSrc('./assets/arty/' + filePrefix + '_Arty' + artySuffix + '.png', internal.render);
+
+            if (elements.inaccessible) {
+                elements.inaccessible.visible = controls.checkInaccessible.is(":checked");
+                elements.inaccessibleKey.visible = controls.checkInaccessible.is(":checked");
+            }
 
             for (let i = 0; i < drawings.length; i++) {
                 const path = drawings[i];
