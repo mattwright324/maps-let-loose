@@ -176,6 +176,7 @@ const mll = (function () {
             controls.checkGarryRadius.prop('checked', controlState.spawnRadius);
             controls.checkArty.prop('checked', controlState.arty);
             controls.checkArtyFlip.prop('checked', controlState.flipArty);
+            controls.checkInaccessible.prop('checked', controlState.inaccessible);
             controls.checkStrongpoints.prop('checked', controlState.sp);
             controls.checkSpResource.prop('checked', controlState.spResource);
             controls.checkSectors.prop('checked', controlState.sectors);
@@ -363,6 +364,7 @@ const mll = (function () {
             spawnRadius: controls.checkGarryRadius.is(":checked"),
             arty: controls.checkArty.is(":checked"),
             flipArty: controls.checkArtyFlip.is(":checked"),
+            inaccessible: controls.checkInaccessible.is(":checked"),
             sp: controls.checkStrongpoints.is(":checked"),
             spResource: controls.checkSpResource.is(":checked"),
             selectedSp: getSelectedSp(),
@@ -1323,6 +1325,7 @@ const mll = (function () {
             controls.checkGrid = $("#grid-visible");
             controls.checkArty = $("#arty-visible");
             controls.checkArtyFlip = $("#flip-arty");
+            controls.checkInaccessible = $("#inaccessible-visible");
             controls.checkStrongpoints = $("#sp-visible");
             controls.checkSpResource = $("#sp-resource-visible");
             elements.strongpointGrid = $("#sp-grid");
@@ -1361,6 +1364,9 @@ const mll = (function () {
             controls.inputEditorKey = $("#editorKey");
             elements.joinError = $("#joinError");
             controls.btnCreateJoin = $("#submitJoin");
+
+            elements.mobileContextMenu = $("#mobileContextModal");
+            elements.mobileContextBody = $("#mobileContextBody");
 
             controls.btnExport = $("#export");
             controls.btnImport = $("#import");
@@ -1770,6 +1776,111 @@ const mll = (function () {
                     mll.menuAdd("textbox")
                 },
             };
+            internal.menuActions = menuActions;
+
+            const contextMenu = {
+                garrison: {name: "Add Garrison", icon: "bi bi-flag"},
+                spawn: {
+                    name: "Add Spawn",
+                    items: {
+                        airhead: {name: "Airhead", icon: "bi bi-triangle-fill"},
+                        halftrack: {name: "Halftrack"},
+                        outpost: {name: "Outpost", icon: "bi bi-triangle"},
+                        recon_op: {name: "Recon Outpost", icon: "bi bi-triangle-half"}
+                    }
+                },
+                vehicle: {
+                    name: "Add Vehicle",
+                    icon: "bi bi-truck",
+                    items: {
+                        tank_heavy: {name: "Heavy Tank", icon: "bi bi-three-dots"},
+                        tank_medium: {name: "Medium Tank"},
+                        tank_light: {name: "Light Tank", icon: "bi bi-dot"},
+                        tank_recon: {name: "Recon Tank", icon: "bi bi-camera"},
+                        truck_supply: {name: "Supply Truck"},
+                        truck_transport: {name: "Transport Truck"},
+                    }
+                },
+                infatry_class: {
+                    name: "Add Player Class",
+                    icon: "bi bi-person-circle",
+                    items: {
+                        class_commander: {name: "Commander", icon: "bi bi-diagram-2-fill"},
+                        class_officer: {name: "Officer", icon: "bi bi-chevron-double-down"},
+                        class_rifleman: {name: "Rifleman", icon: "bi bi-x-lg"},
+                        class_assault: {name: "Assault", icon: "bi bi-lightning-charge"},
+                        class_auto_rifleman: {name: "Automatic Rifleman", icon: "bi bi-chevron-bar-contract"},
+                        class_medic: {name: "Medic", icon: "bi bi-plus-lg"},
+                        class_support: {name: "Support", icon: "bi bi-record-circle"},
+                        class_machine_gunner: {name: "Machine Gunner"},
+                        class_anti_tank: {name: "Anti-Tank", icon: "bi bi-chevron-double-up"},
+                        class_engineer: {name: "Engineer"},
+                        class_spotter: {name: "Spotter", icon: "bi bi-triangle-half"},
+                        class_sniper: {name: "Sniper", icon: "bi bi-bullseye"},
+                    }
+                },
+                buildable: {
+                    name: "Add Buildable",
+                    icon: "bi bi-hammer",
+                    items: {
+                        at_gun: {name: "AT Gun"},
+                        repair_station: {name: "Repair Station", icon: "bi bi-wrench"},
+                        node_batch: {name: "Batch of Nodes", icon: "bi bi-x-diamond"},
+                        node_manpower: {name: "Manpower Node", icon: "bi bi-diamond"},
+                        node_munition: {name: "Munitions Node", icon: "bi bi-diamond"},
+                        node_fuel: {name: "Fuel Node", icon: "bi bi-diamond"},
+                    }
+                },
+                placeable: {
+                    name: "Add Placeable",
+                    items: {
+                        // ammo_box: {name: "Ammo Box"},
+                        // explosive_box: {name: "Explosive Box"},
+                        // bandage_box: {name: "Bandage Box"},
+                        supply_50: {name: "Supplies (50)", icon: "bi bi-tools"},
+                        supply_50x2: {name: "Supplies (50 x 2)", icon: "bi bi-tools"},
+                        supply_100: {name: "Supplies (100)", icon: "bi bi-tools"},
+                        supply_150: {name: "Supplies (150)", icon: "bi bi-tools"},
+                        supply_150x2: {name: "Supplies (150 x 2)", icon: "bi bi-tools"},
+                    }
+                },
+                marker: {
+                    name: "Add Marker",
+                    icon: "bi bi-geo-alt",
+                    items: {
+                        enemy_garrison: {name: "Enemy Garrison", icon: "bi bi-flag"},
+                        enemy_infantry: {name: "Enemy Infantry"},
+                        enemy_outpost: {name: "Enemy Outpost", icon: "bi bi-triangle"},
+                        enemy_tank: {name: "Enemy Tank"},
+                        enemy_vehicle: {name: "Enemy Light Vehicle"},
+                    }
+                },
+                ability: {
+                    name: "Add Command Ability",
+                    icon: "bi bi-telephone-outbound",
+                    items: {
+                        supply_drop: {name: "Supply Drop", icon: "bi bi-box2"},
+                        ammo_drop: {name: "Ammo Drop", icon: "bi bi-box2"},
+                        // recon_plane: {name: "Recon Plane", icon: "bi bi-camera", disabled: true},
+                        precision_strike: {name: "Precision Strike", icon: "bi bi-arrow-down-circle"},
+                        strafing_run: {name: "Strafing Run", icon: "bi bi-file-arrow-up"},
+                        bombing_run: {name: "Bombing Run", icon: "bi bi-file-arrow-up"},
+                        katyusha_strike: {name: "Katyusha Strike", icon: "bi bi-arrow-down-circle"},
+                    }
+                },
+                objects: {
+                    name: "Add Custom Object",
+                    icon: "bi bi-bounding-box-circles",
+                    items: {
+                        measure_radius: {name: "Measure Radius", icon: "bi bi-plus-circle-dotted"},
+                        measure_line: {name: "Measure Line", icon: "bi bi-rulers"},
+                        rectangle: {name: "Rectangle", icon: "bi bi-square"},
+                        circle: {name: "Circle", icon: "bi bi-circle"},
+                        textbox: {name: "Textbox", icon: "bi bi-textarea-t"}
+                    }
+                },
+                cancel: {name: "Cancel"}
+            };
 
             $.contextMenu({
                 selector: "canvas",
@@ -1782,110 +1893,57 @@ const mll = (function () {
                     }
                 },
                 animation: {duration: 5, show: 'fadeIn', hide: 'fadeOut'},
-                items: {
-                    garrison: {name: "Add Garrison", icon: "bi bi-flag"},
-                    spawn: {
-                        name: "Add Spawn",
-                        items: {
-                            airhead: {name: "Airhead", icon: "bi bi-triangle-fill"},
-                            halftrack: {name: "Halftrack"},
-                            outpost: {name: "Outpost", icon: "bi bi-triangle"},
-                            recon_op: {name: "Recon Outpost", icon: "bi bi-triangle-half"}
-                        }
-                    },
-                    vehicle: {
-                        name: "Add Vehicle",
-                        icon: "bi bi-truck",
-                        items: {
-                            tank_heavy: {name: "Heavy Tank", icon: "bi bi-three-dots"},
-                            tank_medium: {name: "Medium Tank"},
-                            tank_light: {name: "Light Tank", icon: "bi bi-dot"},
-                            tank_recon: {name: "Recon Tank", icon: "bi bi-camera"},
-                            truck_supply: {name: "Supply Truck"},
-                            truck_transport: {name: "Transport Truck"},
-                        }
-                    },
-                    infatry_class: {
-                        name: "Add Player Class",
-                        icon: "bi bi-person-circle",
-                        items: {
-                            class_commander: {name: "Commander", icon: "bi bi-diagram-2-fill"},
-                            class_officer: {name: "Officer", icon: "bi bi-chevron-double-down"},
-                            class_rifleman: {name: "Rifleman", icon: "bi bi-x-lg"},
-                            class_assault: {name: "Assault", icon: "bi bi-lightning-charge"},
-                            class_auto_rifleman: {name: "Automatic Rifleman", icon: "bi bi-chevron-bar-contract"},
-                            class_medic: {name: "Medic", icon: "bi bi-plus-lg"},
-                            class_support: {name: "Support", icon: "bi bi-record-circle"},
-                            class_machine_gunner: {name: "Machine Gunner"},
-                            class_anti_tank: {name: "Anti-Tank", icon: "bi bi-chevron-double-up"},
-                            class_engineer: {name: "Engineer"},
-                            class_spotter: {name: "Spotter", icon: "bi bi-triangle-half"},
-                            class_sniper: {name: "Sniper", icon: "bi bi-bullseye"},
-                        }
-                    },
-                    buildable: {
-                        name: "Add Buildable",
-                        icon: "bi bi-hammer",
-                        items: {
-                            at_gun: {name: "AT Gun"},
-                            repair_station: {name: "Repair Station", icon: "bi bi-wrench"},
-                            node_batch: {name: "Batch of Nodes", icon: "bi bi-x-diamond"},
-                            node_manpower: {name: "Manpower Node", icon: "bi bi-diamond"},
-                            node_munition: {name: "Munitions Node", icon: "bi bi-diamond"},
-                            node_fuel: {name: "Fuel Node", icon: "bi bi-diamond"},
-                        }
-                    },
-                    placeable: {
-                        name: "Add Placeable",
-                        items: {
-                            // ammo_box: {name: "Ammo Box"},
-                            // explosive_box: {name: "Explosive Box"},
-                            // bandage_box: {name: "Bandage Box"},
-                            supply_50: {name: "Supplies (50)", icon: "bi bi-tools"},
-                            supply_50x2: {name: "Supplies (50 x 2)", icon: "bi bi-tools"},
-                            supply_100: {name: "Supplies (100)", icon: "bi bi-tools"},
-                            supply_150: {name: "Supplies (150)", icon: "bi bi-tools"},
-                            supply_150x2: {name: "Supplies (150 x 2)", icon: "bi bi-tools"},
-                        }
-                    },
-                    marker: {
-                        name: "Add Marker",
-                        icon: "bi bi-geo-alt",
-                        items: {
-                            enemy_garrison: {name: "Enemy Garrison", icon: "bi bi-flag"},
-                            enemy_infantry: {name: "Enemy Infantry"},
-                            enemy_outpost: {name: "Enemy Outpost", icon: "bi bi-triangle"},
-                            enemy_tank: {name: "Enemy Tank"},
-                            enemy_vehicle: {name: "Enemy Light Vehicle"},
-                        }
-                    },
-                    ability: {
-                        name: "Add Command Ability",
-                        icon: "bi bi-telephone-outbound",
-                        items: {
-                            supply_drop: {name: "Supply Drop", icon: "bi bi-box2"},
-                            ammo_drop: {name: "Ammo Drop", icon: "bi bi-box2"},
-                            // recon_plane: {name: "Recon Plane", icon: "bi bi-camera", disabled: true},
-                            precision_strike: {name: "Precision Strike", icon: "bi bi-arrow-down-circle"},
-                            strafing_run: {name: "Strafing Run", icon: "bi bi-file-arrow-up"},
-                            bombing_run: {name: "Bombing Run", icon: "bi bi-file-arrow-up"},
-                            katyusha_strike: {name: "Katyusha Strike", icon: "bi bi-arrow-down-circle"},
-                        }
-                    },
-                    objects: {
-                        name: "Add Custom Object",
-                        icon: "bi bi-bounding-box-circles",
-                        items: {
-                            measure_radius: {name: "Measure Radius", icon: "bi bi-plus-circle-dotted"},
-                            measure_line: {name: "Measure Line", icon: "bi bi-rulers"},
-                            rectangle: {name: "Rectangle", icon: "bi bi-square"},
-                            circle: {name: "Circle", icon: "bi bi-circle"},
-                            textbox: {name: "Textbox", icon: "bi bi-textarea-t"}
-                        }
-                    },
-                    cancel: {name: "Cancel"}
+                items: contextMenu
+            });
+
+            const accordionItems = [];
+            for (const itemName in contextMenu) {
+                const item = contextMenu[itemName];
+                if (itemName === "cancel") {
+                    continue;
                 }
-            })
+                if (itemName === "garrison") {
+                    elements.mobileContextBody.append(
+                        "<button class='btn btn-link' style='margin: 10px 0' onclick='mll.mobileMenuAdd(\"" + itemName + "\")'>" +
+                        (item.icon ? "<i class='" + item.icon + "'></i>" : "") +
+                        " Add Garrison</button>"
+                    )
+                    continue;
+                }
+                if (item.hasOwnProperty("items")) {
+                    const itemButtons = [];
+                    for (const subItemName in item.items) {
+                        const subItem = item.items[subItemName];
+
+                        itemButtons.push(
+                            "<button class='btn btn-link' onclick='mll.mobileMenuAdd(\"" + subItemName + "\")'>" +
+                            (subItem.icon ? "<i class='" + subItem.icon + "'></i>" : "") +
+                            " " + subItem.name + "</button>"
+                        );
+                    }
+
+                    accordionItems.push(
+                        "<div class='accordion-item'>" +
+                            "<h2 id='heading-" + itemName + "' class='accordion-header'>" +
+                                "<button class='accordion-button collapsed' type='button' data-bs-toggle='collapse' data-bs-target='#collapse-" + itemName + "' aria-expanded='false' aria-controls='heading-" + itemName + "'>" +
+                                item.name,
+                                "</button>" +
+                            "</h2>" +
+                            "<div id='collapse-" + itemName + "' class='accordion-collapse collapse' data-bs-parent='#mobile-context-modal' aria-labelledby='heading-" + itemName + "'>" +
+                                "<div class='accordion-body'>" +
+                                itemButtons.join("") +
+                                "</div>" +
+                            "</div>" +
+                        "</div>"
+                    );
+                }
+            }
+
+            elements.mobileContextBody.append(
+                "<div id='mobile-context-modal' class='accordion'>" +
+                accordionItems.join("") +
+                "</div>"
+            );
 
             const eCanvas = document.createElement("canvas");
             controls.exportCanvas = new fabric.Canvas(eCanvas, {
@@ -1950,6 +2008,28 @@ const mll = (function () {
                     zIndex: zIndex.arty_range
                 });
 
+                addAndOrder(img);
+            });
+            fabric.Image.fromURL('', function (img) {
+                elements.inaccessible = img;
+
+                img.set({
+                    selectable: false,
+                    evented: false,
+                    visible: false,
+                    zIndex: zIndex.arty_range
+                });
+
+                addAndOrder(img);
+            });
+            fabric.Image.fromURL('./assets/accessibility/Accessible_Key.png', function (img) {
+                elements.inaccessibleKey = img;
+                img.set({
+                    selectable: false,
+                    evented: false,
+                    visible: false,
+                    zIndex: zIndex.arty_range
+                });
                 addAndOrder(img);
             });
             elements.strongpoints = [[], [], [], [], []]
@@ -2488,6 +2568,9 @@ const mll = (function () {
                             // console.log(e);
                             pausePanning = true;
 
+                            controls.fabricCanvas.discardActiveObject(controls.fabricCanvas.getObjects())
+                                .requestRenderAll();
+
                             const touch1 = e.e.touches[0];
                             const touch2 = e.e.touches[1];
                             const mid = midpoint(touch1.clientX, touch1.clientY, touch2.clientX, touch2.clientY);
@@ -2520,6 +2603,9 @@ const mll = (function () {
                 },
                 'touch:drag': function (e) {
                     if (!e.e.touches) {return;}
+                    if (e.e.type !== "touchmove") {
+                        return;
+                    }
                     if (e.target && e.target.selectable === true && e.target.lockMovementX === false ||
                         e.transform && (e.transform.action === 'rotate' || e.transform.action.indexOf('scale') !== -1) ||
                         controls.fabricCanvas.isDrawingMode === true) {
@@ -2536,6 +2622,8 @@ const mll = (function () {
                         if ((distX > 1 || distY > 1) && distX <= 50 && distY <= 50) {
                             const delta = new fabric.Point(xChange, yChange);
                             controls.fabricCanvas.relativePan(delta);
+
+                            console.log(e);
                         }
 
                         lastX = e.self.x;
@@ -2545,10 +2633,9 @@ const mll = (function () {
                 'touch:longpress': function (e) {
                     if (!e.e.touches) {return;}
 
-                    return;
-
                     if (e.e.type === "touchstart") {
-                        $("canvas").trigger(jQuery.Event("contextmenu", {}))
+                        // $("canvas").trigger(jQuery.Event("contextmenu", {}))
+                        elements.mobileContextMenu.modal("show");
                     }
                 }
             });
@@ -2704,9 +2791,10 @@ const mll = (function () {
                 console.log("Loading " + filePrefix)
 
                 elements.map.setSrc('./assets/no-grid/' + filePrefix + '_NoGrid.png', internal.render);
-                elements.defaultgarries.setSrc('./assets/defaultgarries/' + filePrefix + '_defaultgarries.png', internal.render)
+                elements.defaultgarries.setSrc('./assets/defaultgarries/' + filePrefix + '_defaultgarries.png', internal.render);
                 let artySuffix = controls.checkArtyFlip.is(":checked") ? 2 : 1;
-                elements.arty.setSrc('./assets/arty/' + filePrefix + '_Arty' + artySuffix + '.png', internal.render)
+                elements.arty.setSrc('./assets/arty/' + filePrefix + '_Arty' + artySuffix + '.png', internal.render);
+                elements.inaccessible.setSrc('./assets/accessibility/' + filePrefix + "_Accessible.png", internal.render);
                 elements.spImage.src = './assets/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
             }
 
@@ -2728,6 +2816,14 @@ const mll = (function () {
                         const imgSrc = './assets/defaultgarries/' + filePrefix + '_defaultgarries.png';
                         if (elements.defaultgarries.src !== imgSrc) {
                             elements.defaultgarries.setSrc(imgSrc, resolve);
+                        } else {
+                            resolve();
+                        }
+                    }),
+                    new Promise(function (resolve) {
+                        const imgSrc = './assets/accessibility/' + filePrefix + '_Accessible.png';
+                        if (elements.inaccessible.src !== imgSrc) {
+                            elements.inaccessible.setSrc(imgSrc, resolve);
                         } else {
                             resolve();
                         }
@@ -2770,9 +2866,9 @@ const mll = (function () {
                 controls.comboMapSelect.trigger('change');
             }
 
-            [controls.checkGrid, controls.checkArty, controls.checkStrongpoints, controls.checkDefaultGarries,
-                controls.checkSectors, controls.checkSectorSwap, controls.checkPlacedGarries, controls.checkGarryRadius,
-                controls.checkArtyFlip, controls.checkSpResource, controls.checkDrawingsVisible
+            [controls.checkGrid, controls.checkArty, controls.checkStrongpoints, controls.checkInaccessible,
+                controls.checkDefaultGarries, controls.checkSectors, controls.checkSectorSwap, controls.checkPlacedGarries,
+                controls.checkGarryRadius, controls.checkArtyFlip, controls.checkSpResource, controls.checkDrawingsVisible
             ].forEach(function (control) {
                 control.change(function () {
                     internal.updateStatesAndRender();
@@ -2946,6 +3042,11 @@ const mll = (function () {
             let artySuffix = controls.checkArtyFlip.is(":checked") ? 2 : 1;
             elements.arty.setSrc('./assets/arty/' + filePrefix + '_Arty' + artySuffix + '.png', internal.render);
 
+            if (elements.inaccessible) {
+                elements.inaccessible.visible = controls.checkInaccessible.is(":checked");
+                elements.inaccessibleKey.visible = controls.checkInaccessible.is(":checked");
+            }
+
             for (let i = 0; i < drawings.length; i++) {
                 const path = drawings[i];
                 path.visible = controls.checkDrawingsVisible.is(":checked");
@@ -3078,6 +3179,13 @@ const mll = (function () {
             }
 
             addMapElement(contextMenuEvent, type, modifier, true);
+        },
+        mobileMenuAdd: function (key) {
+            if (internal.menuActions.hasOwnProperty(key)) {
+                internal.menuActions[key]();
+
+                elements.mobileContextMenu.modal('hide');
+            }
         }
     }
 }());

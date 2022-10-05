@@ -63,6 +63,27 @@
     </span>
 </nav>
 
+<style>
+    #mobileContextModal .btn-link {
+        width: 100%;
+        text-decoration: none;
+    }
+    #mobileContextModal .accordion * {
+        background-color: transparent;
+        border-radius: 0;
+    }
+</style>
+<div class="modal fade" id="mobileContextModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog  modal-dialog-scrollable modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body" style="padding: 0;" id="mobileContextBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {{ content }}
 
 <div id="side-menu" class="container-fluid mb-5">
@@ -152,6 +173,13 @@
                                 <input class="form-check-input" type="checkbox" value="" id="flip-arty">
                                 <label class="form-check-label" for="flip-arty">
                                     Flip artillery range
+                                </label>
+                            </div>
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="inaccessible-visible">
+                                <label class="form-check-label" for="inaccessible-visible">
+                                    Highlight inaccessible areas (WIP)
                                 </label>
                             </div>
 
@@ -540,6 +568,9 @@
         </a></li>
         <li><a target="_blank" href="https://helo-system.de/">
             HeLO System - HLL Competitive Clan Ranking
+        </a></li>
+        <li><a target="_blank" href="https://hll-ecl.eu/">
+            ECL - European Community League
         </a></li>
         <li><a target="_blank" href="https://hellletloose.fandom.com/wiki/Hell_Let_Loose_Wiki">
             Hell Let Loose Wiki (not up to date)
