@@ -452,9 +452,9 @@ const mll = (function () {
 
     const zIndex = {
         map: 0,
-        grid: 1,
-        points: 2,
-        sectors: 3,
+        sectors: 1,
+        grid: 2,
+        points: 3,
         arty_range: 5,
         default_garrisons: 6,
         drawings: 7,
