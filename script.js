@@ -1180,14 +1180,15 @@ const mll = (function () {
                 hasBorders: false,
                 lockMovementX: true,
                 lockMovementY: true,
-                zIndex: 10,
                 originX: "center",
                 originY: "center",
                 centeredScaling: true,
                 top: e.absolutePointer.y,
                 left: e.absolutePointer.x,
-                width: 50,
-                height: 50,
+                // These will change and be calculated but for some reason set them higher so that its selectable once added
+                zIndex: 99,
+                width: 999,
+                height: 999,
             });
             // img.filters.push(new fabric.Image.filters.HueRotation({rotation: 2 * Math.random() - 1}))
             img.type = {
