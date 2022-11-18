@@ -48,6 +48,7 @@ const mll = (function () {
     let drawings = [];
     let resetSelectedPoints = false;
     let selectedElement;
+    let loaded_defaults = [];
 
     function updateZoomScale() {
         const zoom = controls.fabricCanvas.getZoom();
@@ -177,6 +178,8 @@ const mll = (function () {
             controls.checkArty.prop('checked', controlState.arty);
             controls.checkArtyFlip.prop('checked', controlState.flipArty);
             controls.checkInaccessible.prop('checked', controlState.inaccessible);
+            controls.checkEggs.prop('checked', controlState.eggs);
+            controls.checkSpecial.prop('checked', controlState.special);
             controls.checkStrongpoints.prop('checked', controlState.sp);
             controls.checkSpResource.prop('checked', controlState.spResource);
             controls.checkSectors.prop('checked', controlState.sectors);
@@ -365,6 +368,8 @@ const mll = (function () {
             arty: controls.checkArty.is(":checked"),
             flipArty: controls.checkArtyFlip.is(":checked"),
             inaccessible: controls.checkInaccessible.is(":checked"),
+            eggs: controls.checkEggs.is(":checked"),
+            special: controls.checkSpecial.is(":checked"),
             sp: controls.checkStrongpoints.is(":checked"),
             spResource: controls.checkSpResource.is(":checked"),
             selectedSp: getSelectedSp(),
@@ -458,26 +463,9 @@ const mll = (function () {
         arty_range: 5,
         default_garrisons: 6,
         drawings: 7,
-        garry: 8,
-        airhead: 9,
-        halftrack: 9,
-        node: 9,
-        class: 9,
-        "repair-station": 9,
-        "supply-drop": 9,
-        "ammo-drop": 9,
-        "precision-strike": 9,
-        "katyusha-strike": 9,
-        "strafing-run": 9,
-        "bombing-run": 9,
-        tank: 9,
-        truck: 9,
-        'at-gun': 9,
-        enemy: 9,
     }
     const placedMeta = {
         garry: {
-            wh: 380,
             resolveImg: function (object) {
                 const sectorBred = controls.checkSectorSwap.is(":checked");
                 const sectorsVisible = controls.checkSectors.is(":checked");
@@ -508,7 +496,6 @@ const mll = (function () {
             filterRotation: -0.45,
         },
         airhead: {
-            wh: 122,
             resolveImg: function (object) {
                 const radiusHidden = controls.checkGarryRadius.is(":checked");
                 return './assets/airhead-' + (radiusHidden ? 'plain' : 'radius') + '.png'
@@ -518,7 +505,6 @@ const mll = (function () {
             }
         },
         halftrack: {
-            wh: 122,
             resolveImg: function (object) {
                 const radiusHidden = controls.checkGarryRadius.is(":checked");
                 return './assets/halftrack-' + (radiusHidden ? 'plain' : 'radius') + '.png'
@@ -531,7 +517,6 @@ const mll = (function () {
             filterRotation: -0.45,
         },
         outpost: {
-            wh: 122,
             resolveImg: function (object) {
                 const radiusHidden = controls.checkGarryRadius.is(":checked");
                 return './assets/outpost-' + object.type.modifier + "-" + (radiusHidden ? 'plain' : 'radius') + '.png'
@@ -541,7 +526,6 @@ const mll = (function () {
             }
         },
         node: {
-            wh: 122,
             resolveImg: function (object) {
                 if (object.type.modifier) {
                     return './assets/node-' + object.type.modifier + ".png";
@@ -550,43 +534,50 @@ const mll = (function () {
                 return './assets/tank-batch.png'
             }
         },
-        "repair-station": {
-            wh: 122,
+        "arty": {
             resolveImg: function (object) {
-                return "./assets/repair-station.png"
+                return "./assets/arty.png"
+            },
+            customScale: 0.5,
+        },
+        "arty-effect": {
+            resolveImg: function (object) {
+                return "./assets/arty-effect.png"
             },
             zoomScale: false
         },
+        "repair-station": {
+            resolveImg: function (object) {
+                return "./assets/repair-station.png"
+            },
+            zoomScale: true,
+            customScale: 0.5,
+        },
         "supply-drop": {
-            wh: 51,
             resolveImg: function (object) {
                 return "./assets/supply-drop.png"
             },
             zoomScale: false
         },
         "ammo-drop": {
-            wh: 51,
             resolveImg: function (object) {
                 return "./assets/ammo-drop.png"
             },
             zoomScale: false
         },
         "precision-strike": {
-            wh: 122,
             resolveImg: function (object) {
                 return "./assets/precision-strike.png"
             },
             zoomScale: false
         },
         "katyusha-strike": {
-            wh: 197,
             resolveImg: function (object) {
                 return "./assets/katyusha-strike.png"
             },
             zoomScale: false
         },
         "strafing-run": {
-            wh: 380,
             resolveImg: function (object) {
                 return "./assets/strafing-run.png"
             },
@@ -594,7 +585,6 @@ const mll = (function () {
             controlsVisibility: {mtr: true},
         },
         "bombing-run": {
-            wh: 380,
             resolveImg: function (object) {
                 return "./assets/bombing-run.png"
             },
@@ -602,7 +592,6 @@ const mll = (function () {
             controlsVisibility: {mtr: true},
         },
         "supplies": {
-            wh: 51,
             resolveImg: function (object) {
                 if (object.type.modifier) {
                     return './assets/supplies-' + object.type.modifier + ".png";
@@ -615,8 +604,8 @@ const mll = (function () {
             filterRotation: -0.45,
         },
         tank: {
-            wh: 51,
             resolveImg: function (object) {
+                return "./assets/arty.png"
                 if (object.type.modifier) {
                     return './assets/tank-' + object.type.modifier + ".png";
                 }
@@ -625,9 +614,9 @@ const mll = (function () {
             controlsVisibility: {mtr: true},
             zoomScale: true,
             customizable: "asset",
+            customScale: 0.5,
         },
         class: {
-            wh: 51,
             resolveImg: function (object) {
                 if (object.type.modifier) {
                     return './assets/class-' + object.type.modifier + ".png";
@@ -640,7 +629,6 @@ const mll = (function () {
             customizable: "asset",
         },
         truck: {
-            wh: 51,
             resolveImg: function (object) {
                 if (object.type.modifier) {
                     return './assets/truck-' + object.type.modifier + ".png";
@@ -652,7 +640,6 @@ const mll = (function () {
             zoomScale: true
         },
         'at-gun': {
-            wh: 51,
             resolveImg: function (object) {
                 return './assets/at-gun-plain.png'
             },
@@ -660,7 +647,6 @@ const mll = (function () {
             zoomScale: true
         },
         enemy: {
-            wh: 51,
             resolveImg: function (object) {
                 return './assets/enemy-' + object.type.modifier + '.png'
             },
@@ -723,132 +709,7 @@ const mll = (function () {
     fabric.Object.prototype.cornerColor = 'blue';
     fabric.Object.prototype.cornerStyle = 'circle';
 
-    // Each point supports multiple coordinates to draw to tempCanvas
-    // Each map has 25 sectors but 15 points
-    // Sectors without point are represented by null
-    // Coordinates are dependent on a 1920x1920 map image
-    // [x, y, w, h]
-    // How-to: Points were extracted using https://www.textcompare.org/image/
-    // comparing the map with a grid and points to the map with a grid and no points.
-    // Diff Type = 'Diff only'. Then noise/unnecessary bits removed around remaining points to reduce file size.
-    const pointCoords = {
-        Carentan: [
-            [null, null, null, null, null],
-            [[[238, 467, 189, 167]], [[498, 561, 235, 168]], [[909, 467, 219, 170]], [[1227, 516, 255, 170]], [[1482, 593, 252, 170]]],
-            [[[206, 889, 185, 171]], [[653, 890, 111, 128]], [[862, 837, 220, 170]], [[1296, 784, 188, 172]], [[1581, 901, 221, 171]]],
-            [[[213, 1207, 172, 171]], [[449, 1124, 268, 170]], [[878, 1111, 169, 171]], [[1166, 1349, 251, 152]], [[1511, 1214, 263, 172]]],
-            [null, null, null, null, null]
-        ],
-        Foy: [
-            [null, [[347, 123, 260, 136]], [[932, 114, 254, 151]], [[1213, 67, 235, 195]], null],
-            [null, [[557, 390, 220, 27], [610, 421, 115, 159]], [[742, 508, 252, 152]], [[1271, 449, 265, 160]], null],
-            [null, [[313, 696, 264, 192]], [[838, 857, 236, 156]], [[1264, 789, 270, 161]], null],
-            [null, [[474, 1127, 213, 192]], [[938, 1219, 235, 161]], [[1280, 1103, 240, 163]], null],
-            [null, [[304, 1446, 279, 168]], [[794, 1485, 218, 177]], [[1278, 1472, 255, 179]], null],
-        ],
-        Hill400: [
-            [null, null, null, null, null],
-            [[[230, 514, 190, 118]], [[468, 449, 239, 121]], [[889, 545, 150, 121]], [[1091, 468, 260, 123]], [[1458, 549, 257, 117]]],
-            [[[220, 895, 242, 136]], [[524, 949, 271, 125]], [[837, 902, 220, 155]], [[1147, 833, 192, 125]], [[1639, 765, 169, 152]]],
-            [[[253, 1285, 185, 116]], [[423, 1164, 275, 31], [526, 1195, 65, 97]], [[854, 1113, 222, 121]], [[1146, 1291, 248, 122]], [[1503, 1247, 263, 121]]],
-            [null, null, null, null, null],
-        ],
-        HurtgenV2: [
-            [null, null, null, null, null],
-            [[[105, 386, 305, 168]], [[458, 497, 256, 176]], [[903, 369, 233, 157]], [[1282, 510, 222, 160]], [[1539, 469, 249, 156]]],
-            [[[86, 859, 248, 162]], [[536, 839, 168, 195]], [[806, 885, 169, 130]], [[1214, 926, 203, 153]], [[1491, 903, 207, 154]]],
-            [[[131, 1178, 187, 161]], [[448, 1082, 189, 167]], [[822, 1237, 197, 164]], [[1259, 1325, 172, 134]], [[1498, 1325, 152, 162]]],
-            [null, null, null, null, null],
-        ],
-        Kursk: [
-            [null, [[469, 173, 308, 190]], [[949, 192, 145, 167]], [[1317, 198, 174, 169]], null],
-            [null, [[534, 523, 177, 190]], [[863, 483, 218, 211]], [[1242, 468, 197, 222]], null],
-            [null, [[608, 777, 184, 195]], [[980, 851, 139, 215]], [[1236, 906, 203, 177]], null],
-            [null, [[639, 1204, 122, 194]], [[854, 1221, 194, 162]], [[1220, 1238, 248, 175]], null],
-            [null, [[562, 1483, 189, 169]], [[865, 1461, 145, 182]], [[1189, 1450, 214, 193]], null],
-        ],
-        Omaha: [
-            [null, null, null, null, null],
-            [[[160, 485, 305, 183]], [[432, 362, 253, 25], [510, 393, 105, 150]], [[887, 422, 236, 183]], [[1387, 390, 222, 26], [1444, 422, 105, 150]], [[1549, 512, 149, 203]]],
-            [[[202, 866, 264, 154]], [[464, 735, 268, 183]], [[807, 799, 247, 181]], [[1445, 780, 107, 157], [1552, 790, 8, 15], [1552, 781, 5, 9]], [[1560, 765, 194, 158], [1556, 765, 4, 25]]],
-            [[[215, 1162, 178, 179]], [[408, 1107, 223, 155]], [[850, 1135, 270, 185]], [[1332, 1128, 172, 187]], [[1560, 1121, 198, 188]]],
-            [null, null, null, null, null],
-        ],
-        PHL: [
-            [null, [[345, 211, 181, 110]], [[835, 240, 247, 132]], [[1160, 232, 233, 128]], null],
-            [null, [[445, 513, 204, 108]], [[836, 619, 197, 133]], [[1147, 522, 260, 129]], null],
-            [null, [[482, 809, 205, 144]], [[823, 893, 270, 124]], [[1301, 837, 191, 126]], null],
-            [null, [[522, 1159, 220, 134]], [[855, 1259, 249, 113]], [[1361, 1228, 165, 113]], null],
-            [null, [[464, 1508, 254, 136]], [[849, 1486, 254, 119]], [[1302, 1571, 189, 103]], null],
-        ],
-        Remagen: [
-            [null, [[449, 183, 252, 156]], [[818, 184, 254, 157]], [[1245, 186, 234, 163]], null],
-            [null, [[477, 454, 219, 157]], [[928, 440, 250, 155]], [[1201, 454, 260, 160]], null],
-            [null, [[457, 722, 268, 154]], [[884, 801, 203, 237]], [[1200, 990, 268, 164]], null],
-            [null, [[510, 1218, 213, 156]], [[842, 1223, 227, 178]], [[1213, 1208, 237, 161]], null],
-            [null, [[429, 1603, 270, 158]], [[881, 1527, 213, 158]], [[1192, 1501, 252, 155]], null],
-        ],
-        SMDMV2: [
-            [null, [[433, 80, 307, 192]], [[815, 109, 256, 166]], [[1313, 119, 149, 196]], null],
-            [null, [[469, 453, 234, 191]], [[880, 438, 220, 187]], [[1170, 452, 264, 194]], null],
-            [null, [[514, 828, 185, 195]], [[888, 850, 174, 205]], [[1215, 851, 206, 179]], null],
-            [null, [[504, 1198, 199, 194]], [[863, 1260, 171, 164]], [[1281, 1317, 251, 194]], null],
-            [null, [[538, 1501, 190, 182]], [[888, 1580, 145, 173]], [[1229, 1594, 217, 170]], null],
-        ],
-        SME: [
-            [null, null, null, null, null],
-            [[[187, 473, 188, 131]], [[450, 502, 238, 130]], [[876, 423, 147, 129]], [[1211, 535, 256, 132]], [[1507, 590, 257, 130]]],
-            [[[259, 836, 187, 120]], [[529, 724, 236, 137]], [[907, 795, 222, 139]], [[1143, 933, 188, 124]], [[1571, 891, 175, 123]]],
-            [[[226, 1203, 172, 139]], [[489, 1280, 269, 128]], [[882, 1192, 171, 126]], [[1086, 1159, 250, 141]], [[1527, 1242, 262, 136]]],
-            [null, null, null, null, null],
-        ],
-        Stalingrad: [
-            [null, null, null, null, null],
-            [[[175, 360, 308, 194]], [[517, 317, 251, 168]], [[822, 433, 244, 173]], [[1110, 415, 305, 171]], [[1507, 498, 219, 174]]],
-            [[[182, 919, 263, 215]], [[469, 852, 188, 193]], [[908, 816, 221, 213]], [[1349, 830, 187, 164]], [[1547, 831, 179, 158]]],
-            [[[227, 1296, 177, 215]], [[432, 1216, 250, 214]], [[847, 1148, 191, 210]], [[1290, 1258, 165, 161]], [[1522, 1253, 219, 176]]],
-            [null, null, null, null, null],
-        ],
-        Utah: [
-            [null, null, null, null, null],
-            [[[234, 368, 187, 124]], [[547, 399, 234, 124]], [[934, 446, 150, 148]], [[1179, 433, 258, 152]], [[1517, 425, 127, 117]]],
-            [[[221, 833, 188, 128]], [[547, 870, 269, 127]], [[957, 794, 219, 119]], [[1211, 851, 189, 122]], [[1499, 903, 176, 119]]],
-            [[[186, 1378, 290, 123]], [[487, 1253, 270, 155]], [[877, 1335, 170, 155]], [[1362, 1295, 140, 120]], [[1512, 1300, 189, 124]]],
-            [null, null, null, null, null],
-        ],
-    }
     const pointCutoutData = {}
-
-    const sectorData = [
-        {
-            a: {top: 383, left: 0, width: 0, height: 0, visible: false},
-            b: {top: 383, left: 0, width: 1920, height: 1151, visible: true}
-        },
-        {
-            a: {top: 383, left: 0, width: 386, height: 1151, visible: true},
-            b: {top: 383, left: 1920 - 1536, width: 1538, height: 1151, visible: true}
-        },
-        {
-            a: {top: 383, left: 0, width: 769, height: 1151, visible: true},
-            b: {top: 383, left: 1920 - 1151, width: 1151, height: 1151, visible: true}
-        },
-        {
-            a: {top: 383, left: 0, width: 769, height: 1151, visible: true},
-            b: {top: 383, left: 1920 - 769, width: 769, height: 1151, visible: true}
-        },
-        {
-            a: {top: 383, left: 0, width: 1151, height: 1151, visible: true},
-            b: {top: 383, left: 1920 - 769, width: 769, height: 1151, visible: true}
-        },
-        {
-            a: {top: 383, left: 0, width: 1536, height: 1151, visible: true},
-            b: {top: 383, left: 1920 - 386, width: 386, height: 1151, visible: true}
-        },
-        {
-            a: {top: 383, left: 0, width: 1920, height: 1151, visible: true},
-            b: {top: 383, left: 0, width: 0, height: 0, visible: false}
-        }
-    ];
 
     function rectContainsPoint(rect, x, y) {
         const rx = rect.left;
@@ -908,8 +769,83 @@ const mll = (function () {
         line.setControlsVisibility({
             mt: false, mb: false, ml: false, mr: false, bl: false, br: false, tl: false, tr: false, mtr: false,
             moveObject: false
-        })
+        });
         return line;
+    }
+
+    function addDefaultMapElements(map) {
+        const promises = [];
+
+        fabric.Image.fromURL('', function (img) {
+            console.log(img);
+
+            img.set({
+                selectable: true,
+                evented: true,
+                hasBorders: false,
+                lockMovementX: true,
+                lockMovementY: true,
+                zIndex: zIndex[type],
+                originX: "center",
+                originY: "center",
+                centeredScaling: true,
+                top: e.absolutePointer.y,
+                left: e.absolutePointer.x,
+            });
+            // img.filters.push(new fabric.Image.filters.HueRotation({rotation: 2 * Math.random() - 1}))
+            img.type = {
+                id: uuid ? uuid : uuidv4(),
+                type: type,
+                modifier: modifier,
+                originalEvent: {absolutePointer: e.absolutePointer}
+            };
+            if (otherObject) {
+                img.set({
+                    angle: otherObject.angle,
+                    top: otherObject.top,
+                    left: otherObject.left,
+                });
+
+                const side = idx(["type", "side"], otherObject);
+                if (side) {
+                    img.type.side = otherObject.type.side;
+                }
+                if (roomsMode && roomsRole === 'viewer') {
+                    img.set({
+                        selectable: false,
+                        evented: false
+                    })
+                }
+            }
+            if (placedMeta[type].set) {
+                img.set(placedMeta[type].set);
+            }
+            // disable rotation and resizing
+            img.setControlsVisibility({
+                mt: false, mb: false, ml: false, mr: false, bl: false, br: false, tl: false, tr: false, mtr: false
+            })
+            if (placedMeta[type].controlsVisibility) {
+                img.setControlsVisibility(placedMeta[type].controlsVisibility);
+            }
+
+            placed.push(img);
+
+            addAndOrder(img);
+            if (roomSendUpdate) {
+                internal.updateStatesAndRender();
+            }
+            fixElementSelectBoxes();
+            updateZoomScale();
+
+            if (roomSendUpdate) {
+                roomEditorUpdateElements()
+            }
+        });
+        if (type === "offensive_garrisons") {
+        } else if (type === "artillery") {
+        } else if (type === "tanks") {
+        } else if (type === "repair_stations") {
+        }
     }
 
     function addMapElement(e, type, modifier, roomSendUpdate, uuid, otherObject, resolve) {
@@ -983,7 +919,7 @@ const mll = (function () {
                 strokeUniform: true,
                 width: 380,
                 height: 380,
-                zIndex: 7,
+                zIndex: 10,
                 left: e.absolutePointer.x,
                 top: e.absolutePointer.y,
                 scaleX: 3.5036381745797236, // scale to 700m
@@ -1079,7 +1015,7 @@ const mll = (function () {
                 height: 380,
                 opacity: 0.25,
                 fill: "#0080FFFF",
-                zIndex: 7,
+                zIndex: 10,
                 hasBorders: false,
                 lockMovementX: true,
                 lockMovementY: true,
@@ -1120,7 +1056,7 @@ const mll = (function () {
                 //centeredScaling: true,
                 opacity: 0.25,
                 fill: "#0080FFFF",
-                zIndex: 7,
+                zIndex: 10,
                 hasBorders: false,
                 lockMovementX: true,
                 lockMovementY: true,
@@ -1161,7 +1097,7 @@ const mll = (function () {
                 fontSize: 18,
                 backgroundColor: "rgb(34,34,34)",
                 fill: "rgb(255,255,255)",
-                zIndex: 9,
+                zIndex: 10,
                 opacity: 0.8,
             });
             line.set({
@@ -1238,21 +1174,20 @@ const mll = (function () {
         fabric.Image.fromURL('', function (img) {
             console.log(img);
 
-            const wh = placedMeta[type].wh;
             img.set({
                 selectable: true,
                 evented: true,
                 hasBorders: false,
                 lockMovementX: true,
                 lockMovementY: true,
-                zIndex: zIndex[type],
+                zIndex: 10,
                 originX: "center",
                 originY: "center",
                 centeredScaling: true,
                 top: e.absolutePointer.y,
                 left: e.absolutePointer.x,
-                width: wh,
-                height: wh,
+                width: 50,
+                height: 50,
             });
             // img.filters.push(new fabric.Image.filters.HueRotation({rotation: 2 * Math.random() - 1}))
             img.type = {
@@ -1326,6 +1261,8 @@ const mll = (function () {
             controls.checkArty = $("#arty-visible");
             controls.checkArtyFlip = $("#flip-arty");
             controls.checkInaccessible = $("#inaccessible-visible");
+            controls.checkEggs = $("#eggs-visible");
+            controls.checkSpecial = $("#special-visible");
             controls.checkStrongpoints = $("#sp-visible");
             controls.checkSpResource = $("#sp-resource-visible");
             elements.strongpointGrid = $("#sp-grid");
@@ -1719,6 +1656,9 @@ const mll = (function () {
                     mll.menuAdd("supplies", "150x2")
                 },
                 // Marker
+                arty_full_aoe: function () {
+                    mll.menuAdd("arty-effect")
+                },
                 enemy_garrison: function () {
                     mll.menuAdd("enemy", "garry")
                 },
@@ -1801,7 +1741,7 @@ const mll = (function () {
                         truck_transport: {name: "Transport Truck"},
                     }
                 },
-                infatry_class: {
+                infantry_class: {
                     name: "Add Player Class",
                     icon: "bi bi-person-circle",
                     items: {
@@ -1848,6 +1788,7 @@ const mll = (function () {
                     name: "Add Marker",
                     icon: "bi bi-geo-alt",
                     items: {
+                        arty_full_aoe: {name: "Artillery with full AOE", icon: "bi bi-arrow-down"},
                         enemy_garrison: {name: "Enemy Garrison", icon: "bi bi-flag"},
                         enemy_infantry: {name: "Enemy Infantry"},
                         enemy_outpost: {name: "Enemy Outpost", icon: "bi bi-triangle"},
@@ -1924,16 +1865,16 @@ const mll = (function () {
 
                     accordionItems.push(
                         "<div class='accordion-item'>" +
-                            "<h2 id='heading-" + itemName + "' class='accordion-header'>" +
-                                "<button class='accordion-button collapsed' type='button' data-bs-toggle='collapse' data-bs-target='#collapse-" + itemName + "' aria-expanded='false' aria-controls='heading-" + itemName + "'>" +
-                                item.name,
-                                "</button>" +
-                            "</h2>" +
-                            "<div id='collapse-" + itemName + "' class='accordion-collapse collapse' data-bs-parent='#mobile-context-modal' aria-labelledby='heading-" + itemName + "'>" +
-                                "<div class='accordion-body'>" +
-                                itemButtons.join("") +
-                                "</div>" +
-                            "</div>" +
+                        "<h2 id='heading-" + itemName + "' class='accordion-header'>" +
+                        "<button class='accordion-button collapsed' type='button' data-bs-toggle='collapse' data-bs-target='#collapse-" + itemName + "' aria-expanded='false' aria-controls='heading-" + itemName + "'>" +
+                        item.name,
+                        "</button>" +
+                        "</h2>" +
+                        "<div id='collapse-" + itemName + "' class='accordion-collapse collapse' data-bs-parent='#mobile-context-modal' aria-labelledby='heading-" + itemName + "'>" +
+                        "<div class='accordion-body'>" +
+                        itemButtons.join("") +
+                        "</div>" +
+                        "</div>" +
                         "</div>"
                     );
                 }
@@ -1977,6 +1918,39 @@ const mll = (function () {
             controls.fabricCanvas.add(elements.sectorB);
             controls.exportCanvas.add(elements.sectorB);
 
+            // fabric.Image.fromURL('./assets/full-arty-range.png', function (img) {
+            //     elements.arty_range = img;
+            //
+            //     const artyClipRect = new fabric.Rect({
+            //         selectable: false,
+            //         evented: false,
+            //         x: 0,
+            //         y: 383,
+            //         w: 1920,
+            //         h: 1151
+            //     });
+            //
+            //     img.set({
+            //         left: 1893.091081952058,//43.19027413642311,
+            //         top: 961.1552711207927,//915.6430400911386,
+            //         selectable: false,
+            //         evented: false,
+            //         originX: "center",
+            //         originY: "center",
+            //         clipPath: artyClipRect,
+            //         zIndex: zIndex.arty_range,
+            //         dirty: true
+            //     });
+            //
+            //     artyClipRect.set({
+            //         left: img.left * -1 + artyClipRect.x,
+            //         top: img.top * -1 + artyClipRect.y,
+            //         width: artyClipRect.w,
+            //         height: artyClipRect.h,
+            //     })
+            //
+            //     addAndOrder(img);
+            // });
             fabric.Image.fromURL('', function (img) {
                 elements.map = img;
 
@@ -2012,6 +1986,30 @@ const mll = (function () {
             });
             fabric.Image.fromURL('', function (img) {
                 elements.inaccessible = img;
+
+                img.set({
+                    selectable: false,
+                    evented: false,
+                    visible: false,
+                    zIndex: zIndex.arty_range
+                });
+
+                addAndOrder(img);
+            });
+            fabric.Image.fromURL('', function (img) {
+                elements.eggs = img;
+
+                img.set({
+                    selectable: false,
+                    evented: false,
+                    visible: false,
+                    zIndex: zIndex.arty_range
+                });
+
+                addAndOrder(img);
+            });
+            fabric.Image.fromURL('', function (img) {
+                elements.special = img;
 
                 img.set({
                     selectable: false,
@@ -2524,7 +2522,9 @@ const mll = (function () {
 
             let panning = false;
             controls.fabricCanvas.on('mouse:up', function (e) {
-                if (e.e.touches) {return;}
+                if (e.e.touches) {
+                    return;
+                }
                 panning = false;
             });
             controls.fabricCanvas.on('mouse:down', function (e) {
@@ -2551,7 +2551,9 @@ const mll = (function () {
                 }
             });
             controls.fabricCanvas.on('mouse:move', function (e) {
-                if (e.e.touches) {return;}
+                if (e.e.touches) {
+                    return;
+                }
                 if (panning && e && e.e && (e.e.movementX || e.e.movementY)) {
                     const delta = new fabric.Point(e.e.movementX, e.e.movementY);
                     controls.fabricCanvas.relativePan(delta);
@@ -2562,7 +2564,9 @@ const mll = (function () {
             let pausePanning = false, currentX, currentY, xChange, yChange, lastX, lastY, prevDiff;
             controls.fabricCanvas.on({
                 'touch:gesture': function (e) {
-                    if (!e.e.touches) {return;}
+                    if (!e.e.touches) {
+                        return;
+                    }
                     try {
                         if (e.e.touches && e.e.touches.length == 2 && !pausePanning) {
                             // console.log(e);
@@ -2602,7 +2606,9 @@ const mll = (function () {
                     }
                 },
                 'touch:drag': function (e) {
-                    if (!e.e.touches) {return;}
+                    if (!e.e.touches) {
+                        return;
+                    }
                     if (e.e.type !== "touchmove") {
                         return;
                     }
@@ -2631,7 +2637,9 @@ const mll = (function () {
                     }
                 },
                 'touch:longpress': function (e) {
-                    if (!e.e.touches) {return;}
+                    if (!e.e.touches) {
+                        return;
+                    }
 
                     if (e.e.type === "touchstart") {
                         // $("canvas").trigger(jQuery.Event("contextmenu", {}))
@@ -2675,7 +2683,7 @@ const mll = (function () {
                 for (let x = 0; x < 5; x++) {
                     for (let y = 0; y < 5; y++) {
                         const toggle = $(".sp-toggle-" + x + y);
-                        if (pointCoords[filePrefix][x][y] == null) {
+                        if (POINT_COORDS[filePrefix][x][y] == null) {
                             toggle.removeClass("selected").removeClass('available').addClass('unavailable');
                             continue;
                         }
@@ -2728,7 +2736,7 @@ const mll = (function () {
 
                         const tempCanvas = document.createElement('canvas');
                         const context = tempCanvas.getContext('2d');
-                        const point = pointCoords[filePrefix][x][y];
+                        const point = POINT_COORDS[filePrefix][x][y];
                         if (point == null) {
                             pointData["dataUrl"] = "";
                             pointData["position"] = {top: 0, left: 0, width: 0, height: 0}
@@ -2795,6 +2803,8 @@ const mll = (function () {
                 let artySuffix = controls.checkArtyFlip.is(":checked") ? 2 : 1;
                 elements.arty.setSrc('./assets/arty/' + filePrefix + '_Arty' + artySuffix + '.png', internal.render);
                 elements.inaccessible.setSrc('./assets/accessibility/' + filePrefix + "_Accessible.png", internal.render);
+                elements.eggs.setSrc('./assets/eggs/' + filePrefix + "_Eggs.png", internal.render);
+                elements.special.setSrc('./assets/special/' + filePrefix + "_Special.png", internal.render);
                 elements.spImage.src = './assets/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
             }
 
@@ -2824,6 +2834,22 @@ const mll = (function () {
                         const imgSrc = './assets/accessibility/' + filePrefix + '_Accessible.png';
                         if (elements.inaccessible.src !== imgSrc) {
                             elements.inaccessible.setSrc(imgSrc, resolve);
+                        } else {
+                            resolve();
+                        }
+                    }),
+                    new Promise(function (resolve) {
+                        const imgSrc = './assets/eggs/' + filePrefix + '_Eggs.png';
+                        if (elements.eggs.src !== imgSrc) {
+                            elements.eggs.setSrc(imgSrc, resolve);
+                        } else {
+                            resolve();
+                        }
+                    }),
+                    new Promise(function (resolve) {
+                        const imgSrc = './assets/special/' + filePrefix + '_Special.png';
+                        if (elements.special.src !== imgSrc) {
+                            elements.special.setSrc(imgSrc, resolve);
                         } else {
                             resolve();
                         }
@@ -2867,6 +2893,7 @@ const mll = (function () {
             }
 
             [controls.checkGrid, controls.checkArty, controls.checkStrongpoints, controls.checkInaccessible,
+                controls.checkEggs, controls.checkSpecial,
                 controls.checkDefaultGarries, controls.checkSectors, controls.checkSectorSwap, controls.checkPlacedGarries,
                 controls.checkGarryRadius, controls.checkArtyFlip, controls.checkSpResource, controls.checkDrawingsVisible
             ].forEach(function (control) {
@@ -3047,13 +3074,21 @@ const mll = (function () {
                 elements.inaccessibleKey.visible = controls.checkInaccessible.is(":checked");
             }
 
+            if (elements.eggs) {
+                elements.eggs.visible = controls.checkEggs.is(":checked");
+            }
+
+            if (elements.special) {
+                elements.special.visible = controls.checkSpecial.is(":checked");
+            }
+
             for (let i = 0; i < drawings.length; i++) {
                 const path = drawings[i];
                 path.visible = controls.checkDrawingsVisible.is(":checked");
             }
 
-            const mapVertical = pointCoords[filePrefix][0][1] != null;
-            const range = sectorData[controls.sectorRange.val()];
+            const mapVertical = POINT_COORDS[filePrefix][0][1] != null;
+            const range = SECTOR_COORDS[controls.sectorRange.val()];
             elements.sectorA.set(mapVertical ?
                 {
                     top: range.a.left,

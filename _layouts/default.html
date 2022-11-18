@@ -27,6 +27,7 @@
 
     <!-- Apps -->
     <link href="./styles.css?v={{ site.time | date_to_xmlschema }}" rel="stylesheet"/>
+    <script src="./data.js?v={{ site.time | date_to_xmlschema }}" type="text/javascript"></script>
     <script src="./script.js?v={{ site.time | date_to_xmlschema }}" type="text/javascript"></script>
 
     <!-- Analytics -->
@@ -178,6 +179,13 @@
                             </div>
 
                             <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="zoom-scale" checked>
+                                <label class="form-check-label" for="zoom-scale">
+                                    Zoom-scale elements
+                                </label>
+                            </div>
+
+                            <div class="form-check">
                                 <input class="form-check-input" type="checkbox" value="" id="inaccessible-visible">
                                 <label class="form-check-label" for="inaccessible-visible">
                                     Accessibility overlay visible (WIP)
@@ -185,9 +193,71 @@
                             </div>
 
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="" id="zoom-scale" checked>
-                                <label class="form-check-label" for="zoom-scale">
-                                    Zoom-scale elements
+                                <input class="form-check-input" type="checkbox" value="" id="eggs-visible">
+                                <label class="form-check-label" for="eggs-visible">
+                                    Easter eggs overlay visible (WIP)
+                                </label>
+                            </div>
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="special-visible">
+                                <label class="form-check-label" for="special-visible">
+                                    Special structures overlay visible (WIP)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item editor-div" hidden>
+                    <h2 class="accordion-header" id="flush-headingSix">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#flush-collapseSix" aria-expanded="false"
+                                aria-controls="flush-collapseSix">
+                            Toggle Defaults
+                        </button>
+                    </h2>
+                    <div id="flush-collapseSix" class="accordion-collapse collapse show"
+                         aria-labelledby="flush-headingSix">
+                        <div class="accordion-body">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" value="" id="defaults-visible">
+                                <label class="form-check-label" for="defaults-visible">
+                                    Selected defaults visible
+                                </label>
+                            </div>
+                            <div class="btn-group mb-3" role="group" aria-label="Basic radio toggle button group">
+                                <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off">
+                                <label class="btn btn-outline-secondary" for="btnradio1">Side A</label>
+
+                                <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off" checked>
+                                <label class="btn btn-outline-secondary" for="btnradio2">Both</label>
+
+                                <input type="radio" class="btn-check" name="btnradio" id="btnradio3" autocomplete="off">
+                                <label class="btn btn-outline-secondary" for="btnradio3">Side B</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="offensivegarry-visible" checked>
+                                <label class="form-check-label" for="offensivegarry-visible">
+                                    Offensive garrisons
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="artypos-visible" checked>
+                                <label class="form-check-label" for="artypos-visible">
+                                    Artillery positions
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="tanks-visible" checked>
+                                <label class="form-check-label" for="tanks-visible">
+                                    Tanks
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="repairstation-visible" checked>
+                                <label class="form-check-label" for="repairstation-visible">
+                                    Repair stations
                                 </label>
                             </div>
                         </div>
@@ -783,6 +853,10 @@
         <li>
             Measurements are based on 190 pixels being close enough to 200m or one grid square
         </li>
+        <li>
+            Artillery dispersion is a 20m radius. Area of effect around a hit is a 15m radius.
+            The total potential area of effect is a 35m radius.
+        </li>
         <li>Developed by Winston [HR]</li>
     </ul>
 </div>
@@ -828,8 +902,16 @@
             The Tank Bible
         </a></li>
         <li><a target="_blank" href="https://docs.google.com/spreadsheets/d/1a1gDyMqncOqPwsQq05ueGRQwLwDAG_Yy2beAmNXRbJA">
-            HLL XP Guide Table
+            HLL XP Guide Table (U12)
         </a></li>
+        <li>
+            <a target="_blank" href="https://imgur.com/a/JlHnPuj">Panzershreck</a> and
+            <a target="_blank" href="https://imgur.com/a/OoNdUtJ">Bazooka</a> long range aiming guides
+        </li>
+        <li>
+            <a target="_blank" href="https://docs.google.com/spreadsheets/d/1h2y3-D8Cf_PKsvbOJcSZ_-P00MfreQ_G8n7aK-YNXyc/edit">US/GER</a> and
+            <a target="_blank" href="https://docs.google.com/spreadsheets/d/1NinILd2i9JWiOxWVZFmMVoTFNMfaHYK8d0NZOVIWzlg/edit">Soviet</a> arty mil charts
+        </li>
         <li><a target="_blank" href="https://www.easyarty.com/">
             Easy Arty - Simple artillery calculator
         </a></li>
@@ -847,6 +929,9 @@
         </a></li>
         <li><a target="_blank" href="https://hll-ecl.eu/">
             ECL - European Community League
+        </a></li>
+        <li><a target="_blank" href="https://www.18vs18.com/">
+            18 vs 18 - Compact FPS Competitive Format
         </a></li>
         <li><a target="_blank" href="https://helo-system.de/">
             HeLO System - HLL Competitive Clan Ranking
