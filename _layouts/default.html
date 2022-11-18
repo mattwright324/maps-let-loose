@@ -5,6 +5,7 @@
     <meta name="description"
           content="Quickly create custom tacmaps for Hell Let Loose. Customize visible points, add garrisons airheads and halftracks, toggle and change the active sectors, draw freely on the map, see offensive default garrisons and maximum artillery reach.">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="build" content="{{ site.time | date_to_xmlschema }}">
     <title>{{ page.title }}</title>
     <link rel="icon" href="./icon.png">
 
@@ -20,12 +21,13 @@
     <script src="//cdn.jsdelivr.net/npm/jszip-utils@0.1.0/dist/jszip-utils.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/jszip@3.7.1/dist/jszip.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js" type="text/javascript"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.contextMenu.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.contextMenu.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.ui.position.js"></script>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.contextMenu.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.contextMenu.min.js"></script>
+    <script src="./jquery-ui.min.js"></script>
 
     <!-- Apps -->
     <link href="./styles.css?v={{ site.time | date_to_xmlschema }}" rel="stylesheet"/>
+    <script src="./data.js?v={{ site.time | date_to_xmlschema }}" type="text/javascript"></script>
     <script src="./script.js?v={{ site.time | date_to_xmlschema }}" type="text/javascript"></script>
 
     <!-- Analytics -->
@@ -107,7 +109,7 @@
                 </select>
             </div>
 
-            <div class="accordion accordion-flush mb-3" id="accordionFlushExample">
+            <div class="accordion accordion-flush mb-3">
                 <div class="accordion-item editor-div">
                     <h2 class="accordion-header" id="flush-headingOne">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
@@ -177,16 +179,85 @@
                             </div>
 
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="" id="inaccessible-visible">
-                                <label class="form-check-label" for="inaccessible-visible">
-                                    Highlight inaccessible areas (WIP)
+                                <input class="form-check-input" type="checkbox" value="" id="zoom-scale" checked>
+                                <label class="form-check-label" for="zoom-scale">
+                                    Zoom-scale elements
                                 </label>
                             </div>
 
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="" id="zoom-scale" checked>
-                                <label class="form-check-label" for="zoom-scale">
-                                    Zoom-scale elements
+                                <input class="form-check-input" type="checkbox" value="" id="inaccessible-visible">
+                                <label class="form-check-label" for="inaccessible-visible">
+                                    Accessibility overlay visible (WIP)
+                                </label>
+                            </div>
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="eggs-visible">
+                                <label class="form-check-label" for="eggs-visible">
+                                    Easter eggs overlay visible (WIP)
+                                </label>
+                            </div>
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="special-visible">
+                                <label class="form-check-label" for="special-visible">
+                                    Special structures overlay visible (WIP)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item editor-div" hidden>
+                    <h2 class="accordion-header" id="flush-headingSix">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#flush-collapseSix" aria-expanded="false"
+                                aria-controls="flush-collapseSix">
+                            Toggle Defaults
+                        </button>
+                    </h2>
+                    <div id="flush-collapseSix" class="accordion-collapse collapse show"
+                         aria-labelledby="flush-headingSix">
+                        <div class="accordion-body">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" value="" id="defaults-visible">
+                                <label class="form-check-label" for="defaults-visible">
+                                    Selected defaults visible
+                                </label>
+                            </div>
+                            <div class="btn-group mb-3" role="group" aria-label="Basic radio toggle button group">
+                                <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off">
+                                <label class="btn btn-outline-secondary" for="btnradio1">Side A</label>
+
+                                <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off" checked>
+                                <label class="btn btn-outline-secondary" for="btnradio2">Both</label>
+
+                                <input type="radio" class="btn-check" name="btnradio" id="btnradio3" autocomplete="off">
+                                <label class="btn btn-outline-secondary" for="btnradio3">Side B</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="offensivegarry-visible" checked>
+                                <label class="form-check-label" for="offensivegarry-visible">
+                                    Offensive garrisons
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="artypos-visible" checked>
+                                <label class="form-check-label" for="artypos-visible">
+                                    Artillery positions
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="tanks-visible" checked>
+                                <label class="form-check-label" for="tanks-visible">
+                                    Tanks
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="repairstation-visible" checked>
+                                <label class="form-check-label" for="repairstation-visible">
+                                    Repair stations
                                 </label>
                             </div>
                         </div>
@@ -388,91 +459,365 @@
         </div>
 
         <div id="extra-panel" class="col col-lg-3">
-            <div class="mb-3 editor-div">
-                <h4>Customize Element</h4>
-                <small class="text-muted" id="no-selection">
-                    No customizable element selected.
-                    <br><br>
-                    Rectangles, Circles, and Textboxes may change to any background color, text color, and opacity.
-                    <br><br>
-                    Tanks and Player Classes may change from blue to red to indicate enemy.
-                </small>
-
-                <div id="edit-shape" style="display: none">
-                    <label for="drawing-line-width">Opacity
-                        (<span id="shape-opacity-value">7</span>)
-                    </label>
-                    <br>
-                    <input id="shape-opacity" type="range" class="form-range" value="0.25" min="0" max="1" step="0.05">
-                    <br>
-
-                    <label for="shape-color">Background color </label>
-                    <br>
-                    <div id="shape-color-div" class="d-flex align-items-center">
-                        <input type="color" value="#0080ff" id="shape-color">
-                        <span>or quick</span>
-                        <script>
-                            function setColorsAndOpacity(shapeColor, shapeOpacity, textColor) {
-                                const inputShapeColor = $("#shape-color");
-                                const inputTextColor = $("#text-color");
-                                const inputShapeOpacity = $('#shape-opacity');
-
-                                if (shapeColor !== inputShapeColor.val()) {
-                                    inputShapeColor.val(shapeColor).trigger('change');
-                                }
-
-                                if (inputTextColor.is(":visible")) {
-                                    if (textColor !== inputTextColor.val()) {
-                                        inputTextColor.val(textColor).trigger('change');
-                                    }
-                                    if (inputShapeOpacity !== 0.8) {
-                                        inputShapeOpacity.val(0.8).trigger('input');
-                                    }
-                                } else {
-                                    if (inputShapeOpacity !== shapeOpacity) {
-                                        inputShapeOpacity.val(shapeOpacity).trigger('input');
-                                    }
-                                }
-                            }
-                        </script>
-                        <span class="color blue" title="Blue" style="color: #ffffff"
-                              onclick="setColorsAndOpacity('#0080ff', 0.25, '#ffffff')">T</span>
-                        <span class="color red" title="Red" style="color: #ffffff"
-                              onclick="setColorsAndOpacity('#ff8080', 0.25, '#ffffff')">T</span>
-
-                        <span class="color" style="background-color:#ff8000; color: #000000" title="Orange"
-                              onclick="setColorsAndOpacity('#ff8000', 0.25, '#000000')">T</span>
-                        <span class="color" style="background-color:#ffff80; color: #000000" title="Yellow"
-                              onclick="setColorsAndOpacity('#ffff80', 0.25, '#000000')">T</span>
-                        <span class="color" style="background-color:#00ff00; color: #000000" title="Green"
-                              onclick="setColorsAndOpacity('#00ff00', 0.25, '#000000')">T</span>
-                        <span class="color" style="background-color:#8000ff; color: #ffffff" title="Purple"
-                              onclick="setColorsAndOpacity('#8000ff', 0.25, '#ffffff')">T</span>
-                        <span class="color" style="background-color:#ffffff; color: #000000" title="White"
-                              onclick="setColorsAndOpacity('#ffffff', 0.55, '#000000')">T</span>
-                        <span class="color" style="background-color:#c0c0c0; color: #000000" title="Gray"
-                              onclick="setColorsAndOpacity('#c0c0c0', 0.55, '#000000')">T</span>
+            <div class="accordion accordion-flush mb-3">
+                <div class="accordion-item" hidden>
+                    <h2 class="accordion-header" id="flush-headingA">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#flush-collapseA" aria-expanded="false"
+                                aria-controls="flush-collapseA">
+                            Map Configs
+                        </button>
+                    </h2>
+                    <div id="flush-collapseA" class="accordion-collapse collapse show" aria-labelledby="flush-headingA">
+                        <div class="accordion-body">
+                            <div style="margin-bottom: 10px">
+                                <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#slidesCreateModal">Create</button>
+                                <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#slidesManageModal">Manage</button>
+                                <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#slidesImportModal">Import</button>
+                            </div>
+                            <select class="form-select" size="5" aria-label="size 3 select example">
+                                <option selected>Default</option>
+                            </select>
+                        </div>
                     </div>
-                    <br>
-                    <div id="text-color-div" class="text" style="display: none">
-                        <label for="text-color">Text color </label>
-                        <br>
-                        <div class="d-flex align-items-center">
-                            <input type="color" id="text-color" value="#ffffff">
-                            <span>or quick</span>
-                            <span class="color" style="background-color:#ffffff"
-                                  onclick="$('#text-color').val('#ffffff').trigger('change')"></span>
-                            <span class="color" style="background-color:#000000"
-                                  onclick="$('#text-color').val('#000000').trigger('change')"></span>
+
+                    <div class="modal fade" id="slidesCreateModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog  modal-dialog-scrollable modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Create Config(s)</h1>
+                                </div>
+                                <div class="modal-body">
+                                    <p>
+                                        Create new config(s) using config as base:
+                                    </p>
+                                    <p>
+                                        <select class="form-select" aria-label="Default select example">
+                                            <option selected>Default</option>
+                                        </select>
+                                    </p>
+                                    <p>
+                                        <script>
+                                            function addLine() {
+                                                const slideCount = $(".new-slide").length;
+
+                                                $("#new-slides").append("<div class='input-group new-slide' id='newslide-" + slideCount + "'>" +
+                                                    "<input type='text' class='form-control' value='MapConfig " + slideCount + "'>" +
+                                                    "<button class='btn btn-link' onclick='removeLine(" + slideCount + ")'>" +
+                                                    "<i class='bi bi-trash-fill'></i>" +
+                                                    "</button>" +
+                                                    "</div>");
+                                            }
+
+                                            function removeLine(num) {
+                                                $("#newslide-" + num).remove();
+                                            }
+                                        </script>
+                                        <button class="btn btn-secondary" onclick="addLine()">Add line</button>
+                                    </p>
+                                    <div id="new-slides">
+                                        <div class="input-group new-slide" id="newslide-0">
+                                            <input type="text" class="form-control" value="MapConfig 0">
+
+                                            <button class="btn btn-link" onclick="removeLine(0)">
+                                                <i class="bi bi-trash-fill"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Create</button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="slidesManageModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog  modal-dialog-scrollable modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="exampleModalLabel2">Manage Config(s)</h1>
+                                </div>
+                                <div class="modal-body" id="manage-slides-list">
+                                    <div>
+                                        <div class="input-group new-slide">
+                                            <span class="input-group-text"><i class="bi bi-list"></i></span>
+
+                                            <input type="text" class="form-control" value="Carentan - Base Layout">
+
+                                            <button class="btn btn-link" onclick="removeLine(0)">
+                                                <i class="bi bi-trash-fill"></i>
+                                            </button>
+                                        </div>
+                                        <p style="margin-left: 15px">
+                                            Carentan · 15 points · 0 drawings · 0 elements
+                                            <br>
+                                            <small class="text-muted">
+                                                ed63f03c-02f5-4bef-b9ee-cf1fb8891324
+                                            </small>
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <div class="input-group new-slide">
+                                            <span class="input-group-text"><i class="bi bi-list"></i></span>
+
+                                            <input type="text" class="form-control" value="Carentan - Garrisons">
+
+                                            <button class="btn btn-link" onclick="removeLine(0)">
+                                                <i class="bi bi-trash-fill"></i>
+                                            </button>
+                                        </div>
+                                        <p style="margin-left: 15px">
+                                            Carentan · 5 points · 0 drawings · 7 elements
+                                            <br>
+                                            <small class="text-muted">
+                                                4662370f-a5e7-43d7-9d28-f54367ae5324
+                                            </small>
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <div class="input-group new-slide">
+                                            <span class="input-group-text"><i class="bi bi-list"></i></span>
+
+                                            <input type="text" class="form-control" value="Carentan - Foo Bar">
+
+                                            <button class="btn btn-link" onclick="removeLine(0)">
+                                                <i class="bi bi-trash-fill"></i>
+                                            </button>
+                                        </div>
+                                        <p style="margin-left: 15px">
+                                            Carentan · 3 points · 12 drawings · 24 elements
+                                            <br>
+                                            <small class="text-muted">
+                                                8cf968ad-b8c8-4658-b9e9-6b37699f3006
+                                            </small>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Update</button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                </div>
+                                <script>
+                                    $("#manage-slides-list").sortable()
+                                </script>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="slidesImportModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog  modal-dialog-scrollable modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="exampleModalLabel3">Import Config(s)</h1>
+                                </div>
+                                <div class="modal-body">
+                                    <p>
+                                        Importing: <strong>mll_carentan_20220926-160408.zip</strong>
+                                    </p>
+                                    <p>
+                                        Contains 3 config(s): 1 new and 2 with matching ids
+                                    </p>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="b">
+                                        <label class="form-check-label" for="b">
+                                            Remove all current configs and add new
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="a" checked>
+                                        <label class="form-check-label" for="a">
+                                            Add and overwrite all config(s)
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="c">
+                                        <label class="form-check-label" for="c">
+                                            Select config(s) to add and overwrite
+                                        </label>
+                                    </div>
+                                    <div style="overflow: scroll; max-height: 300px; padding: 20px; border-radius: 8px; border: 1px dashed lightgray; margin-top: 10px;">
+                                        <div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" checked>
+                                                <label class="form-check-label">
+                                                    Carentan - Base Layout
+                                                </label>
+                                            </div>
+                                            <p>
+                                                Carentan · 3 points · 0 drawings · 0 elements
+                                                <br>
+                                                <small class="text-muted">
+                                                    8cf968ad-b8c8-4658-b9e9-6b37699f3006 (id match)
+                                                </small>
+                                                <br>
+                                                <strong>Overwrites: Carentan - Base Layout</strong>
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" checked>
+                                                <label class="form-check-label">
+                                                    Carentan - Garrisons
+                                                </label>
+                                            </div>
+                                            <p>
+                                                Carentan · 3 points · 0 drawings · 0 elements
+                                                <br>
+                                                <small class="text-muted">
+                                                    ed63f03c-02f5-4bef-b9ee-cf1fb8891324 (id match)
+                                                </small>
+                                                <br>
+                                                <strong>Overwrites: Carentan - Garrisons</strong>
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" checked>
+                                                <label class="form-check-label">
+                                                    Carentan - AT Guns
+                                                </label>
+                                            </div>
+                                            <p>
+                                                Carentan · 3 points · 0 drawings · 12 elements
+                                                <br>
+                                                <small class="text-muted">
+                                                    4662370f-a5e7-43d7-9d28-f54367ae5324
+                                                </small>
+                                                <br>
+                                                <strong>Add new</strong>
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" checked>
+                                                <label class="form-check-label">
+                                                    Default
+                                                </label>
+                                            </div>
+                                            <p>
+                                                Carentan · 3 points · 0 drawings · 12 elements
+                                                <br>
+                                                <small class="text-muted">
+                                                    has no id
+                                                </small>
+                                                <br>
+                                                <strong>Add new</strong>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div style="text-align: center">
+                                        <a id="selectAll" href="javascript:" style="margin-right: 20px">Select all</a>
+                                        <a id="deselectAll" href="javascript:">Deselect all</a>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Import</button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div id="edit-asset" style="display: none">
-                    <label>Side (friendly/enemy)</label>
-                    <br>
-                    <span class="color blue asset-side selected" title="Friendly" id="assetFriendly"></span>
-                    <span class="color red asset-side" title="Enemy" id="assetEnemy"></span>
+                <div class="accordion-item editor-div">
+                    <h2 class="accordion-header" id="flush-headingB">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#flush-collapseB" aria-expanded="false"
+                                aria-controls="flush-collapseB">
+                            Customize Element
+                        </button>
+                    </h2>
+                    <div id="flush-collapseB" class="accordion-collapse collapse show"
+                         aria-labelledby="flush-headingB">
+                        <div class="accordion-body">
+                            <small class="text-muted" id="no-selection">
+                                No customizable element selected.
+                                <br><br>
+                                Rectangles, Circles, and Textboxes may change to any background color, text color, and opacity.
+                                <br><br>
+                                Tanks and Player Classes may change from blue to red to indicate enemy.
+                            </small>
+
+                            <div id="edit-shape" style="display: none">
+                                <label for="drawing-line-width">Opacity
+                                    (<span id="shape-opacity-value">7</span>)
+                                </label>
+                                <br>
+                                <input id="shape-opacity" type="range" class="form-range" value="0.25" min="0" max="1" step="0.05">
+                                <br>
+
+                                <label for="shape-color">Background color </label>
+                                <br>
+                                <div id="shape-color-div" class="d-flex align-items-center">
+                                    <input type="color" value="#0080ff" id="shape-color">
+                                    <span>or quick</span>
+                                    <script>
+                                        function setColorsAndOpacity(shapeColor, shapeOpacity, textColor) {
+                                            const inputShapeColor = $("#shape-color");
+                                            const inputTextColor = $("#text-color");
+                                            const inputShapeOpacity = $('#shape-opacity');
+
+                                            if (shapeColor !== inputShapeColor.val()) {
+                                                inputShapeColor.val(shapeColor).trigger('change');
+                                            }
+
+                                            if (inputTextColor.is(":visible")) {
+                                                if (textColor !== inputTextColor.val()) {
+                                                    inputTextColor.val(textColor).trigger('change');
+                                                }
+                                                if (inputShapeOpacity !== 0.8) {
+                                                    inputShapeOpacity.val(0.8).trigger('input');
+                                                }
+                                            } else {
+                                                if (inputShapeOpacity !== shapeOpacity) {
+                                                    inputShapeOpacity.val(shapeOpacity).trigger('input');
+                                                }
+                                            }
+                                        }
+                                    </script>
+                                    <span class="color blue" title="Blue" style="color: #ffffff"
+                                          onclick="setColorsAndOpacity('#0080ff', 0.25, '#ffffff')">T</span>
+                                    <span class="color red" title="Red" style="color: #ffffff"
+                                          onclick="setColorsAndOpacity('#ff8080', 0.25, '#ffffff')">T</span>
+
+                                    <span class="color" style="background-color:#ff8000; color: #000000" title="Orange"
+                                          onclick="setColorsAndOpacity('#ff8000', 0.25, '#000000')">T</span>
+                                    <span class="color" style="background-color:#ffff80; color: #000000" title="Yellow"
+                                          onclick="setColorsAndOpacity('#ffff80', 0.25, '#000000')">T</span>
+                                    <span class="color" style="background-color:#00ff00; color: #000000" title="Green"
+                                          onclick="setColorsAndOpacity('#00ff00', 0.25, '#000000')">T</span>
+                                    <span class="color" style="background-color:#8000ff; color: #ffffff" title="Purple"
+                                          onclick="setColorsAndOpacity('#8000ff', 0.25, '#ffffff')">T</span>
+                                    <span class="color" style="background-color:#ffffff; color: #000000" title="White"
+                                          onclick="setColorsAndOpacity('#ffffff', 0.55, '#000000')">T</span>
+                                    <span class="color" style="background-color:#c0c0c0; color: #000000" title="Gray"
+                                          onclick="setColorsAndOpacity('#c0c0c0', 0.55, '#000000')">T</span>
+                                </div>
+                                <br>
+                                <div id="text-color-div" class="text" style="display: none">
+                                    <label for="text-color">Text color </label>
+                                    <br>
+                                    <div class="d-flex align-items-center">
+                                        <input type="color" id="text-color" value="#ffffff">
+                                        <span>or quick</span>
+                                        <span class="color" style="background-color:#ffffff"
+                                              onclick="$('#text-color').val('#ffffff').trigger('change')"></span>
+                                        <span class="color" style="background-color:#000000"
+                                              onclick="$('#text-color').val('#000000').trigger('change')"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="edit-asset" style="display: none">
+                                <label>Side (friendly/enemy)</label>
+                                <br>
+                                <span class="color blue asset-side selected" title="Friendly" id="assetFriendly"></span>
+                                <span class="color red asset-side" title="Enemy" id="assetEnemy"></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -484,14 +829,12 @@
     <ul>
         <li>There are 3^5 or 243 total potential objective configurations</li>
         <li>
-            Offensive is allowed all 243 configurations (unconfirmed, at least allows some consecutive map-edge to
-            map-edge
-            layouts)
+            Offensive is allowed all 243 configurations, no limitations, allowing consecutive points on opposite sides.
             <br>
             <img src="./assets/offensive-ok.png" width="200">
         </li>
         <li>
-            Warfare is allowed only 99 configurations as it removes any consecutive map-edge to map-edge layouts
+            Warfare is allowed only 99 configurations as it removes any consecutive points on opposite sides.
             <br>
             <img src="./assets/warfare-not-ok.png" width="200">
         </li>
@@ -509,6 +852,10 @@
         </li>
         <li>
             Measurements are based on 190 pixels being close enough to 200m or one grid square
+        </li>
+        <li>
+            Artillery dispersion is a 20m radius. Area of effect around a hit is a 15m radius.
+            The total potential area of effect is a 35m radius.
         </li>
         <li>Developed by Winston [HR]</li>
     </ul>
@@ -554,8 +901,19 @@
         <li><a target="_blank" href="https://www.theline.gg/tankbible">
             The Tank Bible
         </a></li>
-        <li><a target="_blank" href="https://www.funletloose.com/">
-            Fun Let Loose - Simple artillery calculator
+        <li><a target="_blank" href="https://docs.google.com/spreadsheets/d/1a1gDyMqncOqPwsQq05ueGRQwLwDAG_Yy2beAmNXRbJA">
+            HLL XP Guide Table (U12)
+        </a></li>
+        <li>
+            <a target="_blank" href="https://imgur.com/a/JlHnPuj">Panzershreck</a> and
+            <a target="_blank" href="https://imgur.com/a/OoNdUtJ">Bazooka</a> long range aiming guides
+        </li>
+        <li>
+            <a target="_blank" href="https://docs.google.com/spreadsheets/d/1h2y3-D8Cf_PKsvbOJcSZ_-P00MfreQ_G8n7aK-YNXyc/edit">US/GER</a> and
+            <a target="_blank" href="https://docs.google.com/spreadsheets/d/1NinILd2i9JWiOxWVZFmMVoTFNMfaHYK8d0NZOVIWzlg/edit">Soviet</a> arty mil charts
+        </li>
+        <li><a target="_blank" href="https://www.easyarty.com/">
+            Easy Arty - Simple artillery calculator
         </a></li>
         <li><a target="_blank" href="https://www.hell-let-loose-calculator.com/#/">
             Hell Let Loose Calculator - Interactive map artillery calculator
@@ -563,14 +921,20 @@
         <li><a target="_blank" href="https://worldwarways.web.app/#/">
             World War Ways - Interactive map driving directions
         </a></li>
+        <li><a target="_blank" href="https://hllseasonal.com/">
+            Seasonal - Hell Let Loose Seasonal Tournament
+        </a></li>
         <li><a target="_blank" href="https://www.hllca.org/">
             HCA - Hell Let Loose Competitive Association
         </a></li>
-        <li><a target="_blank" href="https://helo-system.de/">
-            HeLO System - HLL Competitive Clan Ranking
-        </a></li>
         <li><a target="_blank" href="https://hll-ecl.eu/">
             ECL - European Community League
+        </a></li>
+        <li><a target="_blank" href="https://www.18vs18.com/">
+            18 vs 18 - Compact FPS Competitive Format
+        </a></li>
+        <li><a target="_blank" href="https://helo-system.de/">
+            HeLO System - HLL Competitive Clan Ranking
         </a></li>
         <li><a target="_blank" href="https://hellletloose.fandom.com/wiki/Hell_Let_Loose_Wiki">
             Hell Let Loose Wiki (not up to date)

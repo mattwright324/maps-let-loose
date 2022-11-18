@@ -68,6 +68,13 @@ canvas.draw-mode {
     margin-left: 5px;
 }
 
+.new-slide {
+    margin-bottom: 3px
+}
+.new-slide .bi-trash-fill {
+    color: red;
+}
+
 #sp-grid {
     display: grid;
     grid-template-columns: repeat(5, 40px);
