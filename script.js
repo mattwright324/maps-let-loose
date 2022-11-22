@@ -605,7 +605,6 @@ const mll = (function () {
         },
         tank: {
             resolveImg: function (object) {
-                return "./assets/arty.png"
                 if (object.type.modifier) {
                     return './assets/tank-' + object.type.modifier + ".png";
                 }
