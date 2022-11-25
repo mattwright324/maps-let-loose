@@ -60,43 +60,47 @@ const mll = (function () {
         }
 
         const doScale = controls.checkZoomScale.is(":checked");
-        for (let i = 0; i < placed.length; i++) {
-            const object = placed[i];
-            const meta = object.type;
-            if (meta.type === "measure-radius") {
-                const textEl = idx(["type", "text"], object);
-                const textEl2 = idx(["type", "text2"], object);
-                if (!textEl) {
-                    console.log("no text");
-                } else {
-                    const meters = Math.trunc((100 * object.getScaledWidth()) / 190);
-                    textEl.set({
-                        text: meters + "m"
-                    });
-
-                    if (textEl2) {
-                        textEl2.set({
+        function updateElementZoom(array) {
+            for (let i = 0; i < array.length; i++) {
+                const object = array[i];
+                const meta = object.type;
+                if (meta.type === "measure-radius") {
+                    const textEl = idx(["type", "text"], object);
+                    const textEl2 = idx(["type", "text2"], object);
+                    if (!textEl) {
+                        console.log("no text");
+                    } else {
+                        const meters = Math.trunc((100 * object.getScaledWidth()) / 190);
+                        textEl.set({
                             text: meters + "m"
                         });
+
+                        if (textEl2) {
+                            textEl2.set({
+                                text: meters + "m"
+                            });
+                        }
                     }
                 }
-            }
-            const typeMeta = placedMeta[meta.type];
-            if (!typeMeta) {
-                continue;
-            }
-            const baseScale = typeMeta.customScale || 1;
-            if (doScale && (typeMeta.zoomScale || (typeMeta.hasOwnProperty("zoomScaleWhen") && typeMeta.zoomScaleWhen()))) {
-                const max = typeMeta.maxZoom || 2.25;
-                let adjusted = baseScale + (scale - 1);
-                if (adjusted > max) {
-                    adjusted = max;
+                const typeMeta = placedMeta[meta.type];
+                if (!typeMeta) {
+                    continue;
                 }
-                object.set({scaleX: adjusted, scaleY: adjusted});
-            } else {
-                object.set({scaleX: baseScale, scaleY: baseScale});
+                const baseScale = typeMeta.customScale || 1;
+                if (doScale && (typeMeta.zoomScale || (typeMeta.hasOwnProperty("zoomScaleWhen") && typeMeta.zoomScaleWhen()))) {
+                    const max = typeMeta.maxZoom || 2.25;
+                    let adjusted = baseScale + (scale - 1);
+                    if (adjusted > max) {
+                        adjusted = max;
+                    }
+                    object.set({scaleX: adjusted, scaleY: adjusted});
+                } else {
+                    object.set({scaleX: baseScale, scaleY: baseScale});
+                }
             }
         }
+        updateElementZoom(placed);
+        updateElementZoom(loaded_defaults);
 
         controls.fabricCanvas.requestRenderAll();
     }
@@ -113,19 +117,24 @@ const mll = (function () {
     }
 
     function changeZIndexBySize() {
-        const objectAreas = {}
-        for (let i = 0; i < placed.length; i++) {
-            const element = placed[i];
-            const type = idx(["type", "type"], element);
-            const area = Math.round(type === "measure-line" ? calculateLineArea(element) :
-                element.getScaledWidth() * element.getScaledHeight());
+        const objectAreas = {};
+        function parseAreas(array) {
+            for (let i = 0; i < array.length; i++) {
+                const element = array[i];
+                const type = idx(["type", "type"], element);
+                const area = Math.round(type === "measure-line" ? calculateLineArea(element) :
+                    element.getScaledWidth() * element.getScaledHeight());
 
-            if (objectAreas.hasOwnProperty(area)) {
-                objectAreas[area].push(element);
-            } else {
-                objectAreas[area] = [element];
+                if (objectAreas.hasOwnProperty(area)) {
+                    objectAreas[area].push(element);
+                } else {
+                    objectAreas[area] = [element];
+                }
             }
         }
+        parseAreas(placed);
+        parseAreas(loaded_defaults);
+
         //console.log(objectAreas);
         const sizes = Object.keys(objectAreas).sort(function (a, b) {
             return a - b;
@@ -180,6 +189,14 @@ const mll = (function () {
             controls.checkInaccessible.prop('checked', controlState.inaccessible);
             controls.checkEggs.prop('checked', controlState.eggs);
             controls.checkSpecial.prop('checked', controlState.special);
+            controls.checkDefaults.prop('checked', controlState.defaults);
+            controls.radioSideA.prop('checked', controlState.defaultSideA);
+            controls.radioBothSides.prop('checked', controlState.defaultBoth);
+            controls.radioSideB.prop('checked', controlState.defaultSideB);
+            controls.checkOffensiveGarries.prop('checked', controlState.defaultOffensiveGarries);
+            controls.checkArtillery.prop('checked', controlState.defaultArty);
+            controls.checkTanks.prop('checked', controlState.defaultTanks);
+            controls.checkRepairStations.prop('checked', controlState.defaultRepairStations);
             controls.checkStrongpoints.prop('checked', controlState.sp);
             controls.checkSpResource.prop('checked', controlState.spResource);
             controls.checkSectors.prop('checked', controlState.sectors);
@@ -365,6 +382,14 @@ const mll = (function () {
             defaultGarries: controls.checkDefaultGarries.is(":checked"),
             placed: controls.checkPlacedGarries.is(":checked"),
             spawnRadius: controls.checkGarryRadius.is(":checked"),
+            defaults: controls.checkDefaults.is(":checked"),
+            defaultSideA: controls.radioSideA.is(":checked"),
+            defaultBoth: controls.radioBothSides.is(":checked"),
+            defaultSideB: controls.radioSideB.is(":checked"),
+            defaultOffensiveGarries: controls.checkOffensiveGarries.is(":checked"),
+            defaultArty: controls.checkArtillery.is(":checked"),
+            defaultTanks: controls.checkTanks.is(":checked"),
+            defaultRepairStations: controls.checkRepairStations.is(":checked"),
             arty: controls.checkArty.is(":checked"),
             flipArty: controls.checkArtyFlip.is(":checked"),
             inaccessible: controls.checkInaccessible.is(":checked"),
@@ -551,7 +576,7 @@ const mll = (function () {
                 return "./assets/repair-station.png"
             },
             zoomScale: true,
-            customScale: 0.5,
+            customScale: 0.35,
         },
         "supply-drop": {
             resolveImg: function (object) {
@@ -649,6 +674,19 @@ const mll = (function () {
             resolveImg: function (object) {
                 return './assets/enemy-' + object.type.modifier + '.png'
             },
+            zoomScale: true
+        },
+        offensive_garrisons: {
+            resolveImg: function (object) {
+                return './assets/garry-plain.png'
+            },
+            zoomScale: true
+        },
+        artillery: {
+            resolveImg: function (object) {
+                return './assets/arty.png'
+            },
+            customScale: 0.25,
             zoomScale: true
         }
     }
@@ -772,64 +810,85 @@ const mll = (function () {
         return line;
     }
 
-    function addDefaultMapElements(map) {
+    function removeAll(elements) {
+        while (elements.length > 0) {
+            const element = elements.pop();
+
+            controls.fabricCanvas.remove(element);
+            controls.exportCanvas.remove(element);
+
+            if (element.type && element.type.also) {
+                const also = element.type.also;
+                for (let j = 0; j < also.length; j++) {
+                    controls.fabricCanvas.remove(also[j]);
+                    controls.exportCanvas.remove(also[j]);
+                }
+            }
+        }
+    }
+
+    function addDefaultMapElements(map, roomSendUpdate) {
+        removeAll(loaded_defaults);
+
+        console.log("addDefaultMapElements(" + map + ", " + roomSendUpdate + ")")
+
         const promises = [];
+        for (const key in map) {
+            const sides = map[key];
+            for (const sideName in sides) {
+                const side = sides[sideName];
+                for (let i = 0; i < side.length; i++) {
+                    const data = side[i];
+                    const type = data.type || key;
+                    promises.push(new Promise(function (resolve) {
+                        fabric.Image.fromURL('', function (img) {
+                            console.log(img);
 
-        fabric.Image.fromURL('', function (img) {
-            console.log(img);
+                            img.set({
+                                selectable: false,
+                                evented: false,
+                                hasBorders: false,
+                                lockMovementX: true,
+                                lockMovementY: true,
+                                zIndex: zIndex[type],
+                                originX: "center",
+                                originY: "center",
+                                centeredScaling: true,
+                            });
+                            // img.filters.push(new fabric.Image.filters.HueRotation({rotation: 2 * Math.random() - 1}))
+                            img.set(data);
+                            img.type = {
+                                type: type,
+                                side2: sideName,
+                                modifier: data.modifier
+                            };
+                            console.log(type);
+                            // if (placedMeta[type].set) {
+                            //     img.set(placedMeta[type].set);
+                            // }
+                            // disable rotation and resizing
+                            img.setControlsVisibility({
+                                mt: false, mb: false, ml: false,
+                                mr: false, bl: false, br: false,
+                                tl: false, tr: false, mtr: false
+                            })
+                            // if (placedMeta[type].controlsVisibility) {
+                            //     img.setControlsVisibility(placedMeta[type].controlsVisibility);
+                            // }
 
-            img.set({
-                selectable: true,
-                evented: true,
-                hasBorders: false,
-                lockMovementX: true,
-                lockMovementY: true,
-                zIndex: zIndex[type],
-                originX: "center",
-                originY: "center",
-                centeredScaling: true,
-                top: e.absolutePointer.y,
-                left: e.absolutePointer.x,
-            });
-            // img.filters.push(new fabric.Image.filters.HueRotation({rotation: 2 * Math.random() - 1}))
-            img.type = {
-                id: uuid ? uuid : uuidv4(),
-                type: type,
-                modifier: modifier,
-                originalEvent: {absolutePointer: e.absolutePointer}
-            };
-            if (otherObject) {
-                img.set({
-                    angle: otherObject.angle,
-                    top: otherObject.top,
-                    left: otherObject.left,
-                });
+                            add(img);
+                            loaded_defaults.push(img);
 
-                const side = idx(["type", "side"], otherObject);
-                if (side) {
-                    img.type.side = otherObject.type.side;
+                            resolve();
+                        });
+                    }));
                 }
-                if (roomsMode && roomsRole === 'viewer') {
-                    img.set({
-                        selectable: false,
-                        evented: false
-                    })
-                }
             }
-            if (placedMeta[type].set) {
-                img.set(placedMeta[type].set);
-            }
-            // disable rotation and resizing
-            img.setControlsVisibility({
-                mt: false, mb: false, ml: false, mr: false, bl: false, br: false, tl: false, tr: false, mtr: false
-            })
-            if (placedMeta[type].controlsVisibility) {
-                img.setControlsVisibility(placedMeta[type].controlsVisibility);
-            }
+        }
 
-            placed.push(img);
+        Promise.all(promises).then(function () {
+            console.log(loaded_defaults);
 
-            addAndOrder(img);
             if (roomSendUpdate) {
                 internal.updateStatesAndRender();
             }
@@ -839,12 +898,7 @@ const mll = (function () {
             if (roomSendUpdate) {
                 roomEditorUpdateElements()
             }
-        });
-        if (type === "offensive_garrisons") {
-        } else if (type === "artillery") {
-        } else if (type === "tanks") {
-        } else if (type === "repair_stations") {
-        }
+        })
     }
 
     function addMapElement(e, type, modifier, roomSendUpdate, uuid, otherObject, resolve) {
@@ -1280,6 +1334,15 @@ const mll = (function () {
             controls.checkSectorSwap = $("#swap-sector-color");
             controls.sectorRange = $("#sector-range");
             controls.checkZoomScale = $("#zoom-scale");
+
+            controls.checkDefaults = $("#defaults-visible");
+            controls.radioSideA = $("#radioSideA");
+            controls.radioBothSides = $("#radioBoth");
+            controls.radioSideB = $("#radioSideB");
+            controls.checkOffensiveGarries = $("#offensivegarry-visible");
+            controls.checkArtillery = $("#artypos-visible");
+            controls.checkTanks = $("#tanks-visible");
+            controls.checkRepairStations = $("#repairstation-visible");
 
             elements.extraPanel = $("#extra-panel");
             elements.noSelection = $("#no-selection");
@@ -2337,20 +2400,7 @@ const mll = (function () {
             controls.btnRemoveAllElements.on('click', function () {
                 console.log('Remove all element')
 
-                while (placed.length > 0) {
-                    const element = placed.pop();
-
-                    controls.fabricCanvas.remove(element);
-                    controls.exportCanvas.remove(element);
-
-                    if (element.type && element.type.also) {
-                        const also = element.type.also;
-                        for (let j = 0; j < also.length; j++) {
-                            controls.fabricCanvas.remove(also[j]);
-                            controls.exportCanvas.remove(also[j]);
-                        }
-                    }
-                }
+                removeAll(placed);
 
                 roomEditorUpdateElements()
             })
@@ -2360,16 +2410,7 @@ const mll = (function () {
 
                 const element = placed.pop();
                 if (element) {
-                    controls.fabricCanvas.remove(element);
-                    controls.exportCanvas.remove(element);
-
-                    if (element.type && element.type.also) {
-                        const also = element.type.also;
-                        for (let j = 0; j < also.length; j++) {
-                            controls.fabricCanvas.remove(also[j]);
-                            controls.exportCanvas.remove(also[j]);
-                        }
-                    }
+                    removeAll([element]);
                 }
 
                 roomEditorUpdateElements()
@@ -2798,6 +2839,7 @@ const mll = (function () {
 
                 console.log("Loading " + filePrefix)
 
+                addDefaultMapElements(DEFAULT_ELEMENTS[filePrefix], false)
                 elements.map.setSrc('./assets/no-grid/' + filePrefix + '_NoGrid.png', internal.render);
                 elements.defaultgarries.setSrc('./assets/defaultgarries/' + filePrefix + '_defaultgarries.png', internal.render);
                 let artySuffix = controls.checkArtyFlip.is(":checked") ? 2 : 1;
@@ -2813,6 +2855,9 @@ const mll = (function () {
 
                 console.log("Rooms loading " + filePrefix);
 
+                if (loaded_defaults === null || loaded_defaults.length === 0) {
+                    addDefaultMapElements(DEFAULT_ELEMENTS[filePrefix], false)
+                }
                 const promises = [
                     new Promise(function (resolve) {
                         const imgSrc = './assets/no-grid/' + filePrefix + '_NoGrid.png';
@@ -2895,7 +2940,9 @@ const mll = (function () {
             [controls.checkGrid, controls.checkArty, controls.checkStrongpoints, controls.checkInaccessible,
                 controls.checkEggs, controls.checkSpecial,
                 controls.checkDefaultGarries, controls.checkSectors, controls.checkSectorSwap, controls.checkPlacedGarries,
-                controls.checkGarryRadius, controls.checkArtyFlip, controls.checkSpResource, controls.checkDrawingsVisible
+                controls.checkGarryRadius, controls.checkArtyFlip, controls.checkSpResource, controls.checkDrawingsVisible,
+                controls.checkDefaults, controls.radioSideA, controls.radioBothSides, controls.radioSideB,
+                controls.checkOffensiveGarries, controls.checkArtillery, controls.checkTanks, controls.checkRepairStations,
             ].forEach(function (control) {
                 control.change(function () {
                     internal.updateStatesAndRender();
@@ -3106,7 +3153,8 @@ const mll = (function () {
                     visible: range.b.visible
                 } : range.b);
 
-            if (!controls.checkSectors.is(":checked")) {
+            const sectorsVisible = controls.checkSectors.is(":checked");
+            if (!sectorsVisible) {
                 elements.sectorA.visible = false;
                 elements.sectorB.visible = false;
             }
@@ -3123,30 +3171,61 @@ const mll = (function () {
                 elements.sectorB.set({fill: sectorBlue});
             }
 
-            const applyFilters = [];
-            // Update placed element images
-            for (let i = 0; i < placed.length; i++) {
-                const object = placed[i];
-                promises.push(new Promise(function (resolve) {
-                    const meta = placedMeta[object.type.type];
-                    if (!meta) {
-                        resolve();
-                    }
-                    if (meta.customizable === "asset") {
-                        console.log(object);
-                        if (object.type.side === "enemy") {
-                            // blue to red
-                            const rotation = meta.filterRotation || 0.8097437437027739;
-                            object.filters = [new fabric.Image.filters.HueRotation({rotation: rotation})];
-                        } else {
-                            object.filters = [];
-                        }
-                        applyFilters.push(object);
-                    }
+            const showDefaults = controls.checkDefaults.is(":checked");
+            for (let i = 0; i < loaded_defaults.length; i++) {
+                const element = loaded_defaults[i];
+                const side = element.type.side2;
+                const visible = showDefaults && (
+                    controls.radioBothSides.is(":checked") ||
+                    (controls.radioSideA.is(":checked") && side === "a") ||
+                    (controls.radioSideB.is(":checked") && side === "b")
+                );
+                const type = element.type.type;
+                const typeVisible =
+                    controls.checkOffensiveGarries.is(":checked") && type === "offensive_garrisons" ||
+                    controls.checkArtillery.is(":checked") && type === "artillery" ||
+                    controls.checkTanks.is(":checked") && type === "tank" ||
+                    controls.checkRepairStations.is(":checked") && type === "repair-station";
+                element.visible = visible && typeVisible;
 
-                    object.setSrc(meta.resolveImg(object), resolve);
-                }));
+                if (sectorsVisible &&
+                    (!sectorBred && side === "a" ||
+                        sectorBred && side === "b")) {
+                    element.type.side = "enemy";
+                } else {
+                    element.type.side = null;
+                }
             }
+
+            const applyFilters = [];
+            function updateElements(array) {
+                // Update placed element images
+                for (let i = 0; i < array.length; i++) {
+                    const object = array[i];
+                    promises.push(new Promise(function (resolve) {
+                        const meta = placedMeta[object.type.type];
+                        if (!meta) {
+                            resolve();
+                        }
+                        if (meta.customizable === "asset") {
+                            console.log(object);
+                            if (object.type.side === "enemy") {
+                                // blue to red
+                                const rotation = meta.filterRotation || 0.8097437437027739;
+                                object.filters = [new fabric.Image.filters.HueRotation({rotation: rotation})];
+                            } else {
+                                object.filters = [];
+                            }
+                            applyFilters.push(object);
+                        }
+
+                        object.setSrc(meta.resolveImg(object), resolve);
+                    }));
+                }
+            }
+
+            updateElements(placed);
+            updateElements(loaded_defaults);
 
             let wasLoaded = false;
             for (let x = 0; x < 5; x++) {
