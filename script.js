@@ -3188,12 +3188,14 @@ const mll = (function () {
                     controls.checkRepairStations.is(":checked") && type === "repair-station";
                 element.visible = visible && typeVisible;
 
-                if (sectorsVisible &&
-                    (!sectorBred && side === "a" ||
-                        sectorBred && side === "b")) {
+                if (sectorsVisible && (!sectorBred && side === "a" || sectorBred && side === "b")) {
                     element.type.side = "enemy";
                 } else {
                     element.type.side = null;
+
+                    if (sectorsVisible && type === "offensive_garrisons") {
+                        element.visible = false;
+                    }
                 }
             }
 
