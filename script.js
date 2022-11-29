@@ -678,6 +678,17 @@ const mll = (function () {
         },
         offensive_garrisons: {
             resolveImg: function (object) {
+                const sectorBred = controls.checkSectorSwap.is(":checked");
+                const sectorsVisible = controls.checkSectors.is(":checked");
+                const objectX = object.left;
+                const objectY = object.top;
+
+                if (sectorsVisible &&
+                    (!sectorBred && rectContainsPoint(elements.sectorA, objectX, objectY) ||
+                        sectorBred && rectContainsPoint(elements.sectorB, objectX, objectY))) {
+                    return './assets/garry-plain-invalid.png';
+                }
+
                 return './assets/garry-plain.png'
             },
             zoomScale: true
