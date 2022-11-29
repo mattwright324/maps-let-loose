@@ -35,6 +35,13 @@ const POINT_COORDS = {
         [[[131, 1178, 187, 161]], [[448, 1082, 189, 167]], [[822, 1237, 197, 164]], [[1259, 1325, 172, 134]], [[1498, 1325, 152, 162]]],
         [null, null, null, null, null],
     ],
+    Kharkov: [
+        [null, [[523, 143, 160, 189]], [[910, 142, 252, 198]], [[1246, 148, 224, 189]], null],
+        [null, [[492, 410, 210, 270]], [[957, 447, 177, 186]], [[1306, 430, 211, 185]], null],
+        [null, [[522, 792, 170, 197]], [[930, 800, 175, 230]], [[1320, 783, 137, 191]], null],
+        [null, [[608, 1220, 185, 174]], [[909, 1153, 257, 284]], [[1337, 1193, 154, 182]], null],
+        [null, [[472, 1534, 260, 184]], [[921, 1518, 166, 196]], [[1285, 1511, 144, 185]], null],
+    ],
     Kursk: [
         [null, [[469, 173, 308, 190]], [[949, 192, 145, 167]], [[1317, 198, 174, 169]], null],
         [null, [[534, 523, 177, 190]], [[863, 483, 218, 211]], [[1242, 468, 197, 222]], null],
@@ -726,6 +733,150 @@ const DEFAULT_ELEMENTS = {
                     type: "repair-station",
                     left: 1846.2528607309498,
                     top: 1530.309682354749,
+                }
+            ]
+        }
+    },
+    Kharkov: { // TODO
+        offensive_garrisons: {
+            a: [{
+                "left": 603.8622874470572,
+                "top": 326.7002863095241,
+            }, {
+                "left": 1078.6282435106996,
+                "top": 387.64621235281936,
+            }, {
+                "left": 1402.7675377738208,
+                "top": 356.5083296689237,
+            }],
+            b: [{
+                left: 0,
+                top: 0,
+            }, {
+                left: 0,
+                top: 0,
+            }, {
+                left: 0,
+                top: 0,
+            }],
+        },
+        artillery: {
+            a: [
+                {
+                    angle: 90 + 0,
+                    left: 0,
+                    top: 0,
+                },
+                {
+                    angle: 90 + 0,
+                    left: 0,
+                    top: 0,
+                },
+                {
+                    angle: 90 + 0,
+                    left: 0,
+                    top: 0,
+                }
+            ],
+            b: [
+                {
+                    angle: 90 + 0,
+                    left: 0,
+                    top: 0,
+                },
+                {
+                    angle: 90 + 0,
+                    left: 0,
+                    top: 0,
+                },
+                {
+                    angle: 90 + 0,
+                    left: 0,
+                    top: 0,
+                }
+            ]
+        },
+        tank: {
+            a: [
+                {
+                    type: 'tank',
+                    modifier: 'light',
+                    angle: 0,
+                    left: 0,
+                    top: 0,
+                },
+                {
+                    type: 'tank',
+                    modifier: 'med',
+                    angle: 0,
+                    left: 0,
+                    top: 0,
+                },
+                {
+                    type: 'tank',
+                    modifier: 'recon',
+                    angle: 0,
+                    left: 0,
+                    top: 0,
+                }
+            ],
+            b: [
+                {
+                    type: 'tank',
+                    modifier: 'light',
+                    angle: 0,
+                    left: 0,
+                    top: 0,
+                },
+                {
+                    type: 'tank',
+                    modifier: 'med',
+                    angle: 0,
+                    left: 0,
+                    top: 0,
+                },
+                {
+                    type: 'tank',
+                    modifier: 'recon',
+                    angle: 0,
+                    left: 0,
+                    top: 0,
+                }
+            ]
+        },
+        repair_stations: {
+            a: [
+                {
+                    type: "repair-station",
+                    left: 0,
+                    top: 0,
+                },
+                {
+                    type: "repair-station",
+                    left: 0,
+                    top: 0,
+                },
+                {
+                    type: "repair-station",
+                    left: 0,
+                    top: 0,
+                }
+            ],
+            b: [
+                {
+                    type: "repair-station",
+                    left: 0,
+                    top: 0,
+                },
+                {
+                    type: "repair-station",
+                    left: 0,
+                    top: 0,
+                },
+                {
+                    type: "repair-station",
+                    left: 0,
+                    top: 0,
                 }
             ]
         }
