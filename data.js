@@ -780,19 +780,19 @@ const DEFAULT_ELEMENTS = {
             ],
             b: [
                 {
-                    angle: 90 + 0,
-                    left: 0,
-                    top: 0,
+                    angle: 90,
+                    "left": 925.9629394248217,
+                    "top": 1836.483856555195,
                 },
                 {
-                    angle: 90 + 0,
-                    left: 0,
-                    top: 0,
+                    angle: 90 + 8.549076820418563,
+                    "left": 944.150129413807,
+                    "top": 1839.4243004456298,
                 },
                 {
-                    angle: 90 + 0,
-                    left: 0,
-                    top: 0,
+                    angle: 90 + 24.75154263791195,
+                    "left": 962.0106034149661,
+                    "top": 1846.176430860702,
                 }
             ]
         },
@@ -801,9 +801,9 @@ const DEFAULT_ELEMENTS = {
                 {
                     type: 'tank',
                     modifier: 'light',
-                    angle: 0,
-                    left: 0,
-                    top: 0,
+                    "angle": 80.96071499030487,
+                    "left": 586.4687333715613,
+                    "top": 68.2905434579909,
                 },
                 {
                     type: 'tank',
@@ -815,32 +815,32 @@ const DEFAULT_ELEMENTS = {
                 {
                     type: 'tank',
                     modifier: 'recon',
-                    angle: 0,
-                    left: 0,
-                    top: 0,
+                    "angle": -36.9097083985824,
+                    "left": 1373.2078669767213,
+                    "top": 86.94429380337465,
                 }
             ],
             b: [
                 {
                     type: 'tank',
                     modifier: 'light',
-                    angle: 0,
-                    left: 0,
-                    top: 0,
+                    "angle": 115.91501537460107,
+                    "left": 490.9975182841538,
+                    "top": 1838.4126619644885,
                 },
                 {
                     type: 'tank',
                     modifier: 'med',
-                    angle: 0,
-                    left: 0,
-                    top: 0,
+                    "angle": 40.23412481691448,
+                    "left": 996.3888914882565,
+                    "top": 1881.0056490582729,
                 },
                 {
                     type: 'tank',
                     modifier: 'recon',
                     angle: 0,
-                    left: 0,
-                    top: 0,
+                    "left": 1406.6374160979742,
+                    "top": 1909.722251299826,
                 }
             ]
         },
@@ -848,35 +848,35 @@ const DEFAULT_ELEMENTS = {
             a: [
                 {
                     type: "repair-station",
-                    left: 0,
-                    top: 0,
+                    "left": 599.2630067292481,
+                    "top": 58.83632205726167,
                 },
                 {
                     type: "repair-station",
-                    left: 0,
-                    top: 0,
+                    "left": 1023.2161782120354,
+                    "top": 38.777319206877564,
                 },
                 {
                     type: "repair-station",
-                    left: 0,
-                    top: 0,
+                    "left": 1358.675680016905,
+                    "top": 74.55490301569648,
                 }
             ],
             b: [
                 {
                     type: "repair-station",
-                    left: 0,
-                    top: 0,
+                    "left": 532.858692614044,
+                    "top": 1876.8300182125024,
                 },
                 {
                     type: "repair-station",
-                    left: 0,
-                    top: 0,
+                    "left": 1010.7869134349389,
+                    "top": 1871.3470576030804,
                 },
                 {
                     type: "repair-station",
-                    left: 0,
-                    top: 0,
+                    "left": 1382.9698536995277,
+                    "top": 1892.33533679535,
                 }
             ]
         }
