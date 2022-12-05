@@ -181,8 +181,7 @@ const mll = (function () {
             console.log('updating controls state')
             controls.comboMapSelect.val(controlState.map);
             controls.checkGrid.prop('checked', controlState.grid);
-            controls.checkDefaultGarries.prop('checked', controlState.defaultGarries);
-            controls.checkPlacedGarries.prop('checked', controlState.placed);
+            controls.checkPlacedElements.prop('checked', controlState.placed);
             controls.checkGarryRadius.prop('checked', controlState.spawnRadius);
             controls.checkArty.prop('checked', controlState.arty);
             controls.checkArtyFlip.prop('checked', controlState.flipArty);
@@ -379,8 +378,7 @@ const mll = (function () {
         return {
             map: controls.comboMapSelect.val(),
             grid: controls.checkGrid.is(":checked"),
-            defaultGarries: controls.checkDefaultGarries.is(":checked"),
-            placed: controls.checkPlacedGarries.is(":checked"),
+            placed: controls.checkPlacedElements.is(":checked"),
             spawnRadius: controls.checkGarryRadius.is(":checked"),
             defaults: controls.checkDefaults.is(":checked"),
             defaultSideA: controls.radioSideA.is(":checked"),
@@ -1331,8 +1329,7 @@ const mll = (function () {
             controls.checkStrongpoints = $("#sp-visible");
             controls.checkSpResource = $("#sp-resource-visible");
             elements.strongpointGrid = $("#sp-grid");
-            controls.checkDefaultGarries = $("#dg-visible");
-            controls.checkPlacedGarries = $("#garry-visible");
+            controls.checkPlacedElements = $("#placed-visible");
             controls.checkGarryRadius = $("#garry-radius-visible");
             controls.btnRemoveAllElements = $("#remove-all-elements");
             controls.btnUndoLastElement = $("#undo-last-element");
@@ -2120,18 +2117,6 @@ const mll = (function () {
                     });
                 }
             }
-            fabric.Image.fromURL('', function (img) {
-                elements.defaultgarries = img;
-
-                img.set({
-                    selectable: false,
-                    evented: false,
-                    visible: $("#dg-visible").is("checked"),
-                    zIndex: zIndex.default_garrisons
-                });
-
-                addAndOrder(img);
-            });
 
             const deleteIcon = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='red' class='bi bi-trash3' viewBox='0 0 16 16'%3E%3Cpath d='M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z'/%3E%3C/svg%3E";
             const deleteImg = document.createElement('img');
@@ -2852,7 +2837,6 @@ const mll = (function () {
 
                 addDefaultMapElements(DEFAULT_ELEMENTS[filePrefix], false)
                 elements.map.setSrc('./assets/no-grid/' + filePrefix + '_NoGrid.png', internal.render);
-                elements.defaultgarries.setSrc('./assets/defaultgarries/' + filePrefix + '_defaultgarries.png', internal.render);
                 let artySuffix = controls.checkArtyFlip.is(":checked") ? 2 : 1;
                 elements.arty.setSrc('./assets/arty/' + filePrefix + '_Arty' + artySuffix + '.png', internal.render);
                 elements.inaccessible.setSrc('./assets/accessibility/' + filePrefix + "_Accessible.png", internal.render);
@@ -2874,14 +2858,6 @@ const mll = (function () {
                         const imgSrc = './assets/no-grid/' + filePrefix + '_NoGrid.png';
                         if (elements.map.src !== imgSrc) {
                             elements.map.setSrc(imgSrc, resolve);
-                        } else {
-                            resolve();
-                        }
-                    }),
-                    new Promise(function (resolve) {
-                        const imgSrc = './assets/defaultgarries/' + filePrefix + '_defaultgarries.png';
-                        if (elements.defaultgarries.src !== imgSrc) {
-                            elements.defaultgarries.setSrc(imgSrc, resolve);
                         } else {
                             resolve();
                         }
@@ -2949,8 +2925,7 @@ const mll = (function () {
             }
 
             [controls.checkGrid, controls.checkArty, controls.checkStrongpoints, controls.checkInaccessible,
-                controls.checkEggs, controls.checkSpecial,
-                controls.checkDefaultGarries, controls.checkSectors, controls.checkSectorSwap, controls.checkPlacedGarries,
+                controls.checkEggs, controls.checkSpecial, controls.checkSectors, controls.checkSectorSwap, controls.checkPlacedElements,
                 controls.checkGarryRadius, controls.checkArtyFlip, controls.checkSpResource, controls.checkDrawingsVisible,
                 controls.checkDefaults, controls.radioSideA, controls.radioBothSides, controls.radioSideB,
                 controls.checkOffensiveGarries, controls.checkArtillery, controls.checkTanks, controls.checkRepairStations,
@@ -3114,14 +3089,11 @@ const mll = (function () {
             if (elements.grid) {
                 elements.grid.visible = controls.checkGrid.is(":checked");
             }
-            if (elements.defaultgarries) {
-                elements.defaultgarries.visible = controls.checkDefaultGarries.is(":checked");
-            }
             if (elements.arty) {
                 elements.arty.visible = controls.checkArty.is(":checked");
             }
             for (let i = 0; i < placed.length; i++) {
-                placed[i].visible = controls.checkPlacedGarries.is(":checked");
+                placed[i].visible = controls.checkPlacedElements.is(":checked");
             }
 
             let artySuffix = controls.checkArtyFlip.is(":checked") ? 2 : 1;
