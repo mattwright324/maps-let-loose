@@ -155,7 +155,7 @@ const ARTY_CENTER = {
 const DEFAULT_ELEMENTS = {
     Carentan: {
         offensive_garrisons: {
-            a: [
+            b: [
                 {
                     left: 623.1065265346344,
                     top: 672.685383319194
@@ -169,7 +169,7 @@ const DEFAULT_ELEMENTS = {
                     top: 1270.0309676655831
                 }
             ],
-            b: [
+            a: [
                 {
                     left: 1328.8757892857964,
                     top: 636.6765070083594
@@ -307,7 +307,7 @@ const DEFAULT_ELEMENTS = {
     },
     Foy: {
         offensive_garrisons: {
-            a: [{
+            b: [{
                 left: 593.7066373682393,
                 top: 506.11522150589315,
             }, {
@@ -317,7 +317,7 @@ const DEFAULT_ELEMENTS = {
                 left: 1406.807628829673,
                 top: 595.4509783949038,
             }],
-            b: [{
+            a: [{
                 left: 600.7386043744374,
                 top: 1209.727596089861,
             }, {
@@ -451,7 +451,7 @@ const DEFAULT_ELEMENTS = {
     },
     Hill400: {
         offensive_garrisons: {
-            a: [{
+            b: [{
                 left: 548.8835873928836,
                 top: 513.9377869431116,
             }, {
@@ -461,7 +461,7 @@ const DEFAULT_ELEMENTS = {
                 left: 553.9336631092619,
                 top: 1258.60265747598,
             }],
-            b: [{
+            a: [{
                 left: 1214.546750751503,
                 top: 603.8340328595239,
             }, {
@@ -595,7 +595,7 @@ const DEFAULT_ELEMENTS = {
     },
     HurtgenV2: {
         offensive_garrisons: {
-            a: [{
+            b: [{
                 left: 558.9263293971011,
                 top: 518.7233837443395,
             }, {
@@ -605,7 +605,7 @@ const DEFAULT_ELEMENTS = {
                 left: 561.7491077157383,
                 top: 1236.5790320414535,
             }],
-            b: [{
+            a: [{
                 left: 1163.797539990732,
                 top: 714.4910135159308,
             }, {
@@ -739,7 +739,7 @@ const DEFAULT_ELEMENTS = {
     },
     Kharkov: {
         offensive_garrisons: {
-            a: [{
+            b: [{
                 "left": 603.8622874470572,
                 "top": 326.7002863095241,
             }, {
@@ -749,7 +749,7 @@ const DEFAULT_ELEMENTS = {
                 "left": 1402.7675377738208,
                 "top": 356.5083296689237,
             }],
-            b: [{
+            a: [{
                 "left": 550.8090069088673,
                 "top": 1514.834904848913,
             }, {
@@ -883,7 +883,7 @@ const DEFAULT_ELEMENTS = {
     },
     Kursk: {
         offensive_garrisons: {
-            a: [{
+            b: [{
                 left: 646.3034393199134,
                 top: 468.1061472987303,
             }, {
@@ -893,7 +893,7 @@ const DEFAULT_ELEMENTS = {
                 left: 1406.450238966994,
                 top: 378.71249182836334,
             }],
-            b: [{
+            a: [{
                 left: 699.6472965227365,
                 top: 1441.816560077191,
             }, {
@@ -1027,7 +1027,7 @@ const DEFAULT_ELEMENTS = {
     },
     Omaha: {
         offensive_garrisons: {
-            a: [{
+            b: [{
                 left: 400.6747439049691,
                 top: 658.6820864368391,
             }, {
@@ -1037,7 +1037,7 @@ const DEFAULT_ELEMENTS = {
                 left: 400.3760963227386,
                 top: 1276.3912640853614,
             }],
-            b: [{
+            a: [{
                 left: 1496.786482033171,
                 top: 522.8595175426852,
             }, {
@@ -1171,7 +1171,7 @@ const DEFAULT_ELEMENTS = {
     },
     PHL: {
         offensive_garrisons: {
-            a: [{
+            b: [{
                 left: 564.2804116720569,
                 top: 617.2107680948488,
             }, {
@@ -1181,7 +1181,7 @@ const DEFAULT_ELEMENTS = {
                 left: 1308.3295889312337,
                 top: 640.3991679328561,
             }],
-            b: [{
+            a: [{
                 left: 651.52201651546,
                 top: 1213.6926526534166,
             }, {
@@ -1315,7 +1315,7 @@ const DEFAULT_ELEMENTS = {
     },
     Remagen: {
         offensive_garrisons: {
-            a: [{
+            b: [{
                 left: 541.970705965027,
                 top: 548.4011110051025,
             }, {
@@ -1325,7 +1325,7 @@ const DEFAULT_ELEMENTS = {
                 left: 1306.5320135443317,
                 top: 558.7441747890902,
             }],
-            b: [{
+            a: [{
                 left: 639.3372874073724,
                 top: 1331.84245337665,
             }, {
@@ -1459,7 +1459,7 @@ const DEFAULT_ELEMENTS = {
     },
     SMDMV2: {
         offensive_garrisons: {
-            a: [{
+            b: [{
                 left: 613.5246158108044,
                 top: 638.0480849042734,
             }, {
@@ -1469,7 +1469,7 @@ const DEFAULT_ELEMENTS = {
                 left: 1235.2651384685041,
                 top: 596.0772975683427,
             }],
-            b: [{
+            a: [{
                 left: 582.3703553550762,
                 top: 1275.1177793946044,
             }, {
@@ -1603,7 +1603,7 @@ const DEFAULT_ELEMENTS = {
     },
     SME: {
         offensive_garrisons: {
-            a: [{
+            b: [{
                 left: 621.4942210412511,
                 top: 539.2105415382305,
             }, {
@@ -1613,7 +1613,7 @@ const DEFAULT_ELEMENTS = {
                 left: 655.0646865790467,
                 top: 1335.0402738872099,
             }],
-            b: [{
+            a: [{
                 left: 1339.0558547939365,
                 top: 677.321882262922,
             }, {
@@ -1747,7 +1747,7 @@ const DEFAULT_ELEMENTS = {
     },
     Stalingrad: {
         offensive_garrisons: {
-            a: [{
+            b: [{
                 left: 515.4129287946967,
                 top: 470.0844847094793,
             }, {
@@ -1757,7 +1757,7 @@ const DEFAULT_ELEMENTS = {
                 left: 466.36353632964347,
                 top: 1465.0055855156406,
             }],
-            b: [{
+            a: [{
                 left: 1514.3628889881509,
                 top: 1307.2944674419896,
             }, {
@@ -1891,7 +1891,7 @@ const DEFAULT_ELEMENTS = {
     },
     Utah: {
         offensive_garrisons: {
-            a: [{
+            b: [{
                 left: 541.05816992896,
                 top: 491.44992996282576,
             }, {
@@ -1901,7 +1901,7 @@ const DEFAULT_ELEMENTS = {
                 left: 455.5978606778001,
                 top: 1449.3461697443067,
             }],
-            b: [{
+            a: [{
                 left: 1474.3118288468704,
                 top: 532.9574511511574,
             }, {
