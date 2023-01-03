@@ -3021,7 +3021,7 @@ const mll = (function () {
                 let file = event.target.files[0];
 
                 if (file) {
-                    controls.inputValue.val(file.name);
+                    //controls.inputValue.val(file.name);
                 } else {
                     return;
                 }
