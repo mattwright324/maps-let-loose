@@ -49,6 +49,8 @@ const mll = (function () {
     let resetSelectedPoints = false;
     let selectedElement;
     let loaded_defaults = [];
+    let selectedSlide;
+    let slides = [];
 
     function updateZoomScale() {
         const zoom = controls.fabricCanvas.getZoom();
@@ -683,12 +685,22 @@ const mll = (function () {
 
                 if (sectorsVisible &&
                     (!sectorBred && rectContainsPoint(elements.sectorA, objectX, objectY) ||
-                        sectorBred && rectContainsPoint(elements.sectorB, objectX, objectY))) {
+                        sectorBred && rectContainsPoint(elements.sectorB, objectX, objectY))
+                    && object.type.side === null) {
+                    return './assets/garry-plain-invalid.png';
+                }
+
+                if (sectorsVisible &&
+                    (sectorBred && rectContainsPoint(elements.sectorA, objectX, objectY) ||
+                        !sectorBred && rectContainsPoint(elements.sectorB, objectX, objectY))
+                    && object.type.side === "enemy") {
                     return './assets/garry-plain-invalid.png';
                 }
 
                 return './assets/garry-plain.png'
             },
+            customizable: "asset",
+            filterRotation: -0.45,
             zoomScale: true
         },
         artillery: {
@@ -1380,6 +1392,25 @@ const mll = (function () {
             controls.btnImport = $("#import");
             controls.importFileChooser = $("#importFileChooser");
 
+            controls.createConfigs = $("#createConfigs");
+            controls.addNewSlide = $("#addNewSlide");
+            elements.newSlidesDiv = $("#new-slides");
+            controls.slidesCreateModal = $("#slidesCreateModal");
+            controls.submitCreateSlides = $("#submitCreateSlides");
+
+            controls.createConfigs.click(function () {
+                elements.newSlidesDiv.html("");
+                controls.addNewSlide.click();
+            });
+
+            controls.submitCreateSlides.click(function () {
+                $(".new-slide").each(function (i, e) {
+                    console.log(i + " [" + $(e).find("input").val() + "]")
+                });
+
+                $("#cancelCreateSlides").click();
+            });
+
             new ClipboardJS('.btn');
 
             if (elements.joinPanel[0]) {
@@ -1648,6 +1679,9 @@ const mll = (function () {
                 tank_recon: function () {
                     mll.menuAdd("tank", "recon")
                 },
+                truck_jeep: function () {
+                    mll.menuAdd("truck", "jeep")
+                },
                 truck_supply: function () {
                     mll.menuAdd("truck", "supply")
                 },
@@ -1808,6 +1842,7 @@ const mll = (function () {
                         tank_medium: {name: "Medium Tank"},
                         tank_light: {name: "Light Tank", icon: "bi bi-dot"},
                         tank_recon: {name: "Recon Tank", icon: "bi bi-camera"},
+                        truck_jeep: {name: "Jeep"},
                         truck_supply: {name: "Supply Truck"},
                         truck_transport: {name: "Transport Truck"},
                     }
@@ -2846,6 +2881,7 @@ const mll = (function () {
             }
 
             internal.roomsLoadMapAndSP = function (filePrefix, selectedSp, spCallback) {
+                lastLoadedMap = filePrefix;
                 resetSelectedPoints = true;
 
                 console.log("Rooms loading " + filePrefix);
@@ -3170,15 +3206,14 @@ const mll = (function () {
                     controls.checkTanks.is(":checked") && type === "tank" ||
                     controls.checkRepairStations.is(":checked") && type === "repair-station";
                 element.visible = visible && typeVisible;
+                element.type.side = "enemy";
 
                 if (sectorsVisible && (!sectorBred && side === "a" || sectorBred && side === "b")) {
                     element.type.side = "enemy";
+                } else if (sectorsVisible && (sectorBred && side === "b" || !sectorBred && side === "a") && type === "offensive_garrisons") {
+                    element.type.side = "enemy";
                 } else {
                     element.type.side = null;
-
-                    if (sectorsVisible && type === "offensive_garrisons") {
-                        element.visible = false;
-                    }
                 }
             }
 
@@ -3193,7 +3228,7 @@ const mll = (function () {
                             resolve();
                         }
                         if (meta.customizable === "asset") {
-                            console.log(object);
+                            // console.log(object);
                             if (object.type.side === "enemy") {
                                 // blue to red
                                 const rotation = meta.filterRotation || 0.8097437437027739;
