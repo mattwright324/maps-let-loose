@@ -465,11 +465,20 @@
                     <div id="flush-collapseA" class="accordion-collapse collapse show" aria-labelledby="flush-headingA">
                         <div class="accordion-body">
                             <div style="margin-bottom: 10px">
-                                <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#slidesCreateModal">Create</button>
-                                <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#slidesManageModal">Manage</button>
-                                <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#slidesImportModal">Import</button>
+                                <button id="createConfigs" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#slidesCreateModal">Create</button>
+                                <button id="manageConfigs" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#slidesManageModal">Manage</button>
+                                <button id="importConfigs" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#slidesImportModal"
+                                        onclick="document.getElementById('importFileChooser').click()">
+                                    <span class="spinner"><span class="spinner-border spinner-border-sm" role="status"></span></span>
+                                    <i class="bi bi-upload"></i>&nbsp;&nbsp;Import
+<!--                                    <input id="importFileChooser" type="file" hidden/>-->
+                                </button>
+                                <button id="exportConfigs" class="btn btn-secondary">
+                                    <span class="spinner"><span class="spinner-border spinner-border-sm" role="status"></span></span>
+                                    <span class="text"><i class="bi bi-download"></i>&nbsp;&nbsp;Export</span>
+                                </button>
                             </div>
-                            <select class="form-select" size="5" aria-label="size 3 select example">
+                            <select id="configsSelect" class="form-select" size="5" aria-label="size 3 select example">
                                 <option selected>Default</option>
                             </select>
                         </div>
@@ -486,7 +495,7 @@
                                         Create new config(s) using config as base:
                                     </p>
                                     <p>
-                                        <select class="form-select" aria-label="Default select example">
+                                        <select id="selectBaseConfig" class="form-select" aria-label="Default select example">
                                             <option selected>Default</option>
                                         </select>
                                     </p>
@@ -507,7 +516,7 @@
                                                 $("#newslide-" + num).remove();
                                             }
                                         </script>
-                                        <button class="btn btn-secondary" onclick="addLine()">Add line</button>
+                                        <button id="addNewSlide" class="btn btn-secondary" onclick="addLine()">Add line</button>
                                     </p>
                                     <div id="new-slides">
                                         <div class="input-group new-slide" id="newslide-0">
@@ -520,8 +529,8 @@
                                     </div>
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Create</button>
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button id="submitCreateSlides" type="button" class="btn btn-primary" data-bs-dismiss="modal">Create</button>
+                                    <button id="cancelCreateSlides" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                                 </div>
                             </div>
                         </div>
@@ -535,7 +544,7 @@
                                 </div>
                                 <div class="modal-body" id="manage-slides-list">
                                     <div>
-                                        <div class="input-group new-slide">
+                                        <div class="input-group slide">
                                             <span class="input-group-text"><i class="bi bi-list"></i></span>
 
                                             <input type="text" class="form-control" value="Carentan - Base Layout">
@@ -553,7 +562,7 @@
                                         </p>
                                     </div>
                                     <div>
-                                        <div class="input-group new-slide">
+                                        <div class="input-group slide">
                                             <span class="input-group-text"><i class="bi bi-list"></i></span>
 
                                             <input type="text" class="form-control" value="Carentan - Garrisons">
@@ -571,7 +580,7 @@
                                         </p>
                                     </div>
                                     <div>
-                                        <div class="input-group new-slide">
+                                        <div class="input-group slide">
                                             <span class="input-group-text"><i class="bi bi-list"></i></span>
 
                                             <input type="text" class="form-control" value="Carentan - Foo Bar">
@@ -608,30 +617,32 @@
                                 </div>
                                 <div class="modal-body">
                                     <p>
-                                        Importing: <strong>mll_carentan_20220926-160408.zip</strong>
+                                        Importing: <strong id="importFileName">mll_carentan_20220926-160408.zip</strong>
                                     </p>
                                     <p>
-                                        Contains 3 config(s): 1 new and 2 with matching ids
+                                        Contains <span id="configCount">3</span> config(s):
+                                        <span id="configNewCount">1</span> new and
+                                        <span id="configMatchingCount">2</span> with matching ids
                                     </p>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="b">
-                                        <label class="form-check-label" for="b">
+                                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="importRemoveAllAddNew">
+                                        <label class="form-check-label" for="importRemoveAllAddNew">
                                             Remove all current configs and add new
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="a" checked>
-                                        <label class="form-check-label" for="a">
+                                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="importAddOverwiteAll" checked>
+                                        <label class="form-check-label" for="importAddOverwiteAll">
                                             Add and overwrite all config(s)
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="c">
-                                        <label class="form-check-label" for="c">
+                                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="importAddOverwriteSelect">
+                                        <label class="form-check-label" for="importAddOverwriteSelect">
                                             Select config(s) to add and overwrite
                                         </label>
                                     </div>
-                                    <div style="overflow: scroll; max-height: 300px; padding: 20px; border-radius: 8px; border: 1px dashed lightgray; margin-top: 10px;">
+                                    <div id="importConfigList" style="overflow: scroll; max-height: 300px; padding: 20px; border-radius: 8px; border: 1px dashed lightgray; margin-top: 10px;">
                                         <div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" checked>
@@ -702,13 +713,17 @@
                                         </div>
                                     </div>
                                     <div style="text-align: center">
-                                        <a id="selectAll" href="javascript:" style="margin-right: 20px">Select all</a>
-                                        <a id="deselectAll" href="javascript:">Deselect all</a>
+                                        <a href="javascript:" style="margin-right: 20px" onclick="$('#importConfigList input').prop('checked', true)">Select all</a>
+                                        <a href="javascript:" onclick="$('#importConfigList input').prop('checked', false)">Deselect all</a>
                                     </div>
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Import</button>
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button id="submitImport" type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                                        Import
+                                    </button>
+                                    <button id="cancelImport" type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                        Cancel
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -845,6 +860,7 @@
             attacking side
         </li>
         <li>Offensive default garrisons can only be destroyed by hand or satchel</li>
+        <li>Player render distance is 500m. Vehicle render distance is 1000m.</li>
         <li>
             Measurements are based on 190 pixels being close enough to 200m or one grid square
         </li>
@@ -888,6 +904,10 @@
     <ul>
         <li><a target="_blank" href="https://store.steampowered.com/news/app/686810/view/2998819983302580037">
             The Ultimate New Player Handbook
+        </a></li>
+        <li><a target="_blank" href="https://i.squidds.tv/dIwe6/fuVUPOdU32.pdf">
+            <!-- Alternate link: https://imgur.com/gallery/YyICmzi -->
+            HLL Concept Cards
         </a></li>
         <li><a target="_blank" href="https://www.theline.gg/tankbible">
             The Tank Bible
@@ -940,7 +960,7 @@
 </div>
 
 <div class="ui container" style="padding-top:3%;padding-bottom:3%;color:darkgray;text-align:center">
-    mattwright324 | 2022 | <a href="/">home</a> | <a target="_blank" href="https://github.com/mattwright324">github</a>
+    mattwright324 | 2023 | <a href="/">home</a> | <a target="_blank" href="https://github.com/mattwright324">github</a>
     | <a target="_blank" href="https://github.com/mattwright324/maps-let-loose">maps-let-loose</a>
 </div>
 </body>
