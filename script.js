@@ -169,6 +169,31 @@ const mll = (function () {
         return selected;
     }
 
+    function updateConfigsSelect() {
+        controls.configsSelect.html("");
+        if (slides.length === 0) {
+            console.log('slides empty, creating new default')
+
+            selectedSlide = uuidv4();
+            const newDefault = $.extend({
+                id: selectedSlide,
+                name: "Default"
+            }, getFullState());
+            newDefault.state.elements = [];
+            newDefault.state.drawings = [];
+            slides.push(newDefault);
+
+            loadFromRoomState(newDefault, function (){});
+        }
+
+        for (let i = 0; i < slides.length; i++) {
+            const slide = slides[i];
+            controls.configsSelect.append("<option value='" + slide.id + "'>" + slide.name + "</option>")
+        }
+
+        controls.configsSelect.val(selectedSlide);
+    }
+
     async function loadFromRoomState(message, spCallback) {
         if (!message || !message.state) {
             console.warn('message or state was null')
@@ -223,7 +248,7 @@ const mll = (function () {
             for (let i = 0; i < placed.length; i++) {
                 const element = placed[i];
                 if (updateIds.indexOf(element.type.id) === -1) {
-                    console.log('removing ' + element.type.id)
+                    console.log("removing %s", element.type.id)
                     controls.fabricCanvas.remove(element);
                     controls.exportCanvas.remove(element);
 
@@ -326,7 +351,7 @@ const mll = (function () {
                 const meta = elementState[i].type;
 
                 if (currentIds.indexOf(meta.id) === -1) {
-                    console.log('adding ' + meta.id)
+                    console.log("adding %s", meta.id)
                     addMapElement(meta.originalEvent, meta.type, meta.modifier, false, meta.id, elementState[i]);
                 }
             }
@@ -338,7 +363,7 @@ const mll = (function () {
 
         const drawingState = message.state.drawings;
         if (drawingState) {
-            console.log('updating drawing state')
+            console.log('updating drawing state %s', drawingState.length)
             while (drawings.length) {
                 const element = drawings.pop();
                 controls.fabricCanvas.remove(element);
@@ -405,9 +430,21 @@ const mll = (function () {
         }
     }
 
+    function updateSlideControls() {
+        for (let i = 0; i < slides.length; i++) {
+            const slide = slides[i];
+            if (slide.id === selectedSlide) {
+                console.log("updateSlideControls(%s)", slide.id)
+                slide.state.controls = getControlsRoomState()
+                return;
+            }
+        }
+    }
+
     function roomEditorUpdateControls(control) {
+        updateSlideControls();
         const controlAbout = control instanceof jQuery ? control.attr("id") + "=" + (control.val() || control.is(":checked")) : control;
-        console.log("roomEditorUpdateControls(" + controlAbout + ")")
+        console.log("roomEditorUpdateControls(%s)", controlAbout)
         if (roomsMode && roomsRole === 'editor') {
             console.log('sending editor-controls event')
             const payload = {
@@ -453,7 +490,20 @@ const mll = (function () {
         return reducedElements;
     }
 
+    function updateSlideElements() {
+        for (let i = 0; i < slides.length; i++) {
+            const slide = slides[i];
+            if (slide.id === selectedSlide) {
+                console.log("updateSlideElements(%s)", slide.id)
+                slide.state.elements = getElementsRoomState();
+                console.log(slides);
+                return;
+            }
+        }
+    }
+
     function roomEditorUpdateElements() {
+        updateSlideElements();
         if (roomsMode && roomsRole === 'editor') {
             console.log('sending editor-elements event');
 
@@ -467,7 +517,19 @@ const mll = (function () {
         }
     }
 
+    function updateSlideDrawings() {
+        for (let i = 0; i < slides.length; i++) {
+            const slide = slides[i];
+            if (slide.id === selectedSlide) {
+                console.log("updateSlideDrawings(%s) %s", slide.id, drawings.length)
+                slide.state.drawings = JSON.parse(JSON.stringify(drawings)); // deep clone array
+                return;
+            }
+        }
+    }
+
     function roomEditorUpdateDrawings() {
+        updateSlideDrawings();
         if (roomsMode && roomsRole === 'editor') {
             console.log('sending editor-drawings event')
             socket.emit('editor-drawings', {
@@ -851,7 +913,7 @@ const mll = (function () {
     function addDefaultMapElements(map, roomSendUpdate) {
         removeAll(loaded_defaults);
 
-        console.log("addDefaultMapElements(" + map + ", " + roomSendUpdate + ")")
+        console.log("addDefaultMapElements(%s, %s)", map, roomSendUpdate)
 
         const promises = [];
         for (const key in map) {
@@ -928,7 +990,7 @@ const mll = (function () {
             return;
         }
 
-        console.log(`addMapElement(${type}, ${modifier}, ${roomSendUpdate}, ${uuid}, ${otherObject})`)
+        console.log("addMapElement(%s, %s, %s, %s, %s)", type, modifier, roomSendUpdate, uuid, otherObject)
         console.log(e);
 
         let toAdd;
@@ -1347,6 +1409,7 @@ const mll = (function () {
             controls.btnUndoLastElement = $("#undo-last-element");
             controls.btnEnableAll = $("#enableAll");
             controls.btnDisableAll = $("#disableAll");
+            controls.checkDrawingsVisible = $("#drawing-visible");
             controls.btnSave = $("#save");
             elements.canvas = $("#canvas");
             elements.canvasParent = $("#canvas-container")[0];
@@ -1385,31 +1448,163 @@ const mll = (function () {
             elements.joinError = $("#joinError");
             controls.btnCreateJoin = $("#submitJoin");
 
+            controls.copyViewerLink = $("#copyViewerLink");
+            controls.copyEditorLink = $("#copyEditorLink");
+
             elements.mobileContextMenu = $("#mobileContextModal");
             elements.mobileContextBody = $("#mobileContextBody");
 
             controls.btnExport = $("#export");
             controls.btnImport = $("#import");
             controls.importFileChooser = $("#importFileChooser");
+            controls.slidesImportModal = $("#slidesImportModal");
+            elements.importFileName = $("#importFileName");
+            elements.configCount = $("#configCount");
+            elements.configNewCount = $("#configNewCount");
+            elements.configMatchingCount = $("#configMatchingCount");
+            elements.importConfigList = $("#importConfigList");
+            controls.submitImport = $("#submitImport");
+            controls.importRemoveAllAddNew = $("#importRemoveAllAddNew");
+            controls.importAddOverwiteAll = $("#importAddOverwiteAll");
+            controls.importAddOverwriteSelect = $("#importAddOverwriteSelect");
+
+            controls.configsSelect = $("#configsSelect");
 
             controls.createConfigs = $("#createConfigs");
             controls.addNewSlide = $("#addNewSlide");
             elements.newSlidesDiv = $("#new-slides");
             controls.slidesCreateModal = $("#slidesCreateModal");
             controls.submitCreateSlides = $("#submitCreateSlides");
+            controls.selectBaseConfig = $("#selectBaseConfig");
+
+            controls.manageConfigs = $("#manageConfigs");
+            controls.slidesManageModal = $("#slidesManageModal");
+            controls.submitUpdateSlides = $("#updateSlides");
+            elements.manageSlidesDiv = $("#manage-slides-list");
+
+            controls.manageConfigs.click(function () {
+                elements.manageSlidesDiv.html("");
+                for (let i = 0; i < slides.length; i++) {
+                    const slide = slides[i];
+                    elements.manageSlidesDiv.append(`
+                    <div id="slide-${slide.id}">
+                        <div class="input-group slide">
+                            <span class="input-group-text"><i class="bi bi-list"></i></span>
+
+                            <input id="${slide.id}" type="text" class="form-control" value="${slide.name}">
+
+                            <button class="btn btn-link" onclick="$('#slide-${slide.id}').remove();">
+                                <i class="bi bi-trash-fill"></i>
+                            </button>
+                        </div>
+                        <p style="margin-left: 15px">
+                            ${slide.state.controls.map} · 
+                            ${slide.state.controls.selectedSp.length} points · 
+                            ${slide.state.elements.length} elements · 
+                            ${slide.state.drawings.length} drawings
+                            <br>
+                            <small class="text-muted">
+                                ${slide.id}
+                            </small>
+                        </p>
+                    </div>
+                    `)
+                }
+                elements.manageSlidesDiv.sortable();
+            });
+
+            controls.submitUpdateSlides.click(function () {
+                const slideOrder = {}
+                $(".slide").each(function (i, e) {
+                    const su = $(e);
+                    const pos = i;
+                    const id = su.find('input').attr("id");
+                    const name = su.find('input').val();
+
+                    console.log("update %s %s %s", pos, id, name)
+
+                    slideOrder[id] = pos;
+                    for (let i = 0; i < slides.length; i++) {
+                        if (slides[i].id === id) {
+                            slides[i].name = name;
+                        }
+                    }
+                });
+                slides = slides.sort(function (a, b) {
+                    return slideOrder[a.id] < slideOrder[b.id] ? 0 : 1;
+                });
+                const keepSlides = Object.keys(slideOrder);
+                slides = slides.filter(slide => keepSlides.indexOf(slide.id) !== -1);
+                updateConfigsSelect();
+                $("#cancelUpdate").click();
+            });
 
             controls.createConfigs.click(function () {
                 elements.newSlidesDiv.html("");
+                controls.selectBaseConfig.html("");
+                for (let i = 0; i < slides.length; i++) {
+                    const slide = slides[i];
+                    controls.selectBaseConfig.append("<option value='" + slide.id + "'>" + slide.name + "</option>")
+                }
                 controls.addNewSlide.click();
             });
 
             controls.submitCreateSlides.click(function () {
+                const selectedSlide = getSelectedSlide();
                 $(".new-slide").each(function (i, e) {
-                    console.log(i + " [" + $(e).find("input").val() + "]")
+                    const newSlideId = uuidv4();
+                    const newSlideName = $(e).find("input").val();
+
+                    console.log("%s [%s, %s]", i, newSlideId, newSlideName);
+
+                    controls.configsSelect.append("<option value='" + newSlideId + "'>" + newSlideName + "</option>");
+
+                    const copySlide = JSON.parse(JSON.stringify(selectedSlide));
+                    copySlide.id = newSlideId;
+                    copySlide.name = newSlideName;
+
+                    slides.push(copySlide);
                 });
+
+                console.log(slides);
 
                 $("#cancelCreateSlides").click();
             });
+
+            selectedSlide = uuidv4();
+            slides = [
+                $.extend({
+                    id: selectedSlide,
+                    name: "Default"
+                }, getFullState())
+            ]
+
+            updateConfigsSelect();
+
+            controls.configsSelect.change(function () {
+                selectedSlide = controls.configsSelect.val();
+                for (let i = 0; i < slides.length; i++) {
+                    const slide = slides[i];
+                    if (slide.id === selectedSlide) {
+                        console.log("loading slide [id=%s, name=%s]", slide.id, slide.name);
+                        console.log(slide);
+
+                        loadFromRoomState(slide, function (){});
+
+                        return;
+                    }
+                }
+
+                console.log("no slide loaded, id=%s not in slide list?", selectedSlide)
+            })
+
+            function getSelectedSlide() {
+                for (let i = 0; i < slides.length; i++) {
+                    if (selectedSlide === slides[i].id) {
+                        return slides[i];
+                    }
+                }
+            }
 
             new ClipboardJS('.btn');
 
@@ -1417,8 +1612,8 @@ const mll = (function () {
                 roomsMode = true;
 
                 console.log("Rooms Mode");
-                //socket = io('localhost:3000');
-                socket = io('https://maps-let-loose-websocket.herokuapp.com/');
+                socket = io('localhost:3000');
+                //socket = io('https://maps-let-loose-websocket.herokuapp.com/');
             } else {
                 roomsMode = false;
                 console.log("Solo Mode");
@@ -1522,10 +1717,16 @@ const mll = (function () {
                         elements.viewerPanel.hide();
                         elements.extraPanel.show();
 
-                        $("#shareLinkDisplay").val(
+                        controls.copyViewerLink.attr("data-clipboard-text",
                             window.location.origin + window.location.pathname +
                             "?roomId=" + encodeURI(message.roomId || "") +
                             "&viewerPassword=" + encodeURI(message.viewerPassword || "") +
+                            "&join=true");
+                        controls.copyEditorLink.attr("data-clipboard-text",
+                            window.location.origin + window.location.pathname +
+                            "?roomId=" + encodeURI(message.roomId || "") +
+                            "&viewerPassword=" + encodeURI(message.viewerPassword || "") +
+                            "&editorKey=" + encodeURI(message.editorKey || "") +
                             "&join=true");
 
                         const map = idx(["state", "controls", "map"], message) || "Carentan";
@@ -1606,10 +1807,16 @@ const mll = (function () {
 
                     $("#editor-update-pw").prop('disabled', true);
                     $("#editor-viewer-pw").val(message.viewerPassword);
-                    $("#shareLinkDisplay").val(
+                    controls.copyViewerLink.attr("data-clipboard-text",
                         window.location.origin + window.location.pathname +
                         "?roomId=" + encodeURI(message.roomId || "") +
                         "&viewerPassword=" + encodeURI(message.viewerPassword || "") +
+                        "&join=true");
+                    controls.copyEditorLink.attr("data-clipboard-text",
+                        window.location.origin + window.location.pathname +
+                        "?roomId=" + encodeURI(message.roomId || "") +
+                        "&viewerPassword=" + encodeURI(message.viewerPassword || "") +
+                        "&editorKey=" + encodeURI(message.editorKey || "") +
                         "&join=true");
                 });
 
@@ -2453,7 +2660,6 @@ const mll = (function () {
                 clearEl = $('#clear-paths'),
                 undoEl = $("#undo-path");
 
-            controls.checkDrawingsVisible = $("#drawing-visible");
 
             drawingModeEl.on('click', function () {
                 controls.fabricCanvas.isDrawingMode = !controls.fabricCanvas.isDrawingMode;
@@ -2541,12 +2747,12 @@ const mll = (function () {
                     return;
                 }
                 if ((e.ctrlKey || e.shiftKey) && e.keyCode === 37) {
-                    console.log("Ctrl+" + e.keyCode)
+                    console.log("Ctrl+%s", e.keyCode)
                     controls.sectorRange.val(Number(controls.sectorRange.val()) - 1);
                     controls.sectorRange.trigger('input');
                 }
                 if ((e.ctrlKey || e.shiftKey) && e.keyCode === 39) {
-                    console.log("Ctrl+" + e.keyCode)
+                    console.log("Ctrl+%s", e.keyCode)
                     controls.sectorRange.val(Number(controls.sectorRange.val()) + 1);
                     controls.sectorRange.trigger('input');
                 }
@@ -2747,7 +2953,7 @@ const mll = (function () {
             }
 
             function loadStrongpoints() {
-                console.log("loadStrongpoints(" + elements.spImage.src + ")")
+                console.log("loadStrongpoints(%s)", elements.spImage.src)
                 const filePrefix = controls.comboMapSelect.val();
 
                 initStrongpointData(filePrefix);
@@ -2778,6 +2984,7 @@ const mll = (function () {
                     wasRoomEvent = true;
                 }
 
+                updateSlideControls();
                 if (!wasRoomEvent && roomsMode && roomsRole === "editor") {
                     roomEditorUpdateControls("loadStrongpoints editor");
                 }
@@ -2799,7 +3006,7 @@ const mll = (function () {
                     return;
                 }
 
-                console.log("initStrongpoints('" + strongpointKey + "')")
+                console.log("initStrongpoints('%s')", strongpointKey)
 
                 const data = {}
                 for (let x = 0; x < 5; x++) {
@@ -2868,7 +3075,7 @@ const mll = (function () {
                 lastLoadedMap = filePrefix;
                 resetSelectedPoints = true;
 
-                console.log("Loading " + filePrefix)
+                console.log("Loading %s", filePrefix)
 
                 addDefaultMapElements(DEFAULT_ELEMENTS[filePrefix], false)
                 elements.map.setSrc('./assets/no-grid/' + filePrefix + '_NoGrid.png', internal.render);
@@ -2884,7 +3091,7 @@ const mll = (function () {
                 lastLoadedMap = filePrefix;
                 resetSelectedPoints = true;
 
-                console.log("Rooms loading " + filePrefix);
+                console.log("Rooms loading %s", filePrefix);
 
                 if (loaded_defaults === null || loaded_defaults.length === 0) {
                     addDefaultMapElements(DEFAULT_ELEMENTS[filePrefix], false)
@@ -3019,10 +3226,15 @@ const mll = (function () {
                 );
 
                 console.log("Creating mll_config.json...");
-                zip.file("mll_config.json", JSON.stringify(getFullState(), null, 4));
+                zip.file("mll_config.json", JSON.stringify(slides, null, 4));
 
-                const fileName = "mll_" + controls.comboMapSelect.val().toLowerCase() + "_" + moment().format("YYYYMMDD-HHmmss");
-                console.log("Saving as " + fileName);
+                let name = controls.comboMapSelect.val().toLowerCase();
+                if (slides.length > 1) {
+                    name = "multiconfig(" + slides.length + ")"
+                }
+
+                const fileName = "mll_" + name + "_" + moment().format("YYYYMMDD-HHmmss");
+                console.log("Saving as %s", fileName);
                 zip.generateAsync({
                     type: "blob",
                     compression: "DEFLATE",
@@ -3035,6 +3247,8 @@ const mll = (function () {
                     controls.btnExport.removeClass("loading").removeClass("disabled");
                 });
             });
+
+            let importContent;
 
             // Drag & Drop listener
             document.addEventListener("dragover", function (event) {
@@ -3066,7 +3280,9 @@ const mll = (function () {
             });
 
             function importFile(file) {
-                console.log("Importing from file " + file.name);
+                console.log("Checking import for file %s", file.name);
+                elements.importFileName.text(file.name);
+                elements.importConfigList.html("");
 
                 if (roomsMode && roomsRole === "viewer") {
                     console.log("Viewer cannot import, ignoring")
@@ -3083,16 +3299,129 @@ const mll = (function () {
                         console.log("file was empty?")
                         return;
                     }
-                    const content = JSON.parse(text);
-                    loadFromRoomState(content, function () {
-                        roomEditorUpdateControls("importFile")
-                        roomEditorUpdateElements();
-                        roomEditorUpdateDrawings();
-                    });
+
+                    importContent = JSON.parse(text);
+
+                    // Convert single format into array
+                    if (!Array.isArray(importContent)) {
+                        if (!importContent.hasOwnProperty("id")) {
+                            importContent.id = uuidv4();
+                        }
+                        if (!importContent.hasOwnProperty("name")) {
+                            importContent.name = "Config - Old format";
+                        }
+                        importContent = [importContent];
+                    }
+
+                    const existingSlides = {};
+                    for (let i = 0; i < slides.length; i++) {
+                        const slide = slides[i];
+                        existingSlides[slide.id] = slide.name;
+                    }
+
+                    elements.configCount.text(importContent.length);
+
+                    let countNew = 0;
+                    let countOverwrite = 0;
+
+                    for (let i = 0; i < importContent.length; i++) {
+                        const slide = importContent[i];
+                        elements.importConfigList.append(`
+                        <div class="import-slide" id="${slide.id}">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" checked>
+                                <label class="form-check-label">
+                                    ${slide.name}
+                                </label>
+                            </div>
+                            <p>
+                                ${slide.state.controls.map} · 
+                                ${slide.state.controls.selectedSp.length} points · 
+                                ${slide.state.elements.length} elements · 
+                                ${slide.state.drawings.length} drawings
+                                <br>
+                                <small class="text-muted">
+                                    ${slide.id} 
+                                    ${existingSlides.hasOwnProperty(slide.id) ? "(id match)" : ""}
+                                </small>
+                                <br>
+                                <strong>${existingSlides.hasOwnProperty(slide.id) ? "Overwrites: " + existingSlides[slide.id] : "Add new"}</strong>
+                            </p>
+                        </div>
+                        `);
+
+                        if (existingSlides.hasOwnProperty(slide.id)) {
+                            countOverwrite = countOverwrite + 1;
+                        } else {
+                            countNew = countNew + 1;
+                        }
+                    }
+
+                    elements.configNewCount.text(countNew);
+                    elements.configMatchingCount.text(countOverwrite);
+
+                    console.log("opening import modal");
+                    controls.slidesImportModal.modal('show');
 
                     controls.btnImport.removeClass("loading").removeClass("disabled");
                 });
             }
+
+            controls.submitImport.click(function () {
+                console.log('Submitting import');
+
+                const overwriteAll = controls.importAddOverwiteAll.is(":checked");
+                const overwriteSelected = controls.importAddOverwriteSelect.is(":checked");
+                if (controls.importRemoveAllAddNew.is(":checked")) {
+                    slides = importContent;
+
+                    selectedSlide = slides[0].id;
+                } else if (overwriteAll || overwriteSelected) {
+
+                    const selectedSlides = {}
+                    $(".import-slide").each(function (i, e) {
+                        const importSlide = $(e);
+                        const importSlideId = importSlide.attr("id");
+
+                        if (overwriteAll || overwriteSelected && importSlide.find("input").is(":checked")) {
+                            for (let i = 0; i < importContent.length; i++) {
+                                const slide = importContent[i];
+                                if (slide.id === importSlideId) {
+                                    selectedSlides[importSlideId] = slide;
+                                }
+                            }
+                        }
+                    });
+
+                    const existingSlides = {};
+                    for (let i = 0; i < slides.length; i++) {
+                        const slide = slides[i];
+                        existingSlides[slide.id] = slide.name;
+                    }
+
+                    console.log(selectedSlides);
+                    Object.keys(selectedSlides).forEach(function (slideId) {
+                        const slide = selectedSlides[slideId];
+
+                        if (existingSlides.hasOwnProperty(slideId)) {
+                            for (let i = 0; i < slides.length; i++) {
+                                if (slides[i].id === slideId) {
+                                    slides[i] = slide;
+                                }
+                            }
+                        } else {
+                            slides.push(slide);
+                        }
+                    });
+                }
+
+                updateConfigsSelect();
+                loadFromRoomState(slides[0], function () {
+                    roomEditorUpdateControls("importFile")
+                    roomEditorUpdateElements();
+                    roomEditorUpdateDrawings();
+                });
+            });
 
             internal.pageReady();
         },
@@ -3306,7 +3635,7 @@ const mll = (function () {
 
     return {
         menuAdd: function (type, modifier) {
-            console.log('menuAdd(' + type + ')')
+            console.log('menuAdd(%s)', type)
 
             if (!type) {
                 return;
