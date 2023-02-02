@@ -91,7 +91,7 @@
 <div id="side-menu" class="container-fluid mb-5">
     <div class="row">
         <div id="menu-panel" class="col col-lg-3" style="user-select: none">
-            <div class="mb-3 editor-div">
+            <div class="mb-3 editor-only">
                 <h4>Select Map</h4>
                 <select class="form-select" id="map-select">
                     <option value="Carentan">Carentan</option>
@@ -111,7 +111,7 @@
             </div>
 
             <div class="accordion accordion-flush mb-3">
-                <div class="accordion-item editor-div">
+                <div class="accordion-item editor-only">
                     <h2 class="accordion-header" id="flush-headingOne">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#flush-collapseOne" aria-expanded="false"
@@ -203,7 +203,7 @@
                     </div>
                 </div>
 
-                <div class="accordion-item editor-div">
+                <div class="accordion-item editor-only">
                     <h2 class="accordion-header" id="flush-headingSix">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#flush-collapseSix" aria-expanded="false"
@@ -258,7 +258,7 @@
                     </div>
                 </div>
 
-                <div class="accordion-item editor-div">
+                <div class="accordion-item editor-only">
                     <h2 class="accordion-header" id="flush-headingThree">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#flush-collapseThree" aria-expanded="false"
@@ -290,7 +290,7 @@
                     </div>
                 </div>
 
-                <div class="accordion-item editor-div">
+                <div class="accordion-item editor-only">
                     <h2 class="accordion-header" id="flush-headingFour">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#flush-collapseFour" aria-expanded="false"
@@ -324,7 +324,7 @@
                     </div>
                 </div>
 
-                <div class="accordion-item editor-div">
+                <div class="accordion-item editor-only">
                     <h2 class="accordion-header" id="flush-headingTwo">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#flush-collapseTwo" aria-expanded="false"
@@ -425,20 +425,6 @@
                                 <i class="bi bi-image"></i>
                                 Save as PNG
                             </button>
-
-<!--                            <div style="margin: 5px 0;">Or</div>-->
-<!--                            <button class="btn btn-secondary" id="export">-->
-<!--                                <span class="spinner"><span class="spinner-border spinner-border-sm" role="status"></span></span>-->
-<!--                                <span class="text"><i class="bi bi-download"></i>&nbsp;&nbsp;Export</span>-->
-<!--                            </button>&nbsp;-->
-<!--                            <button class="btn btn-secondary editor-div" id="import" onclick="document.getElementById('importFileChooser').click()">-->
-<!--                                <span class="spinner"><span class="spinner-border spinner-border-sm" role="status"></span></span>-->
-<!--                                <span class="text"><i class="bi bi-upload"></i>&nbsp;&nbsp;Import</span>-->
-<!--                                <input id="importFileChooser" type="file" hidden/>-->
-<!--                            </button>-->
-<!--                            <div>-->
-<!--                                <small class="text-muted">Save this config as a zip file <span class="editor-div">or load from a previous export. Drag and drop supported.</span></small>-->
-<!--                            </div>-->
                         </div>
                     </div>
 
@@ -465,9 +451,9 @@
                     <div id="flush-collapseA" class="accordion-collapse collapse show" aria-labelledby="flush-headingA">
                         <div class="accordion-body">
                             <div style="margin-bottom: 10px">
-                                <button id="createConfigs" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#slidesCreateModal">Create</button>
-                                <button id="manageConfigs" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#slidesManageModal">Manage</button>
-                                <button id="import" class="btn btn-secondary"
+                                <button id="createConfigs" class="btn btn-secondary editor-only" data-bs-toggle="modal" data-bs-target="#slidesCreateModal">Create</button>
+                                <button id="manageConfigs" class="btn btn-secondary editor-only" data-bs-toggle="modal" data-bs-target="#slidesManageModal">Manage</button>
+                                <button id="import" class="btn btn-secondary editor-only"
                                         onclick="document.getElementById('importFileChooser').click()">
                                     <span class="spinner"><span class="spinner-border spinner-border-sm" role="status"></span></span>
                                     <i class="bi bi-upload"></i>&nbsp;&nbsp;Import
@@ -674,7 +660,7 @@
                     </div>
                 </div>
 
-                <div class="accordion-item editor-div">
+                <div class="accordion-item editor-only">
                     <h2 class="accordion-header" id="flush-headingB">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#flush-collapseB" aria-expanded="false"

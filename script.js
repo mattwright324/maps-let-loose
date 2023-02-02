@@ -194,6 +194,34 @@ const mll = (function () {
         controls.configsSelect.val(selectedSlide);
     }
 
+    async function loadFromSlideState(message, spCallback) {
+        if (!message || !message.slides) {
+            console.warn('message or slides was null')
+            return;
+        }
+
+        console.log("loadFromSlideState()")
+        console.log(message);
+
+        slides = message.slides;
+        let selectedSlideDeleted = true;
+        let slide;
+        for (let i = 0; i < slides.length; i++) {
+            if (slides[i].id === selectedSlide) {
+                selectedSlideDeleted = false;
+                slide = slides[i];
+            }
+        }
+        updateConfigsSelect();
+        if (selectedSlideDeleted) {
+            selectedSlide = slides[0].id;
+            loadFromRoomState(slides[0]);
+        } else {
+            loadFromRoomState(slide);
+        }
+        controls.configsSelect.val(selectedSlide);
+    }
+
     async function loadFromRoomState(message, spCallback) {
         if (!message || !message.state) {
             console.warn('message or state was null')
@@ -441,6 +469,19 @@ const mll = (function () {
         }
     }
 
+    function roomEditorUpdateSlides() {
+        if (roomsMode && roomsRole === 'editor') {
+            console.log('sending editor-slides event');
+            const payload = {
+                roomId: controls.inputRoomId.val(),
+                editorKey: $("#editorKeyDisplay").val(),
+                slides: slides
+            };
+            console.log(payload);
+            socket.emit('editor-slides', payload);
+        }
+    }
+
     function roomEditorUpdateControls(control) {
         updateSlideControls();
         const controlAbout = control instanceof jQuery ? control.attr("id") + "=" + (control.val() || control.is(":checked")) : control;
@@ -450,6 +491,7 @@ const mll = (function () {
             const payload = {
                 roomId: controls.inputRoomId.val(),
                 editorKey: $("#editorKeyDisplay").val(),
+                slideId: selectedSlide,
                 state: {
                     controls: getControlsRoomState()
                 },
@@ -510,6 +552,7 @@ const mll = (function () {
             socket.emit('editor-elements', {
                 roomId: controls.inputRoomId.val(),
                 editorKey: $("#editorKeyDisplay").val(),
+                slideId: selectedSlide,
                 state: {
                     elements: getElementsRoomState().slice(0, 50)
                 }
@@ -535,6 +578,7 @@ const mll = (function () {
             socket.emit('editor-drawings', {
                 roomId: controls.inputRoomId.val(),
                 editorKey: $("#editorKeyDisplay").val(),
+                slideId: selectedSlide,
                 state: {
                     drawings: drawings.slice(0, 50)
                 }
@@ -1536,6 +1580,7 @@ const mll = (function () {
                 const keepSlides = Object.keys(slideOrder);
                 slides = slides.filter(slide => keepSlides.indexOf(slide.id) !== -1);
                 updateConfigsSelect();
+                roomEditorUpdateSlides('update');
                 $("#cancelUpdate").click();
             });
 
@@ -1568,6 +1613,8 @@ const mll = (function () {
 
                 console.log(slides);
 
+                roomEditorUpdateSlides('create');
+
                 $("#cancelCreateSlides").click();
             });
 
@@ -1577,7 +1624,7 @@ const mll = (function () {
                     id: selectedSlide,
                     name: "Default"
                 }, getFullState())
-            ]
+            ];
 
             updateConfigsSelect();
 
@@ -1612,8 +1659,8 @@ const mll = (function () {
                 roomsMode = true;
 
                 console.log("Rooms Mode");
-                socket = io('localhost:3000');
-                //socket = io('https://maps-let-loose-websocket.herokuapp.com/');
+                // socket = io('localhost:3000');
+                socket = io('https://maps-let-loose-websocket.herokuapp.com/');
             } else {
                 roomsMode = false;
                 console.log("Solo Mode");
@@ -1688,7 +1735,7 @@ const mll = (function () {
                     }
                 }
 
-                socket.on('connect', function (error) {
+                socket.on('connect', function () {
                     console.info('connected')
 
                     elements.joinError.text("");
@@ -1710,12 +1757,12 @@ const mll = (function () {
                     $("#warning-panel").hide();
                     elements.joinPanel.hide();
                     elements.menuPanel.show();
+                    elements.extraPanel.show();
                     if (message.role === 'editor') {
                         roomsRole = "editor";
-                        $(".editor-div").show();
+                        $(".editor-only").show();
                         elements.editorPanel.show();
                         elements.viewerPanel.hide();
-                        elements.extraPanel.show();
 
                         controls.copyViewerLink.attr("data-clipboard-text",
                             window.location.origin + window.location.pathname +
@@ -1733,34 +1780,84 @@ const mll = (function () {
                         controls.comboMapSelect.val(map)
                         const filePrefix = controls.comboMapSelect.val();
                         internal.loadMap(filePrefix);
+
+                        if (!message.hasOwnProperty("slides") || message.slides.length === 0) {
+                            roomEditorUpdateSlides();
+                        } else {
+                            loadFromSlideState(message);
+                        }
                     } else {
                         roomsRole = 'viewer'
-                        $(".editor-div").hide();
+                        $(".editor-only").hide();
                         elements.editorPanel.hide();
                         elements.viewerPanel.show();
+
+                        if (message.hasOwnProperty("slides")) {
+                            loadFromSlideState(message);
+                        }
                     }
                     elements.canvasPanel.show();
 
-                    loadFromRoomState(message);
+                    // loadFromRoomState(message);
                 });
 
                 socket.on('update-controls', function (message) {
                     console.log('update-controls')
                     console.log(message);
 
-                    loadFromRoomState(message);
+                    for (let i = 0; i < slides.length; i++) {
+                        const slide = slides[i];
+                        if (slide.id === message.slideId) {
+                            console.log("updateSlideControls(%s)", slide.id)
+                            slide.state.controls = message.state.controls;
+
+                            if (message.slideId === selectedSlide) {
+                                loadFromRoomState(message);
+                            }
+                            return;
+                        }
+                    }
+
                 });
                 socket.on('update-elements', function (message) {
                     console.log('update-elements')
                     console.log(message);
 
-                    loadFromRoomState(message);
+                    for (let i = 0; i < slides.length; i++) {
+                        const slide = slides[i];
+                        if (slide.id === message.slideId) {
+                            console.log("updateSlideElements(%s)", slide.id)
+                            slide.state.elements = message.state.elements;
+
+                            if (message.slideId === selectedSlide) {
+                                loadFromRoomState(message);
+                            }
+                            return;
+                        }
+                    }
                 });
                 socket.on('update-drawings', function (message) {
                     console.log('update-drawings')
                     console.log(message);
 
-                    loadFromRoomState(message);
+                    for (let i = 0; i < slides.length; i++) {
+                        const slide = slides[i];
+                        if (slide.id === message.slideId) {
+                            console.log("updateSlideDrawings(%s)", slide.id)
+                            slide.state.drawings = message.state.drawings;
+
+                            if (message.slideId === selectedSlide) {
+                                loadFromRoomState(message);
+                            }
+                            return;
+                        }
+                    }
+                });
+                socket.on('update-slides', function (message) {
+                    console.log('update-slides')
+                    console.log(message);
+
+                    loadFromSlideState(message);
                 });
 
                 $(document).on('click', '.leave-room', function () {
@@ -3416,11 +3513,13 @@ const mll = (function () {
                 }
 
                 updateConfigsSelect();
-                loadFromRoomState(slides[0], function () {
-                    roomEditorUpdateControls("importFile")
-                    roomEditorUpdateElements();
-                    roomEditorUpdateDrawings();
-                });
+                loadFromRoomState(slides[0]);
+                roomEditorUpdateSlides('import');
+                // loadFromRoomState(slides[0], function () {
+                //     roomEditorUpdateControls("importFile")
+                //     roomEditorUpdateElements();
+                //     roomEditorUpdateDrawings();
+                // });
             });
 
             internal.pageReady();
