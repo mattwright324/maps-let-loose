@@ -1575,7 +1575,7 @@ const mll = (function () {
                     }
                 });
                 slides = slides.sort(function (a, b) {
-                    return slideOrder[a.id] < slideOrder[b.id] ? 0 : 1;
+                    return slideOrder[a.id] - slideOrder[b.id];
                 });
                 const keepSlides = Object.keys(slideOrder);
                 slides = slides.filter(slide => keepSlides.indexOf(slide.id) !== -1);
