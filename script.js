@@ -815,6 +815,26 @@ const mll = (function () {
             },
             customScale: 0.25,
             zoomScale: true
+        },
+        box: {
+            resolveImg: function (object) {
+                if (object.type.modifier) {
+                    return './assets/box-' + object.type.modifier + ".png";
+                }
+                return './assets/box-explosive.png'
+            },
+            customizable: "asset",
+            zoomScale: true
+        },
+        mine: {
+            resolveImg: function (object) {
+                if (object.type.modifier) {
+                    return './assets/mine-' + object.type.modifier + ".png";
+                }
+                return './assets/mine-at.png'
+            },
+            customizable: "asset",
+            zoomScale: true
         }
     }
 
@@ -2064,6 +2084,21 @@ const mll = (function () {
                 supply_150x2: function () {
                     mll.menuAdd("supplies", "150x2")
                 },
+                ammo_box: function () {
+                    mll.menuAdd("box", "ammo")
+                },
+                explosive_box: function () {
+                    mll.menuAdd("box", "explosive")
+                },
+                bandage_box: function () {
+                    mll.menuAdd("box", "bandage")
+                },
+                at_mine: function () {
+                    mll.menuAdd("mine", "at")
+                },
+                ap_mine: function () {
+                    mll.menuAdd("mine", "ap")
+                },
                 // Marker
                 arty_full_aoe: function () {
                     mll.menuAdd("arty-effect")
@@ -2131,9 +2166,10 @@ const mll = (function () {
                 garrison: {name: "Add Garrison", icon: "bi bi-flag"},
                 spawn: {
                     name: "Add Spawn",
+                    icon: "bi bi-chevron-double-right",
                     items: {
                         airhead: {name: "Airhead", icon: "bi bi-triangle-fill"},
-                        halftrack: {name: "Halftrack"},
+                        halftrack: {name: "Halftrack", icon: "bi bi-truck"},
                         outpost: {name: "Outpost", icon: "bi bi-triangle"},
                         recon_op: {name: "Recon Outpost", icon: "bi bi-triangle-half"}
                     }
@@ -2146,9 +2182,9 @@ const mll = (function () {
                         tank_medium: {name: "Medium Tank"},
                         tank_light: {name: "Light Tank", icon: "bi bi-dot"},
                         tank_recon: {name: "Recon Tank", icon: "bi bi-camera"},
-                        truck_jeep: {name: "Jeep"},
-                        truck_supply: {name: "Supply Truck"},
-                        truck_transport: {name: "Transport Truck"},
+                        truck_jeep: {name: "Jeep", icon: "bi bi-car-front"},
+                        truck_supply: {name: "Supply Truck", icon: "bi bi-truck"},
+                        truck_transport: {name: "Transport Truck", icon: "bi bi-truck"},
                     }
                 },
                 infantry_class: {
@@ -2173,8 +2209,8 @@ const mll = (function () {
                     name: "Add Buildable",
                     icon: "bi bi-hammer",
                     items: {
-                        at_gun: {name: "AT Gun"},
-                        repair_station: {name: "Repair Station", icon: "bi bi-wrench"},
+                        at_gun: {name: "AT Gun", icon: "bi bi-wrench-adjustable"},
+                        repair_station: {name: "Repair Station", icon: "bi bi-wrench-adjustable-circle"},
                         node_batch: {name: "Batch of Nodes", icon: "bi bi-x-diamond"},
                         node_manpower: {name: "Manpower Node", icon: "bi bi-diamond"},
                         node_munition: {name: "Munitions Node", icon: "bi bi-diamond"},
@@ -2184,14 +2220,16 @@ const mll = (function () {
                 placeable: {
                     name: "Add Placeable",
                     items: {
-                        // ammo_box: {name: "Ammo Box"},
-                        // explosive_box: {name: "Explosive Box"},
-                        // bandage_box: {name: "Bandage Box"},
                         supply_50: {name: "Supplies (50)", icon: "bi bi-tools"},
                         supply_50x2: {name: "Supplies (50 x 2)", icon: "bi bi-tools"},
                         supply_100: {name: "Supplies (100)", icon: "bi bi-tools"},
                         supply_150: {name: "Supplies (150)", icon: "bi bi-tools"},
                         supply_150x2: {name: "Supplies (150 x 2)", icon: "bi bi-tools"},
+                        ammo_box: {name: "Ammo Box", icon: "bi bi-box2"},
+                        explosive_box: {name: "Explosive Box", icon: "bi bi-box2"},
+                        bandage_box: {name: "Bandage Box", icon: "bi bi-box2"},
+                        at_mine: {name: "AT Mine"},
+                        ap_mine: {name: "AP Mine"},
                     }
                 },
                 marker: {
