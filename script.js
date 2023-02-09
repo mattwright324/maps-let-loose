@@ -3185,14 +3185,15 @@ const mll = (function () {
             }
 
             internal.roomsLoadMapAndSP = function (filePrefix, selectedSp, spCallback) {
+                console.log("Rooms loading %s", filePrefix);
+
+                if (loaded_defaults === null || loaded_defaults.length === 0 || lastLoadedMap !== filePrefix) {
+                    addDefaultMapElements(DEFAULT_ELEMENTS[filePrefix], false)
+                }
+
                 lastLoadedMap = filePrefix;
                 resetSelectedPoints = true;
 
-                console.log("Rooms loading %s", filePrefix);
-
-                if (loaded_defaults === null || loaded_defaults.length === 0) {
-                    addDefaultMapElements(DEFAULT_ELEMENTS[filePrefix], false)
-                }
                 const promises = [
                     new Promise(function (resolve) {
                         const imgSrc = './assets/no-grid/' + filePrefix + '_NoGrid.png';
