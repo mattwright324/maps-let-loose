@@ -62,6 +62,7 @@ const mll = (function () {
         }
 
         const doScale = controls.checkZoomScale.is(":checked");
+
         function updateElementZoom(array) {
             for (let i = 0; i < array.length; i++) {
                 const object = array[i];
@@ -101,6 +102,7 @@ const mll = (function () {
                 }
             }
         }
+
         updateElementZoom(placed);
         updateElementZoom(loaded_defaults);
 
@@ -120,6 +122,7 @@ const mll = (function () {
 
     function changeZIndexBySize() {
         const objectAreas = {};
+
         function parseAreas(array) {
             for (let i = 0; i < array.length; i++) {
                 const element = array[i];
@@ -134,8 +137,10 @@ const mll = (function () {
                 }
             }
         }
+
         parseAreas(placed);
         parseAreas(loaded_defaults);
+        parseAreas(drawings);
 
         //console.log(objectAreas);
         const sizes = Object.keys(objectAreas).sort(function (a, b) {
@@ -183,7 +188,8 @@ const mll = (function () {
             newDefault.state.drawings = [];
             slides.push(newDefault);
 
-            loadFromRoomState(newDefault, function (){});
+            loadFromRoomState(newDefault, function () {
+            });
         }
 
         for (let i = 0; i < slides.length; i++) {
@@ -404,9 +410,15 @@ const mll = (function () {
 
                     o.set({
                         zIndex: zIndex.drawings,
-                        evented: false,
-                        selectable: false,
+                        perPixelTargetFind: true,
+                        targetFindTolerance: 7,
+                        lockMovementX: true,
+                        lockMovementY: true,
                         visible: (idx(["state", "controls", "drawings"], message) || controls.checkDrawingsVisible.is(":checked"))
+                    });
+                    o.setControlsVisibility({
+                        mt: false, mb: false, ml: false, mr: false, bl: false, br: false, tl: false, tr: false, mtr: true,
+                        moveObject: true
                     });
 
                     controls.fabricCanvas.add(o);
@@ -415,6 +427,7 @@ const mll = (function () {
             });
             controls.fabricCanvas.orderByZindex();
 
+            fixElementSelectBoxes();
             internal.render();
         }
     }
@@ -525,6 +538,9 @@ const mll = (function () {
                 backgroundColor: element.backgroundColor,
                 fill: element.fill,
                 stroke: element.stroke,
+                strokeWidth: element.strokeWidth,
+                strokeDashArray: element.strokeDashArray,
+                points: element.points,
                 opacity: element.opacity,
             })
         }
@@ -593,7 +609,7 @@ const mll = (function () {
         points: 3,
         arty_range: 5,
         default_garrisons: 6,
-        drawings: 7,
+        drawings: 9,
     }
     const placedMeta = {
         garry: {
@@ -850,6 +866,10 @@ const mll = (function () {
                     toFix.push(also[j]);
                 }
             }
+        }
+        for (let i = 0; i < drawings.length; i++) {
+            const object = drawings[i];
+            toFix.push(object);
         }
         const sel = new fabric.ActiveSelection(toFix, {canvas: controls.fabricCanvas});
         controls.fabricCanvas.setActiveObject(sel).requestRenderAll();
@@ -1239,6 +1259,27 @@ const mll = (function () {
             }
 
             toAdd = rect;
+        } else if (type === "polygon") {
+            const polygon = new fabric.Polygon(otherObject.points, {
+                type: otherObject.type,
+                opacity: otherObject.opacity,
+                fill: otherObject.fill,
+                perPixelTargetFind: true,
+                zIndex: 10,
+                hasBorders: false,
+                lockMovementX: true,
+                lockMovementY: true,
+                originX: "center",
+                originY: "center",
+            });
+            polygon.setControlsVisibility({
+                mt: false, mb: false, ml: false, mr: false, bl: false, br: false, tl: false, tr: false, mtr: true,
+                moveObject: true
+            });
+
+            console.log(polygon);
+
+            toAdd = polygon;
         } else if (type === "circle") {
             const circle = new fabric.Circle({
                 type: {
@@ -1656,7 +1697,8 @@ const mll = (function () {
                         console.log("loading slide [id=%s, name=%s]", slide.id, slide.name);
                         console.log(slide);
 
-                        loadFromRoomState(slide, function (){});
+                        loadFromRoomState(slide, function () {
+                        });
 
                         return;
                     }
@@ -1973,6 +2015,7 @@ const mll = (function () {
                 repeat: 'repeat'
             }, controls.fabricCanvas.renderAll.bind(controls.fabricCanvas))
 
+
             const menuActions = {
                 garrison: function () {
                     mll.menuAdd("garry")
@@ -2156,11 +2199,211 @@ const mll = (function () {
                 circle: function () {
                     mll.menuAdd("circle")
                 },
+                draw_polygon: function () {
+                    console.log("Starting polygon mode")
+                    prototypefabric.polygon.drawPolygon();
+                },
                 textbox: function () {
                     mll.menuAdd("textbox")
                 },
             };
             internal.menuActions = menuActions;
+
+            let min = 99;
+            let max = 999999;
+            let polygonMode = false;
+            let pointArray = new Array();
+            let lineArray = new Array();
+            let activeLine;
+            let activeShape = false;
+            let canvas;
+            let prototypefabric = new function () {
+                this.initCanvas = function () {
+                    canvas = controls.fabricCanvas;
+                    canvas.setWidth($(window).width());
+                    canvas.setHeight($(window).height() - $('#nav-bar').height());
+
+                    canvas.on('mouse:down', function (e) {
+                        if (e.target && pointArray.length && e.target.id == pointArray[0].id) {
+                            prototypefabric.polygon.generatePolygon(pointArray);
+                        }
+                        if (polygonMode) {
+                            prototypefabric.polygon.addPoint(e);
+                        }
+                    });
+                    canvas.on('mouse:move', function (e) {
+                        if (activeLine && activeLine.class == "line") {
+                            const x = e.absolutePointer.x;
+                            const y = e.absolutePointer.y;
+                            activeLine.set({x2: x, y2: y});
+
+                            var points = activeShape.get("points");
+                            points[pointArray.length] = {
+                                x: x,
+                                y: y
+                            }
+                            activeShape.set({
+                                points: points,
+                                opacity: 0.3
+                            });
+                            canvas.renderAll();
+                        }
+                        canvas.renderAll();
+                    });
+                };
+            };
+            prototypefabric.initCanvas();
+
+            prototypefabric.polygon = {
+                drawPolygon: function () {
+                    $("canvas").addClass("polygon-mode");
+                    polygonMode = true;
+                    pointArray = new Array();
+                    lineArray = new Array();
+                    activeLine;
+                },
+                addPoint: function (e) {
+                    console.log(e);
+                    var random = Math.floor(Math.random() * (max - min + 1)) + min;
+                    var id = new Date().getTime() + random;
+                    var circle = new fabric.Circle({
+                        radius: 7,
+                        fill: '#ffffff',
+                        stroke: '#333333',
+                        strokeWidth: 0.5,
+                        left: (e.absolutePointer.x),
+                        top: (e.absolutePointer.y),
+                        selectable: false,
+                        hasBorders: false,
+                        hasControls: false,
+                        originX: 'center',
+                        originY: 'center',
+                        id: id,
+                        objectCaching: false
+                    });
+                    if (pointArray.length == 0) {
+                        circle.set({
+                            fill: 'red'
+                        })
+                    }
+                    var points = [(e.absolutePointer.x),
+                        (e.absolutePointer.y),
+                        (e.absolutePointer.x),
+                        (e.absolutePointer.y)];
+                    var line = new fabric.Line(points, {
+                        strokeWidth: 3,
+                        fill: '#999999',
+                        stroke: '#999999',
+                        class: 'line',
+                        originX: 'center',
+                        originY: 'center',
+                        selectable: false,
+                        hasBorders: false,
+                        hasControls: false,
+                        evented: false,
+                        objectCaching: false
+                    });
+                    if (activeShape) {
+                        var points = activeShape.get("points");
+                        points.push({
+                            x: e.absolutePointer.x,
+                            y: e.absolutePointer.y
+                        });
+                        var polygon = new fabric.Polygon(points, {
+                            stroke: '#333333',
+                            strokeWidth: 1,
+                            fill: '#cccccc',
+                            opacity: 1,
+                            selectable: false,
+                            hasBorders: false,
+                            hasControls: false,
+                            evented: false,
+                            objectCaching: false
+                        });
+                        canvas.remove(activeShape);
+                        canvas.add(polygon);
+                        activeShape = polygon;
+                        canvas.renderAll();
+                    } else {
+                        var polyPoint = [{
+                            x: (e.absolutePointer.x),
+                            y: (e.absolutePointer.y)
+                        }];
+                        var polygon = new fabric.Polygon(polyPoint, {
+                            stroke: '#333333',
+                            strokeWidth: 1,
+                            fill: '#cccccc',
+                            opacity: 0.3,
+                            selectable: false,
+                            hasBorders: false,
+                            hasControls: false,
+                            evented: false,
+                            objectCaching: false
+                        });
+                        activeShape = polygon;
+                        canvas.add(polygon);
+                    }
+                    activeLine = line;
+
+                    pointArray.push(circle);
+                    lineArray.push(line);
+
+                    canvas.add(line);
+                    canvas.add(circle);
+                    canvas.selection = false;
+                },
+                generatePolygon: function (pointArray) {
+                    var points = new Array();
+                    $.each(pointArray, function (index, point) {
+                        points.push({
+                            x: point.left,
+                            y: point.top
+                        });
+                        canvas.remove(point);
+                    });
+                    $.each(lineArray, function (index, line) {
+                        canvas.remove(line);
+                    });
+                    canvas.remove(activeShape).remove(activeLine);
+                    var polygon = new fabric.Polygon(points, {
+                        type: {
+                            id: uuidv4(),
+                            type: "polygon",
+                            customizable: "shape",
+                            saveKeepScale: true,
+                        },
+                        opacity: 0.25,
+                        fill: "#0080FFFF",
+                        perPixelTargetFind: true,
+                        zIndex: 10,
+                        hasBorders: false,
+                        lockMovementX: true,
+                        lockMovementY: true,
+                        originX: "center",
+                        originY: "center",
+                    });
+                    polygon.setControlsVisibility({
+                        mt: false, mb: false, ml: false, mr: false, bl: false, br: false, tl: false, tr: false, mtr: true,
+                        moveObject: true
+                    });
+
+                    $("canvas").removeClass("polygon-mode");
+                    activeLine = null;
+                    activeShape = null;
+                    polygonMode = false;
+                    canvas.selection = true;
+
+                    placed.push(polygon);
+                    addAndOrder(polygon);
+
+                    internal.updateStatesAndRender();
+                    fixElementSelectBoxes();
+                    updateZoomScale();
+
+                    roomEditorUpdateElements();
+                }
+            };
+
 
             const contextMenu = {
                 garrison: {name: "Add Garrison", icon: "bi bi-flag"},
@@ -2265,7 +2508,8 @@ const mll = (function () {
                         measure_line: {name: "Measure Line", icon: "bi bi-rulers"},
                         rectangle: {name: "Rectangle", icon: "bi bi-square"},
                         circle: {name: "Circle", icon: "bi bi-circle"},
-                        textbox: {name: "Textbox", icon: "bi bi-textarea-t"}
+                        draw_polygon: {name: "Custom Polygon", icon: "bi bi-bounding-box-circles"},
+                        textbox: {name: "Textbox", icon: "bi bi-textarea-t"},
                     }
                 },
                 cancel: {name: "Cancel"}
@@ -2790,11 +3034,11 @@ const mll = (function () {
             });
 
             const drawingModeEl = $('#drawing-mode'),
+                drawingStyle = $("#drawing-style"),
                 drawingColorEl = $('#drawing-color'),
                 drawingLineWidthEl = $('#drawing-line-width'),
                 clearEl = $('#clear-paths'),
                 undoEl = $("#undo-path");
-
 
             drawingModeEl.on('click', function () {
                 controls.fabricCanvas.isDrawingMode = !controls.fabricCanvas.isDrawingMode;
@@ -2831,10 +3075,26 @@ const mll = (function () {
             controls.fabricCanvas.on('path:created', function (e) {
                 console.log(e);
 
+                const width = controls.fabricCanvas.freeDrawingBrush.width;
                 e.path.set({
                     zIndex: zIndex.drawings,
-                    evented: false,
-                    selectable: false
+                    perPixelTargetFind: true,
+                    targetFindTolerance: 7,
+                    lockMovementX: true,
+                    lockMovementY: true,
+                });
+                if (drawingStyle.val() === "Dashed") {
+                    e.path.set({
+                        strokeDashArray: [3 * width, 2 * width]
+                    });
+                } else if (drawingStyle.val() === "Dotted") {
+                    e.path.set({
+                        strokeDashArray: [1, 2 * width]
+                    });
+                }
+                e.path.setControlsVisibility({
+                    mt: false, mb: false, ml: false, mr: false, bl: false, br: false, tl: false, tr: false, mtr: true,
+                    moveObject: true
                 });
 
                 drawings.push(e.path);
@@ -2842,6 +3102,7 @@ const mll = (function () {
                 controls.fabricCanvas.orderByZindex();
                 controls.exportCanvas.add(e.path);
 
+                fixElementSelectBoxes();
                 roomEditorUpdateDrawings();
             });
 
@@ -3685,6 +3946,7 @@ const mll = (function () {
             }
 
             const applyFilters = [];
+
             function updateElements(array) {
                 // Update placed element images
                 for (let i = 0; i < array.length; i++) {

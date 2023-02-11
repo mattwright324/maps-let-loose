@@ -380,8 +380,14 @@
                                     <input type="range" class="form-range" value="7" min="3" max="25"
                                            id="drawing-line-width"><br>
 
-                                    <label for="drawing-color">Line color </label>
+                                    <label for="drawing-color">Line style </label>
                                     <br>
+                                    <select id="drawing-style" class="form-select" style="margin-bottom: 7px;">
+                                        <option selected>Solid</option>
+                                        <option>Dashed</option>
+                                        <option>Dotted</option>
+                                    </select>
+                                    <label for="drawing-color">Line color </label>
                                     <div id="line-color-div" class="d-flex">
                                         <input type="color" value="#0080ff" id="drawing-color">
                                         <span>or quick</span>
@@ -680,14 +686,38 @@
                             </small>
 
                             <div id="edit-shape" style="display: none">
-                                <label for="drawing-line-width">Opacity
+                                <label for="shape-opacity">Fill Opacity
                                     (<span id="shape-opacity-value">7</span>)
                                 </label>
                                 <br>
                                 <input id="shape-opacity" type="range" class="form-range" value="0.25" min="0" max="1" step="0.05">
                                 <br>
 
-                                <label for="shape-color">Background color </label>
+<!--                                <label for="shape-border-opacity">Border Opacity-->
+<!--                                    (<span id="shape-bo-value">7</span>)-->
+<!--                                </label>-->
+<!--                                <br>-->
+<!--                                <input id="shape-border-opacity" type="range" class="form-range" value="0.25" min="0" max="1" step="0.05">-->
+<!--                                <br>-->
+
+<!--                                <label for="border-width">Border Width-->
+<!--                                    (<span id="border-width-value">7</span>)-->
+<!--                                </label>-->
+<!--                                <br>-->
+<!--                                <input id="border-width" type="range" class="form-range" value="7" min="3" max="25"><br>-->
+<!--                                <br>-->
+
+<!--                                <label for="border-width">Border Style-->
+<!--                                    (<span id="border-style-value">7</span>)-->
+<!--                                </label>-->
+<!--                                <br>-->
+<!--                                <select id="border-style" class="form-select" style="margin-bottom: 7px;">-->
+<!--                                    <option selected>Solid</option>-->
+<!--                                    <option>Dashed</option>-->
+<!--                                    <option>Dotted</option>-->
+<!--                                </select>-->
+
+                                <label for="shape-color">Fill Color </label>
                                 <br>
                                 <div id="shape-color-div" class="d-flex align-items-center">
                                     <input type="color" value="#0080ff" id="shape-color">
