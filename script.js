@@ -2813,8 +2813,6 @@ const mll = (function () {
                         break;
                     }
                 }
-                console.log("removing " + target.type.id);
-                console.log(drawings);
                 for (let i = 0; i < drawings.length; i++) {
                     if (drawings[i].type.id === target.type.id) {
                         drawings.splice(i, 1);
@@ -2822,7 +2820,6 @@ const mll = (function () {
                         break;
                     }
                 }
-                console.log(drawings);
 
                 controls.fabricCanvas.remove(target);
                 controls.exportCanvas.remove(target);
