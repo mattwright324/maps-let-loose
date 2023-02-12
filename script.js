@@ -1538,6 +1538,7 @@ const mll = (function () {
             elements.editAsset = $("#edit-asset");
             controls.textColor = $("#text-color");
             elements.textColorDiv = $("#text-color-div");
+            elements.fillOpacityDiv = $("#fill-opacity-div");
             controls.shapeBgColor = $("#shape-color");
             controls.rangeBgOpacity = $("#shape-opacity");
             elements.opacityValue = $("#shape-opacity-value");
@@ -2885,6 +2886,11 @@ const mll = (function () {
                             controls.shapeBgColor.val((selectedElement.fill || "").substring(0, 7));
                         }
 
+                        elements.fillOpacityDiv.show();
+                        if (elType === "drawing") {
+                            elements.fillOpacityDiv.hide();
+                        }
+
                         controls.rangeBgOpacity.val(selectedElement.opacity);
                         elements.opacityValue.text(selectedElement.opacity);
 
@@ -2949,6 +2955,10 @@ const mll = (function () {
                     selectedElement.set({
                         backgroundColor: controls.shapeBgColor.val()
                     });
+                } else if (elType === "drawing") {
+                    selectedElement.set({
+                        stroke: controls.shapeBgColor.val()
+                    });
                 } else {
                     selectedElement.set({
                         fill: controls.shapeBgColor.val()
@@ -2962,6 +2972,10 @@ const mll = (function () {
             controls.rangeBgOpacity.on('input', function () {
                 if (!selectedElement) {
                     console.log("no selected element");
+                    return;
+                }
+                const elType = idx(["type", "type"], selectedElement);
+                if (elType === "drawing") {
                     return;
                 }
 
@@ -3077,6 +3091,10 @@ const mll = (function () {
 
                 const width = controls.fabricCanvas.freeDrawingBrush.width;
                 e.path.set({
+                    type: {
+                        type: "drawing",
+                        customizable: "shape",
+                    },
                     zIndex: zIndex.drawings,
                     perPixelTargetFind: true,
                     targetFindTolerance: 7,
