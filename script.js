@@ -428,6 +428,7 @@ const mll = (function () {
 
                     o.set({
                         type: {
+                            id: uuidv4(),
                             type: "drawing",
                             customizable: "shape"
                         },
@@ -2803,12 +2804,25 @@ const mll = (function () {
             function deleteObject(eventData, transform) {
                 const target = transform.target;
 
+                let removedElement = false;
+                let removedDrawing = false;
                 for (let i = 0; i < placed.length; i++) {
                     if (placed[i].type.id === target.type.id) {
                         placed.splice(i, 1);
+                        removedElement = true;
                         break;
                     }
                 }
+                console.log("removing " + target.type.id);
+                console.log(drawings);
+                for (let i = 0; i < drawings.length; i++) {
+                    if (drawings[i].type.id === target.type.id) {
+                        drawings.splice(i, 1);
+                        removedDrawing = true;
+                        break;
+                    }
+                }
+                console.log(drawings);
 
                 controls.fabricCanvas.remove(target);
                 controls.exportCanvas.remove(target);
@@ -2821,7 +2835,12 @@ const mll = (function () {
                 }
                 controls.fabricCanvas.requestRenderAll();
 
-                roomEditorUpdateElements();
+                if (removedElement) {
+                    roomEditorUpdateElements();
+                }
+                if (removedDrawing) {
+                    roomEditorUpdateDrawings();
+                }
             }
 
             function renderIcon(ctx, left, top, styleOverride, fabricObject) {
@@ -2868,7 +2887,13 @@ const mll = (function () {
                 console.log("object:modified")
                 console.log(e.target);
                 internal.updateStatesAndRender();
-                roomEditorUpdateElements();
+
+                const elType = idx(["type", "type"], e.target);
+                if (elType === "drawing") {
+                    roomEditorUpdateDrawings();
+                } else {
+                    roomEditorUpdateElements();
+                }
             });
 
             controls.fabricCanvas.on({
@@ -3118,7 +3143,8 @@ const mll = (function () {
 
                 const width = controls.fabricCanvas.freeDrawingBrush.width;
                 e.path.set({
-                    data: {
+                    type: {
+                        id: uuidv4(),
                         type: "drawing",
                         customizable: "shape"
                     },
