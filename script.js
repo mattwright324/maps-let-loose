@@ -404,11 +404,33 @@ const mll = (function () {
                 controls.exportCanvas.remove(element);
             }
 
+            for (let i = 0; i < drawingState.length; i++) {
+                const drawing = drawingState[i];
+                if (drawing.type) {
+                    const path = "path";
+                    drawing.type = {
+                        type: "drawing",
+                        customizable: "shape",
+                        // hack fix for fabric.js
+                        charAt: function (pos) {
+                            return path.charAt(pos);
+                        },
+                        slice: function (a, b) {
+                            return path.slice(a, b);
+                        }
+                    }
+                }
+            }
+
             fabric.util.enlivenObjects(drawingState, function (objects) {
                 objects.forEach(function (o) {
                     drawings.push(o);
 
                     o.set({
+                        type: {
+                            type: "drawing",
+                            customizable: "shape"
+                        },
                         zIndex: zIndex.drawings,
                         perPixelTargetFind: true,
                         targetFindTolerance: 7,
@@ -427,6 +449,7 @@ const mll = (function () {
             });
             controls.fabricCanvas.orderByZindex();
 
+            changeZIndexBySize();
             fixElementSelectBoxes();
             internal.render();
         }
@@ -2966,7 +2989,11 @@ const mll = (function () {
                 }
 
                 internal.render();
-                roomEditorUpdateElements();
+                if (elType === "drawing") {
+                    roomEditorUpdateDrawings();
+                } else {
+                    roomEditorUpdateElements();
+                }
             })
 
             controls.rangeBgOpacity.on('input', function () {
@@ -3091,9 +3118,9 @@ const mll = (function () {
 
                 const width = controls.fabricCanvas.freeDrawingBrush.width;
                 e.path.set({
-                    type: {
+                    data: {
                         type: "drawing",
-                        customizable: "shape",
+                        customizable: "shape"
                     },
                     zIndex: zIndex.drawings,
                     perPixelTargetFind: true,
