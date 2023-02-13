@@ -2375,7 +2375,6 @@ const mll = (function () {
 
                     canvas.add(line);
                     canvas.add(circle);
-                    canvas.selection = false;
                 },
                 generatePolygon: function (pointArray) {
                     var points = new Array();
@@ -2416,7 +2415,6 @@ const mll = (function () {
                     activeLine = null;
                     activeShape = null;
                     polygonMode = false;
-                    canvas.selection = true;
 
                     placed.push(polygon);
                     addAndOrder(polygon);
