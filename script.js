@@ -3169,6 +3169,7 @@ const mll = (function () {
                 controls.exportCanvas.add(e.path);
 
                 fixElementSelectBoxes();
+                changeZIndexBySize();
                 roomEditorUpdateDrawings();
             });
 
