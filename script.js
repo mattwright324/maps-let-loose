@@ -22,6 +22,12 @@ const mll = (function () {
         );
     }
 
+    function htmlEncode(input) {
+        const textArea = document.createElement("textarea");
+        textArea.innerText = input;
+        return textArea.innerHTML.split("<br>").join("\n");
+    }
+
     function parseQuery(queryString) {
         const query = {};
         const pairs = (queryString[0] === '?' ? queryString.substr(1) : queryString).split('&');
@@ -194,7 +200,7 @@ const mll = (function () {
 
         for (let i = 0; i < slides.length; i++) {
             const slide = slides[i];
-            controls.configsSelect.append("<option value='" + slide.id + "'>" + slide.name + "</option>")
+            controls.configsSelect.append("<option value='" + slide.id + "'>" + htmlEncode(slide.name) + "</option>")
         }
 
         controls.configsSelect.val(selectedSlide);
@@ -1621,14 +1627,14 @@ const mll = (function () {
                         <div class="input-group slide">
                             <span class="input-group-text"><i class="bi bi-list"></i></span>
 
-                            <input id="${slide.id}" type="text" class="form-control" value="${slide.name}">
+                            <input id="${htmlEncode(slide.id)}" type="text" class="form-control" value="${htmlEncode(slide.name).replaceAll("\"", "&quot;")}">
 
-                            <button class="btn btn-link" onclick="$('#slide-${slide.id}').remove();">
+                            <button class="btn btn-link" onclick="$('#slide-${htmlEncode(slide.id)}').remove();">
                                 <i class="bi bi-trash-fill"></i>
                             </button>
                         </div>
                         <p style="margin-left: 15px">
-                            ${slide.state.controls.map} · 
+                            ${htmlEncode(slide.state.controls.map)} · 
                             ${slide.state.controls.selectedSp.length} points · 
                             ${slide.state.elements.length} elements · 
                             ${slide.state.drawings.length} drawings
@@ -1675,7 +1681,7 @@ const mll = (function () {
                 controls.selectBaseConfig.html("");
                 for (let i = 0; i < slides.length; i++) {
                     const slide = slides[i];
-                    controls.selectBaseConfig.append("<option value='" + slide.id + "'>" + slide.name + "</option>")
+                    controls.selectBaseConfig.append("<option value='" + htmlEncode(slide.id) + "'>" + htmlEncode(slide.name) + "</option>")
                 }
                 controls.addNewSlide.click();
             });
@@ -1688,7 +1694,7 @@ const mll = (function () {
 
                     console.log("%s [%s, %s]", i, newSlideId, newSlideName);
 
-                    controls.configsSelect.append("<option value='" + newSlideId + "'>" + newSlideName + "</option>");
+                    controls.configsSelect.append("<option value='" + htmlEncode(newSlideId) + "'>" + htmlEncode(newSlideName) + "</option>");
 
                     const copySlide = JSON.parse(JSON.stringify(selectedSlide));
                     copySlide.id = newSlideId;
@@ -3791,25 +3797,25 @@ const mll = (function () {
                     for (let i = 0; i < importContent.length; i++) {
                         const slide = importContent[i];
                         elements.importConfigList.append(`
-                        <div class="import-slide" id="${slide.id}">
+                        <div class="import-slide" id="${htmlEncode(slide.id)}">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" checked>
                                 <label class="form-check-label">
-                                    ${slide.name}
+                                    ${htmlEncode(slide.name)}
                                 </label>
                             </div>
                             <p>
-                                ${slide.state.controls.map} · 
+                                ${htmlEncode(slide.state.controls.map)} · 
                                 ${slide.state.controls.selectedSp.length} points · 
                                 ${slide.state.elements.length} elements · 
                                 ${slide.state.drawings.length} drawings
                                 <br>
                                 <small class="text-muted">
-                                    ${slide.id} 
+                                    ${htmlEncode(slide.id)} 
                                     ${existingSlides.hasOwnProperty(slide.id) ? "(id match)" : ""}
                                 </small>
                                 <br>
-                                <strong>${existingSlides.hasOwnProperty(slide.id) ? "Overwrites: " + existingSlides[slide.id] : "Add new"}</strong>
+                                <strong>${existingSlides.hasOwnProperty(slide.id) ? "Overwrites: " + htmlEncode(existingSlides[slide.id]) : "Add new"}</strong>
                             </p>
                         </div>
                         `);
