@@ -25,7 +25,7 @@ const mll = (function () {
     function htmlEncode(input) {
         const textArea = document.createElement("textarea");
         textArea.innerText = input;
-        return textArea.innerHTML.split("<br>").join("\n");
+        return textArea.innerHTML.split("<br>").join("\n").replaceAll("\"", "&quot;");
     }
 
     function parseQuery(queryString) {
@@ -1627,7 +1627,7 @@ const mll = (function () {
                         <div class="input-group slide">
                             <span class="input-group-text"><i class="bi bi-list"></i></span>
 
-                            <input id="${htmlEncode(slide.id)}" type="text" class="form-control" value="${htmlEncode(slide.name).replaceAll("\"", "&quot;")}">
+                            <input id="${htmlEncode(slide.id)}" type="text" class="form-control" value="${htmlEncode(slide.name)}">
 
                             <button class="btn btn-link" onclick="$('#slide-${htmlEncode(slide.id)}').remove();">
                                 <i class="bi bi-trash-fill"></i>
