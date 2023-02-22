@@ -395,6 +395,9 @@ const mll = (function () {
                     addMapElement(meta.originalEvent, meta.type, meta.modifier, false, meta.id, elementState[i]);
                 }
             }
+
+            changeZIndexBySize();
+            fixElementSelectBoxes();
         }
 
         if (controlState || elementState) {
@@ -1263,7 +1266,7 @@ const mll = (function () {
                 left: e.absolutePointer.x,
                 width: 380,
                 height: 380,
-                opacity: 0.35,
+                opacity: 0.5,
                 fill: "#0080FFFF",
                 zIndex: 10,
                 hasBorders: false,
@@ -1325,7 +1328,7 @@ const mll = (function () {
                 originX: "center",
                 originY: "center",
                 //centeredScaling: true,
-                opacity: 0.35,
+                opacity: 0.5,
                 fill: "#0080FFFF",
                 zIndex: 10,
                 hasBorders: false,
@@ -1526,8 +1529,49 @@ const mll = (function () {
         order();
     }
 
+    function deleteObject(eventData, transform) {
+        const target = transform.target;
+
+        let removedElement = false;
+        let removedDrawing = false;
+        for (let i = 0; i < placed.length; i++) {
+            if (placed[i].type.id === target.type.id) {
+                placed.splice(i, 1);
+                removedElement = true;
+                break;
+            }
+        }
+        for (let i = 0; i < drawings.length; i++) {
+            if (drawings[i].type.id === target.type.id) {
+                drawings.splice(i, 1);
+                removedDrawing = true;
+                break;
+            }
+        }
+
+        controls.fabricCanvas.remove(target);
+        controls.exportCanvas.remove(target);
+        if (target.type && target.type.also) {
+            const also = target.type.also;
+            for (let j = 0; j < also.length; j++) {
+                controls.fabricCanvas.remove(also[j]);
+                controls.exportCanvas.remove(also[j]);
+            }
+        }
+        controls.fabricCanvas.requestRenderAll();
+
+        if (removedElement) {
+            roomEditorUpdateElements();
+        }
+        if (removedDrawing) {
+            roomEditorUpdateDrawings();
+        }
+    }
+
     const internal = {
         init: function () {
+            controls.inputTitle = $("#title");
+
             controls.comboMapSelect = $("#map-select");
             controls.checkGrid = $("#grid-visible");
             controls.checkArty = $("#arty-visible");
@@ -1617,6 +1661,19 @@ const mll = (function () {
             controls.slidesManageModal = $("#slidesManageModal");
             controls.submitUpdateSlides = $("#updateSlides");
             elements.manageSlidesDiv = $("#manage-slides-list");
+
+            $('html').on('click', function (e) {
+                if (!$(e.target).is('#title')) {
+                    controls.inputTitle.attr('readonly', true);
+                } else {
+                    controls.inputTitle.attr('readonly', false);
+                }
+            });
+            controls.inputTitle.on('keypress', function (e) {
+                if (e.key === "Enter") {
+                    controls.inputTitle.attr('readonly', true);
+                }
+            });
 
             controls.manageConfigs.click(function () {
                 elements.manageSlidesDiv.html("");
@@ -1747,11 +1804,7 @@ const mll = (function () {
             }
 
             function getSelectedSlide() {
-                for (let i = 0; i < slides.length; i++) {
-                    if (selectedSlide === slides[i].id) {
-                        return slides[i];
-                    }
-                }
+                return getSlide(selectedSlide);
             }
 
             new ClipboardJS('.btn');
@@ -2046,7 +2099,10 @@ const mll = (function () {
                 scale: 1,
                 moveCursor: 'default',
                 hoverCursor: 'default',
-                viewportTransform: [0.40, 0, 0, 0.40, 0, 0]
+                viewportTransform: [0.40, 0, 0, 0.40, 0, 0],
+                isDragMode: true,
+                isDrawingMode: false,
+                isEraserMode: false
             });
             controls.fabricCanvas.setHeight(800);
             controls.fabricCanvas.setBackgroundColor({
@@ -2410,7 +2466,7 @@ const mll = (function () {
                             customizable: "shape",
                             saveKeepScale: true,
                         },
-                        opacity: 0.35,
+                        opacity: 0.5,
                         fill: "#0080FFFF",
                         perPixelTargetFind: true,
                         zIndex: 10,
@@ -2421,7 +2477,15 @@ const mll = (function () {
                         originY: "center",
                     });
                     polygon.setControlsVisibility({
-                        mt: false, mb: false, ml: false, mr: false, bl: false, br: false, tl: false, tr: false, mtr: true,
+                        mt: false,
+                        mb: false,
+                        ml: false,
+                        mr: false,
+                        bl: false,
+                        br: false,
+                        tl: false,
+                        tr: false,
+                        mtr: true,
                         moveObject: true
                     });
 
@@ -2566,6 +2630,7 @@ const mll = (function () {
                 items: contextMenu
             });
 
+            const dblClickOptions = [];
             const accordionItems = [];
             for (const itemName in contextMenu) {
                 const item = contextMenu[itemName];
@@ -2573,6 +2638,8 @@ const mll = (function () {
                     continue;
                 }
                 if (itemName === "garrison") {
+                    dblClickOptions.push("<option value='" + itemName + "'>Garrison</option>")
+
                     elements.mobileContextBody.append(
                         "<button class='btn btn-link' style='margin: 10px 0' onclick='mll.mobileMenuAdd(\"" + itemName + "\")'>" +
                         (item.icon ? "<i class='" + item.icon + "'></i>" : "") +
@@ -2584,6 +2651,8 @@ const mll = (function () {
                     const itemButtons = [];
                     for (const subItemName in item.items) {
                         const subItem = item.items[subItemName];
+
+                        dblClickOptions.push("<option value='" + subItemName + "'>" + subItem.name + "</option>")
 
                         itemButtons.push(
                             "<button class='btn btn-link' onclick='mll.mobileMenuAdd(\"" + subItemName + "\")'>" +
@@ -2614,6 +2683,7 @@ const mll = (function () {
                 accordionItems.join("") +
                 "</div>"
             );
+            $("#dbl-click-element").html(dblClickOptions.join(""))
 
             const eCanvas = document.createElement("canvas");
             controls.exportCanvas = new fabric.Canvas(eCanvas, {
@@ -2812,45 +2882,6 @@ const mll = (function () {
                 render: renderIconDrag,
                 cornerSize: 24
             });
-
-            function deleteObject(eventData, transform) {
-                const target = transform.target;
-
-                let removedElement = false;
-                let removedDrawing = false;
-                for (let i = 0; i < placed.length; i++) {
-                    if (placed[i].type.id === target.type.id) {
-                        placed.splice(i, 1);
-                        removedElement = true;
-                        break;
-                    }
-                }
-                for (let i = 0; i < drawings.length; i++) {
-                    if (drawings[i].type.id === target.type.id) {
-                        drawings.splice(i, 1);
-                        removedDrawing = true;
-                        break;
-                    }
-                }
-
-                controls.fabricCanvas.remove(target);
-                controls.exportCanvas.remove(target);
-                if (target.type && target.type.also) {
-                    const also = target.type.also;
-                    for (let j = 0; j < also.length; j++) {
-                        controls.fabricCanvas.remove(also[j]);
-                        controls.exportCanvas.remove(also[j]);
-                    }
-                }
-                controls.fabricCanvas.requestRenderAll();
-
-                if (removedElement) {
-                    roomEditorUpdateElements();
-                }
-                if (removedDrawing) {
-                    roomEditorUpdateDrawings();
-                }
-            }
 
             function renderIcon(ctx, left, top, styleOverride, fabricObject) {
                 const size = this.cornerSize;
@@ -3086,7 +3117,11 @@ const mll = (function () {
                     return;
                 }
 
-                addMapElement(e, 'garry', null, true);
+                const dblClickType = $("#dbl-click-element").val();
+                console.log("Double Click: " + dblClickType);
+
+                contextMenuEvent = e; // not from a context menu but reuse for click position
+                mll.mobileMenuAdd(dblClickType);
             });
 
             controls.btnRemoveAllElements.on('click', function () {
@@ -3108,6 +3143,40 @@ const mll = (function () {
                 roomEditorUpdateElements()
             });
 
+            const draggingTool = $("#tool-drag"),
+                drawingTool = $("#tool-draw"),
+                eraserTool = $("#tool-erase");
+
+            function setToolSelected(type) {
+                $(".tool").removeClass("selected");
+                $("#tool-" + type).addClass("selected");
+
+                controls.fabricCanvas.isDragMode = false;
+                controls.fabricCanvas.isEraserMode = false;
+                controls.fabricCanvas.isDrawingMode = false;
+                $("canvas").removeClass("draw-mode").removeClass('drag-mode').removeClass('eraser-mode');
+                if (type === "drag") {
+                    $("canvas").addClass("drag-mode");
+                    controls.fabricCanvas.isDragMode = true;
+                } else if (type === "draw") {
+                    $("canvas").addClass("draw-mode");
+                    controls.fabricCanvas.isDrawingMode = true;
+                } else if (type === "erase") {
+                    $("canvas").addClass("eraser-mode");
+                    controls.fabricCanvas.isEraserMode = true;
+                }
+            }
+
+            draggingTool.click(function () {
+                setToolSelected('drag');
+            })
+            drawingTool.click(function () {
+                setToolSelected('draw');
+            })
+            eraserTool.click(function () {
+                setToolSelected('erase');
+            })
+
             const drawingModeEl = $('#drawing-mode'),
                 drawingStyle = $("#drawing-style"),
                 drawingColorEl = $('#drawing-color'),
@@ -3116,13 +3185,15 @@ const mll = (function () {
                 undoEl = $("#undo-path");
 
             drawingModeEl.on('click', function () {
+                controls.fabricCanvas.isDragMode = false;
+                controls.fabricCanvas.isEraserMode = false;
                 controls.fabricCanvas.isDrawingMode = !controls.fabricCanvas.isDrawingMode;
                 if (controls.fabricCanvas.isDrawingMode) {
+                    setToolSelected('draw');
                     drawingModeEl.text('Stop drawing mode');
-                    $("canvas").addClass("draw-mode").removeClass('drag-mode');
                 } else {
+                    setToolSelected('drag');
                     drawingModeEl.text('Start drawing mode');
-                    $("canvas").removeClass("draw-mode").addClass('drag-mode');
                 }
             });
 
@@ -3218,6 +3289,26 @@ const mll = (function () {
                     console.log("Shift+D")
                     drawingModeEl.click();
                 }
+                if (e.shiftKey && String.fromCharCode(e.which).toLowerCase() === 'e') {
+                    if (roomsMode && roomsRole === 'viewer') {
+                        return;
+                    }
+
+                    console.log("Shift+E");
+                    if (controls.fabricCanvas.isEraserMode) {
+                        draggingTool.click();
+                    } else {
+                        eraserTool.click();
+                    }
+                }
+                if (e.shiftKey && String.fromCharCode(e.which).toLowerCase() === 'w') {
+                    if (roomsMode && roomsRole === 'viewer') {
+                        return;
+                    }
+
+                    console.log("Shift+W");
+                    draggingTool.click();
+                }
             })
             $(document).on('keyup', function (e) {
                 if (roomsMode && roomsRole === 'viewer') {
@@ -3275,10 +3366,15 @@ const mll = (function () {
                 roomEditorUpdateControls("btnDisableAll");
             });
 
+            let erasing = false;
             let panning = false;
             controls.fabricCanvas.on('mouse:up', function (e) {
                 if (e.e.touches) {
                     return;
+                }
+                if (controls.fabricCanvas.isEraserMode === true) {
+                    controls.fabricCanvas.discardActiveObject().renderAll();
+                    erasing = false;
                 }
                 panning = false;
             });
@@ -3288,6 +3384,15 @@ const mll = (function () {
                     return;
                 }
                 console.log(e);
+                if (controls.fabricCanvas.isEraserMode === true) {
+                    erasing = true;
+                    if (e.target && e.target.type && e.target.type.id) {
+                        console.log("Erasing object " + e.target.type.id);
+                        deleteObject(e, e);
+                        controls.fabricCanvas.discardActiveObject().renderAll();
+                    }
+                    return;
+                }
                 if (e.button === 3) {
                     if (roomsMode && roomsRole === 'viewer') {
                         return;
@@ -3298,7 +3403,7 @@ const mll = (function () {
                     panning = false;
                 } else if (e.target && e.target.selectable === true && e.target.lockMovementX === false ||
                     e.transform && (e.transform.action === 'rotate' || e.transform.action.indexOf('scale') !== -1) ||
-                    controls.fabricCanvas.isDrawingMode === true) {
+                    controls.fabricCanvas.isDragMode !== true) {
                     // Dragging element
                     panning = false;
                 } else {
@@ -3308,6 +3413,13 @@ const mll = (function () {
             controls.fabricCanvas.on('mouse:move', function (e) {
                 if (e.e.touches) {
                     return;
+                }
+                if (controls.fabricCanvas.isEraserMode === true && erasing) {
+                    if (e.target && e.target.type && e.target.type.id) {
+                        console.log("Erasing object " + e.target.type.id);
+                        deleteObject(e, e);
+                        controls.fabricCanvas.discardActiveObject().renderAll();
+                    }
                 }
                 if (panning && e && e.e && (e.e.movementX || e.e.movementY)) {
                     const delta = new fabric.Point(e.e.movementX, e.e.movementY);
@@ -3327,8 +3439,7 @@ const mll = (function () {
                             // console.log(e);
                             pausePanning = true;
 
-                            controls.fabricCanvas.discardActiveObject(controls.fabricCanvas.getObjects())
-                                .requestRenderAll();
+                            controls.fabricCanvas.discardActiveObject().renderAll();
 
                             const touch1 = e.e.touches[0];
                             const touch2 = e.e.touches[1];
@@ -3369,7 +3480,7 @@ const mll = (function () {
                     }
                     if (e.target && e.target.selectable === true && e.target.lockMovementX === false ||
                         e.transform && (e.transform.action === 'rotate' || e.transform.action.indexOf('scale') !== -1) ||
-                        controls.fabricCanvas.isDrawingMode === true) {
+                        controls.fabricCanvas.isDragMode !== true) {
                         return;
                     }
                     if (pausePanning !== true && e.self.x && e.self.y) {
@@ -3747,10 +3858,7 @@ const mll = (function () {
                 console.log(event);
 
                 let file = event.target.files[0];
-
-                if (file) {
-                    //controls.inputValue.val(file.name);
-                } else {
+                if (!file) {
                     return;
                 }
 
@@ -3894,13 +4002,13 @@ const mll = (function () {
                 }
 
                 updateConfigsSelect();
-                loadFromRoomState(slides[0]);
+                loadFromRoomState(slides[0]).then(function () {
+                    console.log('???')
+                    updateZoomScale();
+                    changeZIndexBySize();
+                    fixElementSelectBoxes();
+                });
                 roomEditorUpdateSlides('import');
-                // loadFromRoomState(slides[0], function () {
-                //     roomEditorUpdateControls("importFile")
-                //     roomEditorUpdateElements();
-                //     roomEditorUpdateDrawings();
-                // });
             });
 
             internal.pageReady();
