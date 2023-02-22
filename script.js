@@ -1687,7 +1687,7 @@ const mll = (function () {
             });
 
             controls.submitCreateSlides.click(function () {
-                const selectedSlide = getSelectedSlide();
+                const selectedSlide = getSlide(controls.selectBaseConfig.val());
                 $(".new-slide").each(function (i, e) {
                     const newSlideId = uuidv4();
                     const newSlideName = $(e).find("input").val();
@@ -1737,6 +1737,14 @@ const mll = (function () {
 
                 console.log("no slide loaded, id=%s not in slide list?", selectedSlide)
             })
+
+            function getSlide(slideId) {
+                for (let i = 0; i < slides.length; i++) {
+                    if (slideId === slides[i].id) {
+                        return slides[i];
+                    }
+                }
+            }
 
             function getSelectedSlide() {
                 for (let i = 0; i < slides.length; i++) {
