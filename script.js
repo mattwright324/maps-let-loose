@@ -1747,11 +1747,7 @@ const mll = (function () {
             }
 
             function getSelectedSlide() {
-                for (let i = 0; i < slides.length; i++) {
-                    if (selectedSlide === slides[i].id) {
-                        return slides[i];
-                    }
-                }
+                return getSlide(selectedSlide);
             }
 
             new ClipboardJS('.btn');
