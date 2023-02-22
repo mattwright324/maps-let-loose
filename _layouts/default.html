@@ -133,20 +133,6 @@
                                 <input class="form-check-input" type="checkbox" value="" id="placed-visible" checked>
                                 <label class="form-check-label" for="placed-visible">
                                     Placed map elements
-                                    <a id="remove-all-elements" href="javascript:" title="Remove all map elements">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                             fill="currentColor"
-                                             class="bi bi-trash3-fill" viewBox="0 0 16 16">
-                                            <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"/>
-                                        </svg>
-                                    </a>
-                                    <a id="undo-last-element" href="javascript:" title="Remove most recent map element">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                             fill="currentColor"
-                                             class="bi bi-caret-left-fill" viewBox="0 0 16 16">
-                                            <path d="m3.86 8.753 5.482 4.796c.646.566 1.658.106 1.658-.753V3.204a1 1 0 0 0-1.659-.753l-5.48 4.796a1 1 0 0 0 0 1.506z"/>
-                                        </svg>
-                                    </a>
                                 </label>
                                 <p style="margin-bottom: 0">
                                     <small class="text-muted">Double click or right click on map</small>
@@ -344,27 +330,9 @@
                                     </label>
                                 </div>
                                 <div style="margin: 5px 0">
-                                    <div class="btn-group" role="group" aria-label="Basic example">
-                                        <button id="drawing-mode" type="button" class="btn btn-secondary">Start drawing
-                                            mode
-                                        </button>
-                                        <button id="clear-paths" type="button" class="btn btn-link"
-                                                title="Clear all drawings">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                 fill="currentColor"
-                                                 class="bi bi-trash3-fill" viewBox="0 0 16 16">
-                                                <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"/>
-                                            </svg>
-                                        </button>
-                                        <button id="undo-path" type="button" class="btn btn-link"
-                                                title="Undo last drawing">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                 fill="currentColor"
-                                                 class="bi bi-caret-left-fill" viewBox="0 0 16 16">
-                                                <path d="m3.86 8.753 5.482 4.796c.646.566 1.658.106 1.658-.753V3.204a1 1 0 0 0-1.659-.753l-5.48 4.796a1 1 0 0 0 0 1.506z"/>
-                                            </svg>
-                                        </button>
-                                    </div>
+                                    <button id="drawing-mode" type="button" class="btn btn-secondary">Start drawing
+                                        mode
+                                    </button>
                                 </div>
                                 <small class="text-muted">
                                     Shift+D to toggle drawing mode on the fly
@@ -439,6 +407,69 @@
         </div>
 
         <div id="canvas-panel" class="col col-lg-6 mb-3 ">
+            <input hidden id="title" type="text" value="Untitled" style="border: none; background-color: transparent; color: white; font-size: 22px; width: 100%; margin-bottom: 5px;" readonly>
+            <div id="tools-panel" class="row editor-only" style="margin-bottom: 8px;">
+                <style>
+                    .w-auto {
+                        width: auto;
+                        padding: 2px 6px;
+                    }
+                    .tool {
+                        cursor: pointer;
+                        width: auto;
+                        color: orange;
+                        padding: 2px 6px;
+                        border: 2px solid transparent;
+                    }
+                    .tool.selected {
+                        border: 2px dotted white;
+                        border-radius: 25px;
+                    }
+                </style>
+                <div class="col col-auto">
+                    <span style="font-size: 18px">Tools</span>
+                </div>
+                <div class="col col-auto">
+                    <div class="row">
+                        <span id="tool-drag" class="tool selected" title="Navigate & Select (Shift+W)">
+                            <i class="bi bi-hand-index-thumb"></i>
+                        </span>
+                        <span id="tool-draw" class="tool" title="Free Draw (Shift+D)">
+                            <i class="bi bi-brush"></i>
+                        </span>
+                        <span id="tool-erase" class="tool" title="Eraser (Shift+E)">
+                            <i class="bi bi-eraser"></i>
+                        </span>
+                    </div>
+                </div>
+                <div class="col col-auto">
+                    <span style="font-size: 18px">Dbl-Click</span>
+                </div>
+                <div class="col col-auto">
+                    <div class="row">
+                        <select id="dbl-click-element" class="form-select form-select-sm">
+                        </select>
+                    </div>
+                </div>
+                <div class="col col-auto">
+                    <span style="font-size: 18px">Elements</span>
+                </div>
+                <div class="col col-auto">
+                    <div class="row">
+                        <span class="w-auto"><a id="remove-all-elements" href="javascript:">Clear</a></span>
+                        <span class="w-auto"><a id="undo-last-element" href="javascript:">Remove last</a></span>
+                    </div>
+                </div>
+                <div class="col col-auto">
+                    <span style="font-size: 18px">Drawings</span>
+                </div>
+                <div class="col col-auto">
+                    <div class="row">
+                        <span class="w-auto"><a id="clear-paths"href="javascript:">Clear</a></span>
+                        <span class="w-auto"><a id="undo-path" href="javascript:">Remove last</a></span>
+                    </div>
+                </div>
+            </div>
             <div id="canvas-container">
                 <canvas id="canvas" class="hasmenu drag-mode"></canvas>
             </div>
@@ -725,22 +756,22 @@
                                         }
                                     </script>
                                     <span class="color blue" title="Blue" style="color: #ffffff"
-                                          onclick="setColorsAndOpacity('#0080ff', 0.35, '#ffffff')">T</span>
+                                          onclick="setColorsAndOpacity('#0080ff', 0.5, '#ffffff')">T</span>
                                     <span class="color red" title="Red" style="color: #ffffff"
-                                          onclick="setColorsAndOpacity('#ff8080', 0.35, '#ffffff')">T</span>
+                                          onclick="setColorsAndOpacity('#ff8080', 0.5, '#ffffff')">T</span>
 
                                     <span class="color" style="background-color:#ff8000; color: #000000" title="Orange"
-                                          onclick="setColorsAndOpacity('#ff8000', 0.35, '#000000')">T</span>
+                                          onclick="setColorsAndOpacity('#ff8000', 0.5, '#000000')">T</span>
                                     <span class="color" style="background-color:#ffff80; color: #000000" title="Yellow"
-                                          onclick="setColorsAndOpacity('#ffff80', 0.35, '#000000')">T</span>
+                                          onclick="setColorsAndOpacity('#ffff80', 0.5, '#000000')">T</span>
                                     <span class="color" style="background-color:#00ff00; color: #000000" title="Green"
-                                          onclick="setColorsAndOpacity('#00ff00', 0.35, '#000000')">T</span>
+                                          onclick="setColorsAndOpacity('#00ff00', 0.5, '#000000')">T</span>
                                     <span class="color" style="background-color:#8000ff; color: #ffffff" title="Purple"
-                                          onclick="setColorsAndOpacity('#8000ff', 0.35, '#ffffff')">T</span>
+                                          onclick="setColorsAndOpacity('#8000ff', 0.5, '#ffffff')">T</span>
                                     <span class="color" style="background-color:#ffffff; color: #000000" title="White"
-                                          onclick="setColorsAndOpacity('#ffffff', 0.55, '#000000')">T</span>
+                                          onclick="setColorsAndOpacity('#ffffff', 0.5, '#000000')">T</span>
                                     <span class="color" style="background-color:#c0c0c0; color: #000000" title="Gray"
-                                          onclick="setColorsAndOpacity('#c0c0c0', 0.55, '#000000')">T</span>
+                                          onclick="setColorsAndOpacity('#c0c0c0', 0.5, '#000000')">T</span>
                                 </div>
                                 <br>
                                 <div id="text-color-div" class="text" style="display: none">

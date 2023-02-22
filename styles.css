@@ -37,6 +37,9 @@ canvas.drag-mode {
 canvas.draw-mode {
     cursor: crosshair !important;
 }
+canvas.eraser-mode {
+    cursor: crosshair !important;
+}
 canvas.polygon-mode {
     cursor: crosshair !important;
 }
