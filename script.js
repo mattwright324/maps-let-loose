@@ -1334,6 +1334,7 @@ const mll = (function () {
                 hasBorders: false,
                 lockMovementX: true,
                 lockMovementY: true,
+                perPixelTargetFind: true,
             });
             circle.setControlsVisibility({
                 mt: true, mb: true, ml: true, mr: true, bl: true, br: true, tl: false, tr: false, mtr: true
@@ -1447,7 +1448,6 @@ const mll = (function () {
 
         fabric.Image.fromURL('', function (img) {
             console.log(img);
-
             img.set({
                 selectable: true,
                 evented: true,
@@ -1461,8 +1461,6 @@ const mll = (function () {
                 left: e.absolutePointer.x,
                 // These will change and be calculated but for some reason set them higher so that its selectable once added
                 zIndex: 99,
-                width: 999,
-                height: 999,
             });
             // img.filters.push(new fabric.Image.filters.HueRotation({rotation: 2 * Math.random() - 1}))
             img.type = {
@@ -2374,7 +2372,8 @@ const mll = (function () {
                         originX: 'center',
                         originY: 'center',
                         id: id,
-                        objectCaching: false
+                        objectCaching: false,
+                        perPixelTargetFind: true,
                     });
                     if (pointArray.length == 0) {
                         circle.set({
@@ -2917,7 +2916,8 @@ const mll = (function () {
                         left: point[0],
                         top: point[1],
                         text: meters + "m"
-                    })
+                    });
+                    line.setCoords();
 
                     controls.fabricCanvas.requestRenderAll();
                 }
@@ -3528,7 +3528,21 @@ const mll = (function () {
                 updateZoomScale();
             });
 
-            // TODO https://codepen.io/durga598/pen/gXQjdw?editors=0010
+            // Fabric object bounding box debug
+            // controls.fabricCanvas.on('after:render', function() {
+            //     controls.fabricCanvas.forEachObject(function(obj) {
+            //         if (obj.selectable) {
+            //             controls.fabricCanvas.contextContainer.strokeStyle = '#2dff00';
+            //             var bound = obj.getBoundingRect();
+            //             controls.fabricCanvas.contextContainer.strokeRect(
+            //                 bound.left + 0.5,
+            //                 bound.top + 0.5,
+            //                 bound.width,
+            //                 bound.height
+            //             );
+            //         }
+            //     })
+            // });
 
             elements.spImage = new Image();
             elements.spImage.onload = loadStrongpoints;
@@ -4157,7 +4171,11 @@ const mll = (function () {
                             applyFilters.push(object);
                         }
 
-                        object.setSrc(meta.resolveImg(object), resolve);
+                        object.setSrc(meta.resolveImg(object), function (o) {
+                            // fix image bounding box after src changes
+                            o.setCoords();
+                            resolve();
+                        });
                     }));
                 }
             }
