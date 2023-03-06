@@ -95,7 +95,9 @@ const mll = (function () {
                 if (!typeMeta) {
                     continue;
                 }
-                const baseScale = typeMeta.customScale || 1;
+                const baseScale = (typeMeta.customScale &&
+                    (!typeMeta.hasOwnProperty("customScaleWhen") || typeMeta.hasOwnProperty("customScaleWhen") && typeMeta.customScaleWhen())) ?
+                    typeMeta.customScale : 1;
                 if (doScale && (typeMeta.zoomScale || (typeMeta.hasOwnProperty("zoomScaleWhen") && typeMeta.zoomScaleWhen()))) {
                     const max = typeMeta.maxZoom || 2.25;
                     let adjusted = baseScale + (scale - 1);
@@ -262,6 +264,7 @@ const mll = (function () {
             controls.checkOffensiveGarries.prop('checked', controlState.defaultOffensiveGarries);
             controls.checkArtillery.prop('checked', controlState.defaultArty);
             controls.checkTanks.prop('checked', controlState.defaultTanks);
+            controls.checkCommandSpawn.prop('checked', controlState.defaultCommandSpawn);
             controls.checkRepairStations.prop('checked', controlState.defaultRepairStations);
             controls.checkStrongpoints.prop('checked', controlState.sp);
             controls.checkSpResource.prop('checked', controlState.spResource);
@@ -488,6 +491,7 @@ const mll = (function () {
             defaultOffensiveGarries: controls.checkOffensiveGarries.is(":checked"),
             defaultArty: controls.checkArtillery.is(":checked"),
             defaultTanks: controls.checkTanks.is(":checked"),
+            defaultCommandSpawn: controls.checkCommandSpawn.is(":checked"),
             defaultRepairStations: controls.checkRepairStations.is(":checked"),
             arty: controls.checkArty.is(":checked"),
             flipArty: controls.checkArtyFlip.is(":checked"),
@@ -693,7 +697,12 @@ const mll = (function () {
             zoomScaleWhen: function () {
                 return controls.checkGarryRadius.is(":checked")
             },
+            customScaleWhen: function () {
+                return controls.checkGarryRadius.is(":checked")
+            },
+            zoomScale: true,
             customizable: "asset",
+            customScale: 0.5,
             filterRotation: -0.45,
         },
         outpost: {
@@ -795,6 +804,15 @@ const mll = (function () {
             customizable: "asset",
             customScale: 0.5,
         },
+        command_spawn: {
+            resolveImg: function (object) {
+                return './assets/halftrack-plain.png'
+            },
+            zoomScale: true,
+            customizable: "asset",
+            customScale: 0.5,
+            filterRotation: -0.45,
+        },
         class: {
             resolveImg: function (object) {
                 if (object.type.modifier) {
@@ -816,7 +834,9 @@ const mll = (function () {
                 return './assets/truck-supply.png'
             },
             controlsVisibility: {mtr: true},
-            zoomScale: true
+            zoomScale: true,
+            customizable: "asset",
+            customScale: 0.5,
         },
         'at-gun': {
             resolveImg: function (object) {
@@ -1602,6 +1622,7 @@ const mll = (function () {
             controls.checkOffensiveGarries = $("#offensivegarry-visible");
             controls.checkArtillery = $("#artypos-visible");
             controls.checkTanks = $("#tanks-visible");
+            controls.checkCommandSpawn = $("#commandspawn-visible");
             controls.checkRepairStations = $("#repairstation-visible");
 
             elements.extraPanel = $("#extra-panel");
@@ -3774,7 +3795,7 @@ const mll = (function () {
                 controls.checkEggs, controls.checkSpecial, controls.checkSectors, controls.checkSectorSwap, controls.checkPlacedElements,
                 controls.checkGarryRadius, controls.checkArtyFlip, controls.checkSpResource, controls.checkDrawingsVisible,
                 controls.checkDefaults, controls.radioSideA, controls.radioBothSides, controls.radioSideB,
-                controls.checkOffensiveGarries, controls.checkArtillery, controls.checkTanks, controls.checkRepairStations,
+                controls.checkOffensiveGarries, controls.checkArtillery, controls.checkTanks, controls.checkCommandSpawn, controls.checkRepairStations,
             ].forEach(function (control) {
                 control.change(function () {
                     internal.updateStatesAndRender();
@@ -4135,6 +4156,7 @@ const mll = (function () {
                     controls.checkOffensiveGarries.is(":checked") && type === "offensive_garrisons" ||
                     controls.checkArtillery.is(":checked") && type === "artillery" ||
                     controls.checkTanks.is(":checked") && type === "tank" ||
+                    controls.checkCommandSpawn.is(":checked") && type === "command_spawn" ||
                     controls.checkRepairStations.is(":checked") && type === "repair-station";
                 element.visible = visible && typeVisible;
                 element.type.side = "enemy";
