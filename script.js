@@ -95,10 +95,15 @@ const mll = (function () {
                 if (!typeMeta) {
                     continue;
                 }
-                const baseScale = (typeMeta.customScale &&
-                    (!typeMeta.hasOwnProperty("customScaleWhen") || typeMeta.hasOwnProperty("customScaleWhen") && typeMeta.customScaleWhen())) ?
-                    typeMeta.customScale : 1;
-                if (doScale && (typeMeta.zoomScale || (typeMeta.hasOwnProperty("zoomScaleWhen") && typeMeta.zoomScaleWhen()))) {
+                let baseScale = 1;
+                if (typeMeta.customScale && (typeMeta.hasOwnProperty("customScaleWhen") && typeMeta.customScaleWhen())) {
+                    baseScale = typeMeta.customScale;
+                }
+                if (typeMeta.customScale && !typeMeta.hasOwnProperty("customScaleWhen")) {
+                    baseScale = typeMeta.customScale;
+                }
+                if (doScale && (typeMeta.zoomScale &&
+                    (!typeMeta.hasOwnProperty("zoomScaleWhen") || typeMeta.hasOwnProperty("zoomScaleWhen") && typeMeta.zoomScaleWhen()))) {
                     const max = typeMeta.maxZoom || 2.25;
                     let adjusted = baseScale + (scale - 1);
                     if (adjusted > max) {
@@ -162,7 +167,7 @@ const mll = (function () {
                 const element = elements[j];
                 elements[j].set({zIndex: zIndex});
 
-                if (element.type.also) {
+                if (element.type.also && element.type.type !== "measure-line") {
                     for (let k = 0; k < element.type.also.length; k++) {
                         element.type.also[k].set({zIndex: zIndex});
                     }
@@ -695,9 +700,11 @@ const mll = (function () {
             },
             controlsVisibility: {mtr: true},
             zoomScaleWhen: function () {
+                console.log('halftrack zoomscale %s', controls.checkGarryRadius.is(":checked"));
                 return controls.checkGarryRadius.is(":checked")
             },
             customScaleWhen: function () {
+                console.log('halftrack customscale %s', controls.checkGarryRadius.is(":checked"));
                 return controls.checkGarryRadius.is(":checked")
             },
             zoomScale: true,
@@ -993,7 +1000,7 @@ const mll = (function () {
             originY: "center",
             selectable: true,
             evented: true,
-            zIndex: 9,
+            zIndex: 999,
             hasControls: false,
             hasBorders: false,
         });
