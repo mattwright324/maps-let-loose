@@ -256,7 +256,7 @@ const mll = (function () {
             controls.comboMapSelect.val(controlState.map);
             controls.checkGrid.prop('checked', controlState.grid);
             controls.checkPlacedElements.prop('checked', controlState.placed);
-            controls.checkGarryRadius.prop('checked', controlState.spawnRadius);
+            controls.checkHideRadius.prop('checked', controlState.spawnRadius);
             controls.checkArty.prop('checked', controlState.arty);
             controls.checkArtyFlip.prop('checked', controlState.flipArty);
             controls.checkInaccessible.prop('checked', controlState.inaccessible);
@@ -488,7 +488,7 @@ const mll = (function () {
             map: controls.comboMapSelect.val(),
             grid: controls.checkGrid.is(":checked"),
             placed: controls.checkPlacedElements.is(":checked"),
-            spawnRadius: controls.checkGarryRadius.is(":checked"),
+            spawnRadius: controls.checkHideRadius.is(":checked"),
             defaults: controls.checkDefaults.is(":checked"),
             defaultSideA: controls.radioSideA.is(":checked"),
             defaultBoth: controls.radioBothSides.is(":checked"),
@@ -658,7 +658,7 @@ const mll = (function () {
             resolveImg: function (object) {
                 const sectorBred = controls.checkSectorSwap.is(":checked");
                 const sectorsVisible = controls.checkSectors.is(":checked");
-                const radiusHidden = controls.checkGarryRadius.is(":checked");
+                const radiusHidden = controls.checkHideRadius.is(":checked");
                 const objectX = object.left;
                 const objectY = object.top;
 
@@ -679,33 +679,40 @@ const mll = (function () {
                 return './assets/garry-blue-zone.png';
             },
             zoomScaleWhen: function () {
-                return controls.checkGarryRadius.is(":checked")
+                return controls.checkHideRadius.is(":checked")
             },
+            customScaleWhen: function () {
+                return controls.checkHideRadius.is(":checked")
+            },
+            zoomScale: true,
             customizable: "asset",
             filterRotation: -0.45,
         },
         airhead: {
             resolveImg: function (object) {
-                const radiusHidden = controls.checkGarryRadius.is(":checked");
+                const radiusHidden = controls.checkHideRadius.is(":checked");
                 return './assets/airhead-' + (radiusHidden ? 'plain' : 'radius') + '.png'
             },
             zoomScaleWhen: function () {
-                return controls.checkGarryRadius.is(":checked")
-            }
+                return controls.checkHideRadius.is(":checked")
+            },
+            customScaleWhen: function () {
+                return controls.checkHideRadius.is(":checked")
+            },
+            zoomScale: true,
+            customScale: 0.5,
         },
         halftrack: {
             resolveImg: function (object) {
-                const radiusHidden = controls.checkGarryRadius.is(":checked");
+                const radiusHidden = controls.checkHideRadius.is(":checked");
                 return './assets/halftrack-' + (radiusHidden ? 'plain' : 'radius') + '.png'
             },
             controlsVisibility: {mtr: true},
             zoomScaleWhen: function () {
-                console.log('halftrack zoomscale %s', controls.checkGarryRadius.is(":checked"));
-                return controls.checkGarryRadius.is(":checked")
+                return controls.checkHideRadius.is(":checked")
             },
             customScaleWhen: function () {
-                console.log('halftrack customscale %s', controls.checkGarryRadius.is(":checked"));
-                return controls.checkGarryRadius.is(":checked")
+                return controls.checkHideRadius.is(":checked")
             },
             zoomScale: true,
             customizable: "asset",
@@ -714,12 +721,17 @@ const mll = (function () {
         },
         outpost: {
             resolveImg: function (object) {
-                const radiusHidden = controls.checkGarryRadius.is(":checked");
+                const radiusHidden = controls.checkHideRadius.is(":checked");
                 return './assets/outpost-' + object.type.modifier + "-" + (radiusHidden ? 'plain' : 'radius') + '.png'
             },
             zoomScaleWhen: function () {
-                return controls.checkGarryRadius.is(":checked")
-            }
+                return controls.checkHideRadius.is(":checked")
+            },
+            customScaleWhen: function () {
+                return controls.checkHideRadius.is(":checked")
+            },
+            zoomScale: true,
+            customScale: 0.5,
         },
         node: {
             resolveImg: function (object) {
@@ -753,13 +765,29 @@ const mll = (function () {
             resolveImg: function (object) {
                 return "./assets/supply-drop.png"
             },
-            zoomScale: false
+            zoomScale: true,
+            customScale: 0.5,
         },
         "ammo-drop": {
             resolveImg: function (object) {
                 return "./assets/ammo-drop.png"
             },
-            zoomScale: false
+            zoomScale: true,
+            customScale: 0.5,
+        },
+        "airhead-drop": {
+            resolveImg: function (object) {
+                return "./assets/airhead-drop.png"
+            },
+            zoomScale: true,
+            customScale: 0.5,
+        },
+        "reinforce": {
+            resolveImg: function (object) {
+                return "./assets/reinforce.png"
+            },
+            zoomScale: true,
+            customScale: 0.5,
         },
         "precision-strike": {
             resolveImg: function (object) {
@@ -847,9 +875,12 @@ const mll = (function () {
         },
         'at-gun': {
             resolveImg: function (object) {
+                // return './assets/arty.png' // TODO
                 return './assets/at-gun-plain.png'
             },
             controlsVisibility: {mtr: true},
+            customizable: "asset",
+            customScale: 0.5,
             zoomScale: true
         },
         enemy: {
@@ -911,7 +942,15 @@ const mll = (function () {
             },
             customizable: "asset",
             zoomScale: true
-        }
+        },
+        "render-distance-radiuses": {
+            resolveImg: function (object) {
+                return './assets/render-distance-radiuses.png'
+            },
+            controlsVisibility: {mtr: true},
+            zoomScale: false
+        },
+        zoomScale: false
     }
 
     function fixElementSelectBoxes() {
@@ -1608,7 +1647,7 @@ const mll = (function () {
             controls.checkSpResource = $("#sp-resource-visible");
             elements.strongpointGrid = $("#sp-grid");
             controls.checkPlacedElements = $("#placed-visible");
-            controls.checkGarryRadius = $("#garry-radius-visible");
+            controls.checkHideRadius = $("#garry-radius-visible");
             controls.btnRemoveAllElements = $("#remove-all-elements");
             controls.btnUndoLastElement = $("#undo-last-element");
             controls.btnEnableAll = $("#enableAll");
@@ -2141,6 +2180,9 @@ const mll = (function () {
                 garrison: function () {
                     mll.menuAdd("garry")
                 },
+                arty: function () {
+                    mll.menuAdd("arty")
+                },
                 // Spawn
                 airhead: function () {
                     mll.menuAdd("airhead")
@@ -2289,6 +2331,9 @@ const mll = (function () {
                 ammo_drop: function () {
                     mll.menuAdd("ammo-drop");
                 },
+                airhead_drop: function () {
+                    mll.menuAdd("airhead-drop");
+                },
                 reinforce: function () {
                     mll.menuAdd("reinforce");
                 },
@@ -2313,6 +2358,9 @@ const mll = (function () {
                 },
                 measure_line: function () {
                     mll.menuAdd("measure-line")
+                },
+                render_distance_radiuses: function () {
+                    mll.menuAdd("render-distance-radiuses")
                 },
                 rectangle: function () {
                     mll.menuAdd("rectangle")
@@ -2539,6 +2587,7 @@ const mll = (function () {
                     name: "Add Spawn",
                     icon: "bi bi-chevron-double-right",
                     items: {
+                        // arty: {name: "Arty"}, // Temporary for creating defaults
                         airhead: {name: "Airhead", icon: "bi bi-triangle-fill"},
                         halftrack: {name: "Halftrack", icon: "bi bi-truck"},
                         outpost: {name: "Outpost", icon: "bi bi-triangle"},
@@ -2621,8 +2670,10 @@ const mll = (function () {
                     items: {
                         supply_drop: {name: "Supply Drop", icon: "bi bi-box2"},
                         ammo_drop: {name: "Ammo Drop", icon: "bi bi-box2"},
+                        airhead_drop: {name: "Airhead Drop", icon: "bi bi-triangle-fill"},
+                        reinforce: {name: "Reinforce", icon: "bi bi-people"},
                         // recon_plane: {name: "Recon Plane", icon: "bi bi-camera", disabled: true},
-                        precision_strike: {name: "Precision Strike", icon: "bi bi-arrow-down-circle"},
+                        // precision_strike: {name: "Precision Strike", icon: "bi bi-arrow-down-circle"},
                         strafing_run: {name: "Strafing Run", icon: "bi bi-file-arrow-up"},
                         bombing_run: {name: "Bombing Run", icon: "bi bi-file-arrow-up"},
                         katyusha_strike: {name: "Katyusha Strike", icon: "bi bi-arrow-down-circle"},
@@ -2634,6 +2685,7 @@ const mll = (function () {
                     items: {
                         measure_radius: {name: "Measure Radius", icon: "bi bi-plus-circle-dotted"},
                         measure_line: {name: "Measure Line", icon: "bi bi-rulers"},
+                        render_distance_radiuses: {name: "Render Distance Radiuses", icon: "bi bi-plus-circle-dotted"},
                         rectangle: {name: "Rectangle", icon: "bi bi-square"},
                         circle: {name: "Circle", icon: "bi bi-circle"},
                         draw_polygon: {name: "Custom Polygon", icon: "bi bi-bounding-box-circles"},
@@ -3800,7 +3852,7 @@ const mll = (function () {
 
             [controls.checkGrid, controls.checkArty, controls.checkStrongpoints, controls.checkInaccessible,
                 controls.checkEggs, controls.checkSpecial, controls.checkSectors, controls.checkSectorSwap, controls.checkPlacedElements,
-                controls.checkGarryRadius, controls.checkArtyFlip, controls.checkSpResource, controls.checkDrawingsVisible,
+                controls.checkHideRadius, controls.checkArtyFlip, controls.checkSpResource, controls.checkDrawingsVisible,
                 controls.checkDefaults, controls.radioSideA, controls.radioBothSides, controls.radioSideB,
                 controls.checkOffensiveGarries, controls.checkArtillery, controls.checkTanks, controls.checkCommandSpawn, controls.checkRepairStations,
             ].forEach(function (control) {
