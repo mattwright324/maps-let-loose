@@ -268,6 +268,62 @@ const DEFAULT_ELEMENTS = {
                 }
             ]
         },
+        truck: {
+            a: [
+                {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 91.44701089616983,
+                    left: 46.694428070914796,
+                    top: 613.3445418454547,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 64.03978734160204,
+                    left: 42.14780334194154,
+                    top: 952.7879407893656,
+                }, {
+                    type: 'truck',
+                    modifier: 'supply',
+                    angle: 95.02184363085983,
+                    left: 41.64148127478654,
+                    top: 964.1954376879874,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 69.9629207794586,
+                    left: 43.0973536881711,
+                    top: 1423.3611211426048,
+                },
+            ],
+            b: [
+                {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: -139.09235923781662,
+                    left: 1859.1484201131673,
+                    top: 586.3971969948261,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: -96.94062652867657,
+                    left: 1864.1992215589307,
+                    top: 968.1549625982924,
+                }, {
+                    type: 'truck',
+                    modifier: 'supply',
+                    angle: -131.12988907440774,
+                    left: 1864.7992215589309,
+                    top: 951.0549625982924,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 357.67314576051814,
+                    left: 1871.9006320933645,
+                    top: 1318.5200476658688,
+                },
+            ]
+        },
         command_spawn: {
             a: [
                 {
@@ -452,6 +508,62 @@ const DEFAULT_ELEMENTS = {
                     left: 1396.660925389123,
                     top: 1856.027985072562,
                 }
+            ]
+        },
+        truck: {
+            a: [
+                {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: -177.83588702709582,
+                    left: 601.1511518058454,
+                    top: 77.09752990402569,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 123.16958691447014,
+                    left: 1108.2182319867504,
+                    top: 70.86309133921054,
+                }, {
+                    type: 'truck',
+                    modifier: 'supply',
+                    angle: 135.00000000000014,
+                    left: 1072.0097237506225,
+                    top: 45.35001938206176,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 90.40348473505858,
+                    left: 1380.795701499438,
+                    top: 54.32624207999527,
+                },
+            ],
+            b: [
+                {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 0,
+                    left: 517.7038215287103,
+                    top: 1810.6017960319568,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: -102.45815943482926,
+                    left: 1153.5744492789827,
+                    top: 1851.013103690628,
+                }, {
+                    type: 'truck',
+                    modifier: 'supply',
+                    angle: -10.077673241270597,
+                    left: 1148.237132265635,
+                    top: 1868.5145385483502,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 89.55516320997027,
+                    left: 1408.5249005045537,
+                    top: 1847.2233591573174,
+                },
             ]
         },
         command_spawn: {
@@ -640,6 +752,62 @@ const DEFAULT_ELEMENTS = {
                 }
             ]
         },
+        truck: {
+            a: [
+                {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 9.452140558371,
+                    left: 52.97798865387119,
+                    top: 712.176503393695,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 80.47622242014887,
+                    left: 40.13937688893418,
+                    top: 1154.7910364742652,
+                }, {
+                    type: 'truck',
+                    modifier: 'supply',
+                    angle: 164.26718240972173,
+                    left: 48.51130508369522,
+                    top: 1141.5658165723962,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 25.252956311000652,
+                    left: 50.91093494404231,
+                    top: 1417.3981809100912,
+                },
+            ],
+            b: [
+                {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: -84.26004212059094,
+                    left: 1838.9956905764463,
+                    top: 488.85013237045956,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: -136.0470148521518,
+                    left: 1872.0814035722178,
+                    top: 809.3024867506261,
+                }, {
+                    type: 'truck',
+                    modifier: 'supply',
+                    angle: -63.9480913165392,
+                    left: 1842.7055818623664,
+                    top: 794.4198987887903,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 182.61872716732324,
+                    left: 1872.626826628628,
+                    top: 1252.178716364413,
+                },
+            ]
+        },
         command_spawn: {
             a: [
                 {
@@ -824,6 +992,62 @@ const DEFAULT_ELEMENTS = {
                     left: 1817.3533315337543,
                     top: 1529.6071058185626,
                 }
+            ]
+        },
+        truck: {
+            a: [
+                {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 40.965010170966224,
+                    left: 33.94569811397662,
+                    top: 655.8970842501411,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 166.05752032763516,
+                    left: 80.97178883773256,
+                    top: 912.0908038401728,
+                }, {
+                    type: 'truck',
+                    modifier: 'supply',
+                    angle: 78.09203465555414,
+                    left: 76.84958943854258,
+                    top: 940.1663240724938,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 89.25270612317406,
+                    left: 159.87919996091875,
+                    top: 1347.7802330877757,
+                },
+            ],
+            b: [
+                {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: -130.06078445787386,
+                    left: 1855.310653140165,
+                    top: 560.394967032916,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 179.64632684075306,
+                    left: 1825.6944581121745,
+                    top: 1008.727180666802,
+                }, {
+                    type: 'truck',
+                    modifier: 'supply',
+                    angle: -7.520225563382284,
+                    left: 1807.9944581121745,
+                    top: 1026.627180666802,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 2.6187015253694734,
+                    left: 1771.5795421593903,
+                    top: 1522.0941817635705,
+                },
             ]
         },
         command_spawn: {
@@ -1012,6 +1236,62 @@ const DEFAULT_ELEMENTS = {
                 }
             ]
         },
+        truck: {
+            a: [
+                {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 46.73570458892852,
+                    left: 575.8333325906431,
+                    top: 67.1725998267533,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: -132.8731728298483,
+                    left: 1047.5677599643313,
+                    top: 33.21259430808186,
+                }, {
+                    type: 'truck',
+                    modifier: 'supply',
+                    angle: -157.89025673220073,
+                    left: 1036.0237950611431,
+                    top: 31.03448772257468,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: -173.6887894248669,
+                    left: 1354.7404629214861,
+                    top: 55.36800908795567,
+                },
+            ],
+            b: [
+                {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 144.824948881988,
+                    left: 508.01511377069704,
+                    top: 1841.894230559296,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 38.24290245549405,
+                    left: 1001.6042409026277,
+                    top: 1885.0348033545108,
+                }, {
+                    type: 'truck',
+                    modifier: 'supply',
+                    angle: 56.40655258397235,
+                    left: 992.1163103611016,
+                    top: 1876.6010873175987,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 0,
+                    left: 1400.2033661245166,
+                    top: 1909.6781313067786,
+                },
+            ]
+        },
         command_spawn: {
             a: [
                 {
@@ -1196,6 +1476,62 @@ const DEFAULT_ELEMENTS = {
                     left: 1482.4929043471802,
                     top: 1838.4269524986366,
                 }
+            ]
+        },
+        truck: {
+            a: [
+                {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 40.75982975293591,
+                    left: 605.3679602418566,
+                    top: 126.40119409344084,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 135.325540698659,
+                    left: 1031.2139982270678,
+                    top: 117.59688807290638,
+                }, {
+                    type: 'truck',
+                    modifier: 'supply',
+                    angle: 129.2254196275558,
+                    left: 1031.6596414053586,
+                    top: 124.39294654184107,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: -20.664329710080548,
+                    left: 1340.9650520359555,
+                    top: 83.28697350758614,
+                },
+            ],
+            b: [
+                {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 23.733779149385803,
+                    left: 491.76299337809525,
+                    top: 1760.388997312142,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: -97.74913757193217,
+                    left: 986.7839261294536,
+                    top: 1817.763802288201,
+                }, {
+                    type: 'truck',
+                    modifier: 'supply',
+                    angle: -101.07020257793951,
+                    left: 986.3382829511628,
+                    top: 1814.1986568618747,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 144.84777404647033,
+                    left: 1472.2118077124499,
+                    top: 1849.3526920067952,
+                },
             ]
         },
         command_spawn: {
@@ -1384,19 +1720,73 @@ const DEFAULT_ELEMENTS = {
                 }
             ]
         },
+        truck: {
+            a: [
+                {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 84.71373009830002,
+                    left: 83.58079032198077,
+                    top: 504.8812584996116,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 44.198712669893055,
+                    left: 83.8564761929606,
+                    top: 874.8863842574635,
+                }, {
+                    type: 'truck',
+                    modifier: 'supply',
+                    angle: 85.64373636725517,
+                    left: 112.14445066952487,
+                    top: 936.4008107053837,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 104.6499041058129,
+                    left: 43.46538363125967,
+                    top: 1264.40783284043,
+                },
+            ],
+            b: [
+                {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: -102.16891432990909,
+                    left: 1750.7272912377348,
+                    top: 532.4659845338875,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: -94.20286030853282,
+                    left: 1817.8950766641588,
+                    top: 971.9244854206742,
+                }, {
+                    type: 'truck',
+                    modifier: 'supply',
+                    angle: -102.15355166217458,
+                    left: 1824.5950766641588,
+                    top: 964.0244854206742,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 269.98688783770365,
+                    left: 1842.6464035250026,
+                    top: 1376.1045300106766,
+                },
+            ]
+        },
         command_spawn: {
             a: [
                 {
                     type: 'command_spawn',
                     angle: 44.82768701273851,
-                    "height": 64,
                     left: 100.61724814128922,
                     top: 527.6509416287323,
                 },
                 {
                     type: 'command_spawn',
                     angle: 59.939469971429766,
-                    "height": 64,
                     left: 92.22725176895176,
                     top: 941.923953160949,
                 },
@@ -1570,6 +1960,62 @@ const DEFAULT_ELEMENTS = {
                     left: 1449.4402024312749,
                     top: 1860.7889802207505,
                 }
+            ]
+        },
+        truck: {
+            a: [
+                {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 166.81703484145913,
+                    left: 428.67576850399195,
+                    top: 118.27488818387928,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 10.619655276155152,
+                    left: 995.1314854659136,
+                    top: 91.98180139866508,
+                }, {
+                    type: 'truck',
+                    modifier: 'supply',
+                    angle: 66.66115082034663,
+                    left: 988.1615443922905,
+                    top: 84.24952302011457,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: -167.9853261826255,
+                    left: 1430.044388916395,
+                    top: 135.37282388030894,
+                },
+            ],
+            b: [
+                {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: -21.588167736379678,
+                    left: 580.8116757931315,
+                    top: 1871.9412813444555,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 0,
+                    left: 980.0079258790529,
+                    top: 1881.465576881987,
+                }, {
+                    type: 'truck',
+                    modifier: 'supply',
+                    angle: -3.6044205391755617,
+                    left: 996.2729496645263,
+                    top: 1875.592096070566,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 340.66969928092215,
+                    left: 1455.7112137689146,
+                    top: 1820.7338224338278,
+                },
             ]
         },
         command_spawn: {
@@ -1758,26 +2204,79 @@ const DEFAULT_ELEMENTS = {
                 }
             ]
         },
+        truck: {
+            a: [
+                {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: -138.5035316447844,
+                    left: 531.2635505676541,
+                    top: 123.48895253349201,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 135.69187711676378,
+                    left: 982.2272227423663,
+                    top: 91.65355730204578,
+                }, {
+                    type: 'truck',
+                    modifier: 'supply',
+                    angle: 136.65913067959008,
+                    left: 978.7272227423663,
+                    top: 94.05355730204587,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 90.83820464799358,
+                    left: 1351.4870024345807,
+                    top: 108.48470756006168,
+                },
+            ],
+            b: [
+                {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: -10.247609988951924,
+                    left: 554.2846839557619,
+                    top: 1890.5834529849508,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 38.76896258016885,
+                    left: 884.4029776279933,
+                    top: 1880.7538253043203,
+                }, {
+                    type: 'truck',
+                    modifier: 'supply',
+                    angle: 42.94538206701722,
+                    left: 889.2438000354484,
+                    top: 1884.9740294544094,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 271.88559977077955,
+                    left: 1321.0224387420685,
+                    top: 1867.0892166202755,
+                },
+            ]
+        },
         command_spawn: {
             a: [
                 {
                     type: 'command_spawn',
                     angle: -174.16568387460822,
-                    "height": 64,
                     left: 523.4421325237706,
                     top: 117.41791731207184,
                 },
                 {
                     type: 'command_spawn',
                     angle: 152.16968191448566,
-                    "height": 64,
                     left: 993.0832266983324,
                     top: 83.18842629779681,
                 },
                 {
                     type: 'command_spawn',
                     angle: 112.75422385055045,
-                    "height": 64,
                     left: 1346.38644951585,
                     top: 100.40319064442883,
                 }
@@ -1786,21 +2285,18 @@ const DEFAULT_ELEMENTS = {
                 {
                     type: 'command_spawn',
                     angle: 33.742679617513474,
-                    "height": 64,
                     left: 543.1686688952786,
                     top: 1880.3044902922063,
                 },
                 {
                     type: 'command_spawn',
                     angle: 39.44117159611407,
-                    "height": 64,
                     left: 902.2629418889654,
                     top: 1894.5077056422074,
                 },
                 {
                     type: 'command_spawn',
                     angle: 321.49352531253913,
-                    "height": 64,
                     left: 1322.3778171733295,
                     top: 1880.5686622830526,
                 }
@@ -1948,6 +2444,62 @@ const DEFAULT_ELEMENTS = {
                     left: 1427.6255964380491,
                     top: 1863.7109033857857,
                 }
+            ]
+        },
+        truck: {
+            a: [
+                {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 173.92687104335985,
+                    left: 562.8475252311456,
+                    top: 81.88719716338494,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: -169.3652390612597,
+                    left: 1020.172909333919,
+                    top: 21.380426350000334,
+                }, {
+                    type: 'truck',
+                    modifier: 'supply',
+                    angle: -123.91094299904732,
+                    left: 962.343112192139,
+                    top: 22.422195233939306,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 145.33699897914707,
+                    left: 1371.0392170584125,
+                    top: 20.099602518043184,
+                },
+            ],
+            b: [
+                {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 64.28533500825634,
+                    left: 498.4045637112871,
+                    top: 1852.4398213781594,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: -54.815424522640285,
+                    left: 939.8160084546072,
+                    top: 1860.5300129556604,
+                }, {
+                    type: 'truck',
+                    modifier: 'supply',
+                    angle: 113.59925376944052,
+                    left: 915.011252277989,
+                    top: 1858.3730776359546,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 356.73339519781604,
+                    left: 1421.6461204545915,
+                    top: 1861.9666174392357,
+                },
             ]
         },
         command_spawn: {
@@ -2136,6 +2688,62 @@ const DEFAULT_ELEMENTS = {
                 }
             ]
         },
+        truck: {
+            a: [
+                {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: -178.71251082243936,
+                    left: 72.9781249651104,
+                    top: 609.4469620805633,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 3.4572120873669245,
+                    left: 77.50921086617518,
+                    top: 971.3708373603006,
+                }, {
+                    type: 'truck',
+                    modifier: 'supply',
+                    angle: 68.12265796805916,
+                    left: 71.70115071909925,
+                    top: 957.1272612853286,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 129.2034728252286,
+                    left: 79.42535182040251,
+                    top: 1420.957390664401,
+                },
+            ],
+            b: [
+                {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: -90.41114459858446,
+                    left: 1875.7387043808833,
+                    top: 594.1066021698138,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: -88.34570809359272,
+                    left: 1827.9829578345268,
+                    top: 947.7842514543831,
+                }, {
+                    type: 'truck',
+                    modifier: 'supply',
+                    angle: -115.27466446290305,
+                    left: 1831.4584200757768,
+                    top: 963.7962024944268,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 300.2852464337742,
+                    left: 1831.5282175961222,
+                    top: 1355.6816527211704,
+                },
+            ]
+        },
         command_spawn: {
             a: [
                 {
@@ -2322,6 +2930,62 @@ const DEFAULT_ELEMENTS = {
                 }
             ]
         },
+        truck: {
+            a: [
+                {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 11.309932474020261,
+                    left: 71.32289204084839,
+                    top: 520.1072472847231,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 105.02704004728626,
+                    left: 64.07915399081264,
+                    top: 1059.6469655859512,
+                }, {
+                    type: 'truck',
+                    modifier: 'supply',
+                    angle: 103.15034120202117,
+                    left: 75.66587662637346,
+                    top: 1065.217505314586,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 108.44900568709359,
+                    left: 58.83531328030665,
+                    top: 1430.1814419490447,
+                },
+            ],
+            b: [
+                {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: -137.70345895423105,
+                    left: 1828.6305551029413,
+                    top: 598.2226061905956,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 179.5613100679413,
+                    left: 1842.495945004234,
+                    top: 1121.1434391445046,
+                }, {
+                    type: 'truck',
+                    modifier: 'supply',
+                    angle: 178.66265948764087,
+                    left: 1834.1401354112816,
+                    top: 1120.8092067607865,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 4.8372629537916,
+                    left: 1832.6560300809133,
+                    top: 1390.8898158854622,
+                },
+            ]
+        },
         command_spawn: {
             a: [
                 {
@@ -2506,6 +3170,62 @@ const DEFAULT_ELEMENTS = {
                     left: 1754.6934959544183,
                     top: 1420.967986130489,
                 }
+            ]
+        },
+        truck: {
+            a: [
+                {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 89.27170304692352,
+                    left: 192.37470854117532,
+                    top: 504.3941746212634,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 94.85366812161178,
+                    left: 92.70106677139665,
+                    top: 913.108478583896,
+                }, {
+                    type: 'truck',
+                    modifier: 'supply',
+                    angle: 93.41742630623362,
+                    left: 108.98124903588518,
+                    top: 983.4612459207194,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 80.36424585753622,
+                    left: 206.09837248133056,
+                    top: 1455.2098337433051,
+                },
+            ],
+            b: [
+                {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: -107.25002595142922,
+                    left: 1733.683728249832,
+                    top: 570.5297550268971,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: -93.632107246396,
+                    left: 1749.0746233933714,
+                    top: 1035.247638310906,
+                }, {
+                    type: 'truck',
+                    modifier: 'supply',
+                    angle: -92.88883308500563,
+                    left: 1766.4519345996205,
+                    top: 1041.9503154904592,
+                }, {
+                    type: 'truck',
+                    modifier: 'transport',
+                    angle: 300.6997225508145,
+                    left: 1707.7920742042515,
+                    top: 1424.8392418234912,
+                },
             ]
         },
         command_spawn: {

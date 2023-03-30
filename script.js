@@ -269,6 +269,7 @@ const mll = (function () {
             controls.checkOffensiveGarries.prop('checked', controlState.defaultOffensiveGarries);
             controls.checkArtillery.prop('checked', controlState.defaultArty);
             controls.checkTanks.prop('checked', controlState.defaultTanks);
+            controls.checkTrucks.prop('checked', controlState.defaultTrucks);
             controls.checkCommandSpawn.prop('checked', controlState.defaultCommandSpawn);
             controls.checkRepairStations.prop('checked', controlState.defaultRepairStations);
             controls.checkStrongpoints.prop('checked', controlState.sp);
@@ -496,6 +497,7 @@ const mll = (function () {
             defaultOffensiveGarries: controls.checkOffensiveGarries.is(":checked"),
             defaultArty: controls.checkArtillery.is(":checked"),
             defaultTanks: controls.checkTanks.is(":checked"),
+            defaultTrucks: controls.checkTrucks.is(":checked"),
             defaultCommandSpawn: controls.checkCommandSpawn.is(":checked"),
             defaultRepairStations: controls.checkRepairStations.is(":checked"),
             arty: controls.checkArty.is(":checked"),
@@ -1668,6 +1670,7 @@ const mll = (function () {
             controls.checkOffensiveGarries = $("#offensivegarry-visible");
             controls.checkArtillery = $("#artypos-visible");
             controls.checkTanks = $("#tanks-visible");
+            controls.checkTrucks = $("#trucks-visible");
             controls.checkCommandSpawn = $("#commandspawn-visible");
             controls.checkRepairStations = $("#repairstation-visible");
 
@@ -3854,7 +3857,8 @@ const mll = (function () {
                 controls.checkEggs, controls.checkSpecial, controls.checkSectors, controls.checkSectorSwap, controls.checkPlacedElements,
                 controls.checkHideRadius, controls.checkArtyFlip, controls.checkSpResource, controls.checkDrawingsVisible,
                 controls.checkDefaults, controls.radioSideA, controls.radioBothSides, controls.radioSideB,
-                controls.checkOffensiveGarries, controls.checkArtillery, controls.checkTanks, controls.checkCommandSpawn, controls.checkRepairStations,
+                controls.checkOffensiveGarries, controls.checkArtillery, controls.checkTanks, controls.checkTrucks,
+                controls.checkCommandSpawn, controls.checkRepairStations,
             ].forEach(function (control) {
                 control.change(function () {
                     internal.updateStatesAndRender();
@@ -4215,6 +4219,7 @@ const mll = (function () {
                     controls.checkOffensiveGarries.is(":checked") && type === "offensive_garrisons" ||
                     controls.checkArtillery.is(":checked") && type === "artillery" ||
                     controls.checkTanks.is(":checked") && type === "tank" ||
+                    controls.checkTrucks.is(":checked") && type === "truck" ||
                     controls.checkCommandSpawn.is(":checked") && type === "command_spawn" ||
                     controls.checkRepairStations.is(":checked") && type === "repair-station";
                 element.visible = visible && typeVisible;
