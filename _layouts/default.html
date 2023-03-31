@@ -610,13 +610,13 @@
                                         <span id="configMatchingCount">0</span> with matching ids
                                     </p>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="importRemoveAllAddNew">
+                                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="importRemoveAllAddNew" checked>
                                         <label class="form-check-label" for="importRemoveAllAddNew">
                                             Remove all current configs and add new
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="importAddOverwiteAll" checked>
+                                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="importAddOverwiteAll">
                                         <label class="form-check-label" for="importAddOverwiteAll">
                                             Add and overwrite all config(s)
                                         </label>
@@ -838,6 +838,11 @@
             There is a theoretical limit of 12 dynamic team spawns: 8 maximum garrisons, 3 maximum halftracks, and 1 airhead.
         </li>
         <li>
+            There are 14 default vehicles: 7 on each side (3 tanks + 4 trucks).
+            There is a limit of 5 commander spawnable vehicles per side.
+            In total there is a limit of 28 potential vehicles in a match.
+        </li>
+        <li>
             Almost all spawn points have a 50m warning radius where it goes "hot" when an enemy is within the radius
             regardless of where they are placed.
         </li>
@@ -852,6 +857,7 @@
             Artillery dispersion is a 20m radius. Area of effect around a hit is a 15m radius.
             The total potential area of effect is a 35m radius.
         </li>
+        <li>Servers operate on a 20Hz tick rate.</li>
         <li>This application's distance measurements are based on 190 pixels being close enough to 200m or one grid square</li>
         <li>Developed by Winston [HR]</li>
         <li>Tactical maps and some assets are not mine and are or are based on content owned by Black Matter and Team 17.</li>
