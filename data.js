@@ -14,6 +14,20 @@ const POINT_COORDS = {
         [[[176, 1180, 218, 210]], [[465, 1105, 215, 201]], [[828, 1088, 250, 215]], [[1163, 1312, 233, 209]], [[1500, 1186, 290, 216]]],
         [null, null, null, null, null]
     ],
+    Driel: [
+        [null, null, null, null, null],
+        [null, null, null, null, null],
+        [null, null, null, null, null],
+        [null, null, null, null, null],
+        [null, null, null, null, null]
+    ],
+    ElAlamein: [
+        [null, null, null, null, null],
+        [null, null, null, null, null],
+        [null, null, null, null, null],
+        [null, null, null, null, null],
+        [null, null, null, null, null]
+    ],
     Foy: [
         [null, [[347, 123, 260, 136]], [[932, 114, 254, 151]], [[1213, 67, 235, 195]], null],
         [null, [[557, 390, 220, 27], [610, 421, 115, 159]], [[742, 508, 252, 152]], [[1271, 449, 265, 160]], null],
