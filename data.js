@@ -417,6 +417,82 @@ const DEFAULT_ELEMENTS = {
             ]
         }
     },
+    Driel: {
+        offensive_garrisons: {
+            b: [
+            ],
+            a: [
+            ]
+        },
+        artillery: {
+            a: [
+            ],
+            b: [
+            ]
+        },
+        tank: {
+            a: [
+            ],
+            b: [
+            ]
+        },
+        truck: {
+            a: [
+            ],
+            b: [
+            ]
+        },
+        command_spawn: {
+            a: [
+            ],
+            b: [
+            ]
+        },
+        repair_stations: {
+            a: [
+            ],
+            b: [
+            ]
+        }
+    },
+    ElAlamein: {
+        offensive_garrisons: {
+            b: [
+            ],
+            a: [
+            ]
+        },
+        artillery: {
+            a: [
+            ],
+            b: [
+            ]
+        },
+        tank: {
+            a: [
+            ],
+            b: [
+            ]
+        },
+        truck: {
+            a: [
+            ],
+            b: [
+            ]
+        },
+        command_spawn: {
+            a: [
+            ],
+            b: [
+            ]
+        },
+        repair_stations: {
+            a: [
+            ],
+            b: [
+            ]
+        }
+    },
     Foy: {
         offensive_garrisons: {
             b: [{
