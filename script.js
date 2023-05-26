@@ -3,6 +3,7 @@ const mll = (function () {
 
     const elements = {};
     const controls = {};
+    const build = document.querySelector("meta[name='build']").content;
 
     function idx(p, o) {
         return p.reduce((xs, x) => (xs && xs[x]) ? xs[x] : null, o)
@@ -741,7 +742,7 @@ const mll = (function () {
                     return './assets/node-' + object.type.modifier + ".png";
                 }
 
-                return './assets/tank-batch.png'
+                return './assets/node-batch.png'
             }
         },
         "arty": {
@@ -3763,13 +3764,13 @@ const mll = (function () {
                 console.log("Loading %s", filePrefix)
 
                 addDefaultMapElements(DEFAULT_ELEMENTS[filePrefix], false)
-                elements.map.setSrc('./assets/no-grid/' + filePrefix + '_NoGrid.png', internal.render);
+                elements.map.setSrc('./assets/no-grid/' + filePrefix + '_NoGrid.png?build=' + build, internal.render);
                 let artySuffix = controls.checkArtyFlip.is(":checked") ? 2 : 1;
-                elements.arty.setSrc('./assets/arty/' + filePrefix + '_Arty' + artySuffix + '.png', internal.render);
-                elements.inaccessible.setSrc('./assets/accessibility/' + filePrefix + "_Accessible.png", internal.render);
-                elements.eggs.setSrc('./assets/eggs/' + filePrefix + "_Eggs.png", internal.render);
-                elements.special.setSrc('./assets/special/' + filePrefix + "_Special.png", internal.render);
-                elements.spImage.src = './assets/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
+                elements.arty.setSrc('./assets/arty/' + filePrefix + '_Arty' + artySuffix + '.png?build=' + build, internal.render);
+                elements.inaccessible.setSrc('./assets/accessibility/' + filePrefix + "_Accessible.png?build=" + build, internal.render);
+                elements.eggs.setSrc('./assets/eggs/' + filePrefix + "_Eggs.png?build=" + build, internal.render);
+                elements.special.setSrc('./assets/special/' + filePrefix + "_Special.png?build=" + build, internal.render);
+                elements.spImage.src = './assets/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png?build=' + build;
             }
 
             internal.roomsLoadMapAndSP = function (filePrefix, selectedSp, spCallback) {
@@ -3784,7 +3785,7 @@ const mll = (function () {
 
                 const promises = [
                     new Promise(function (resolve) {
-                        const imgSrc = './assets/no-grid/' + filePrefix + '_NoGrid.png';
+                        const imgSrc = './assets/no-grid/' + filePrefix + '_NoGrid.png?build=' + build;
                         if (elements.map.src !== imgSrc) {
                             elements.map.setSrc(imgSrc, resolve);
                         } else {
@@ -3792,7 +3793,7 @@ const mll = (function () {
                         }
                     }),
                     new Promise(function (resolve) {
-                        const imgSrc = './assets/accessibility/' + filePrefix + '_Accessible.png';
+                        const imgSrc = './assets/accessibility/' + filePrefix + '_Accessible.png?build=' + build;
                         if (elements.inaccessible.src !== imgSrc) {
                             elements.inaccessible.setSrc(imgSrc, resolve);
                         } else {
@@ -3800,7 +3801,7 @@ const mll = (function () {
                         }
                     }),
                     new Promise(function (resolve) {
-                        const imgSrc = './assets/eggs/' + filePrefix + '_Eggs.png';
+                        const imgSrc = './assets/eggs/' + filePrefix + '_Eggs.png?build=' + build;
                         if (elements.eggs.src !== imgSrc) {
                             elements.eggs.setSrc(imgSrc, resolve);
                         } else {
@@ -3808,7 +3809,7 @@ const mll = (function () {
                         }
                     }),
                     new Promise(function (resolve) {
-                        const imgSrc = './assets/special/' + filePrefix + '_Special.png';
+                        const imgSrc = './assets/special/' + filePrefix + '_Special.png?build=' + build;
                         if (elements.special.src !== imgSrc) {
                             elements.special.setSrc(imgSrc, resolve);
                         } else {
@@ -3817,7 +3818,7 @@ const mll = (function () {
                     }),
                     new Promise(function (resolve) {
                         const artySuffix = controls.checkArtyFlip.is(":checked") ? 2 : 1;
-                        const imgSrc = './assets/arty/' + filePrefix + '_Arty' + artySuffix + '.png';
+                        const imgSrc = './assets/arty/' + filePrefix + '_Arty' + artySuffix + '.png?build=' + build;
                         if (elements.arty.src !== imgSrc) {
                             elements.arty.setSrc(imgSrc, resolve);
                         } else {
@@ -3829,7 +3830,7 @@ const mll = (function () {
 
                 elements.spImage.spCallback = spCallback;
                 elements.spImage.roomsSelectedSp = selectedSp;
-                elements.spImage.src = './assets/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
+                elements.spImage.src = './assets/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png?build=' + build;
             }
 
             controls.comboMapSelect.change(function () {
