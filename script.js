@@ -615,7 +615,7 @@ const mll = (function () {
                 editorKey: $("#editorKeyDisplay").val(),
                 slideId: selectedSlide,
                 state: {
-                    elements: getElementsRoomState().slice(0, 200)
+                    elements: getElementsRoomState().slice(0, 1000)
                 }
             });
         }
@@ -641,7 +641,7 @@ const mll = (function () {
                 editorKey: $("#editorKeyDisplay").val(),
                 slideId: selectedSlide,
                 state: {
-                    drawings: drawings.slice(0, 200)
+                    drawings: drawings.slice(0, 1000)
                 }
             });
         }
