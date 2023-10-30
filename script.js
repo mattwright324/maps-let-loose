@@ -858,7 +858,7 @@ const mll = (function () {
                 }
                 return './assets/class-rifleman.png'
             },
-            customScale: 0.5,
+            customScale: 0.30,
             maxZoom: 1,
             zoomScale: true,
             customizable: "asset",
