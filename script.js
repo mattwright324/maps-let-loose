@@ -258,6 +258,7 @@ const mll = (function () {
             controls.checkGrid.prop('checked', controlState.grid);
             controls.checkPlacedElements.prop('checked', controlState.placed);
             controls.checkHideRadius.prop('checked', controlState.spawnRadius);
+            controls.checkSkirmishMode.prop('checked', controlState.skirmishMode);
             controls.checkArty.prop('checked', controlState.arty);
             controls.checkArtyFlip.prop('checked', controlState.flipArty);
             controls.checkInaccessible.prop('checked', controlState.inaccessible);
@@ -491,6 +492,7 @@ const mll = (function () {
             grid: controls.checkGrid.is(":checked"),
             placed: controls.checkPlacedElements.is(":checked"),
             spawnRadius: controls.checkHideRadius.is(":checked"),
+            skirmishMode: controls.checkSkirmishMode.is(":checked"),
             defaults: controls.checkDefaults.is(":checked"),
             defaultSideA: controls.radioSideA.is(":checked"),
             defaultBoth: controls.radioBothSides.is(":checked"),
@@ -650,8 +652,9 @@ const mll = (function () {
     const zIndex = {
         map: 0,
         sectors: 1,
-        grid: 2,
-        points: 3,
+        skirmish: 2,
+        grid: 3,
+        points: 4,
         arty_range: 5,
         default_garrisons: 6,
         drawings: 9,
@@ -680,6 +683,21 @@ const mll = (function () {
                 }
 
                 return './assets/garry-blue-zone.png';
+            },
+            zoomScaleWhen: function () {
+                return controls.checkHideRadius.is(":checked")
+            },
+            customScaleWhen: function () {
+                return controls.checkHideRadius.is(":checked")
+            },
+            zoomScale: true,
+            customizable: "asset",
+            filterRotation: -0.45,
+        },
+        forward: {
+            resolveImg: function (object) {
+                const radiusHidden = controls.checkHideRadius.is(":checked");
+                return './assets/forward-' + (radiusHidden ? 'plain' : 'radius') + '.png'
             },
             zoomScaleWhen: function () {
                 return controls.checkHideRadius.is(":checked")
@@ -1651,6 +1669,7 @@ const mll = (function () {
             elements.strongpointGrid = $("#sp-grid");
             controls.checkPlacedElements = $("#placed-visible");
             controls.checkHideRadius = $("#garry-radius-visible");
+            controls.checkSkirmishMode = $("#skirmish-mode");
             controls.btnRemoveAllElements = $("#remove-all-elements");
             controls.btnUndoLastElement = $("#undo-last-element");
             controls.btnEnableAll = $("#enableAll");
@@ -2188,6 +2207,9 @@ const mll = (function () {
                     mll.menuAdd("arty")
                 },
                 // Spawn
+                forward: function () {
+                    mll.menuAdd("forward")
+                },
                 airhead: function () {
                     mll.menuAdd("airhead")
                 },
@@ -2592,6 +2614,7 @@ const mll = (function () {
                     icon: "bi bi-chevron-double-right",
                     items: {
                         // arty: {name: "Arty"}, // Temporary for creating defaults
+                        forward: {name: "Forward", icon: "bi bi bi-triangle"},
                         airhead: {name: "Airhead", icon: "bi bi-triangle-fill"},
                         halftrack: {name: "Halftrack", icon: "bi bi-truck"},
                         outpost: {name: "Outpost", icon: "bi bi-triangle"},
@@ -2844,13 +2867,23 @@ const mll = (function () {
 
                 addAndOrder(img);
             });
-            fabric.Image.fromURL('./assets/plain-grid.png', function (img) {
+            fabric.Image.fromURL('', function (img) {
                 elements.grid = img;
                 img.set({
                     selectable: false,
                     evented: false,
                     visible: false,
                     zIndex: zIndex.grid
+                });
+                addAndOrder(img);
+            });
+            fabric.Image.fromURL('', function (img) {
+                elements.skirmish = img;
+                img.set({
+                    selectable: false,
+                    evented: false,
+                    visible: false,
+                    zIndex: zIndex.skirmish
                 });
                 addAndOrder(img);
             });
@@ -3856,7 +3889,7 @@ const mll = (function () {
 
             [controls.checkGrid, controls.checkArty, controls.checkStrongpoints, controls.checkInaccessible,
                 controls.checkEggs, controls.checkSpecial, controls.checkSectors, controls.checkSectorSwap, controls.checkPlacedElements,
-                controls.checkHideRadius, controls.checkArtyFlip, controls.checkSpResource, controls.checkDrawingsVisible,
+                controls.checkHideRadius, controls.checkSkirmishMode, controls.checkArtyFlip, controls.checkSpResource, controls.checkDrawingsVisible,
                 controls.checkDefaults, controls.radioSideA, controls.radioBothSides, controls.radioSideB,
                 controls.checkOffensiveGarries, controls.checkArtillery, controls.checkTanks, controls.checkTrucks,
                 controls.checkCommandSpawn, controls.checkRepairStations,
@@ -4148,6 +4181,17 @@ const mll = (function () {
                 placed[i].visible = controls.checkPlacedElements.is(":checked");
             }
 
+            const mapVertical = POINT_COORDS[filePrefix][0][1] != null;
+            if (controls.checkSkirmishMode.is(":checked")) {
+                elements.grid.setSrc('./assets/skirmish-grid.png')
+                elements.skirmish.setSrc(`./assets/skirmish-${mapVertical ? 'vert' : 'horiz'}.png`)
+                elements.skirmish.visible = true
+                console.log(elements.skirmish)
+            } else {
+                elements.skirmish.visible = false
+                elements.grid.setSrc('./assets/plain-grid.png')
+            }
+
             let artySuffix = controls.checkArtyFlip.is(":checked") ? 2 : 1;
             elements.arty.setSrc('./assets/arty/' + filePrefix + '_Arty' + artySuffix + '.png', internal.render);
 
@@ -4169,8 +4213,9 @@ const mll = (function () {
                 path.visible = controls.checkDrawingsVisible.is(":checked");
             }
 
-            const mapVertical = POINT_COORDS[filePrefix][0][1] != null;
-            const range = SECTOR_COORDS[controls.sectorRange.val()];
+            const range = controls.checkSkirmishMode.is(":checked") ?
+                SKIRMISH_SECTOR_COORDS[controls.sectorRange.val()] :
+                SECTOR_COORDS[controls.sectorRange.val()];
             elements.sectorA.set(mapVertical ?
                 {
                     top: range.a.left,

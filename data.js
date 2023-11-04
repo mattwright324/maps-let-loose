@@ -114,34 +114,74 @@ const POINT_COORDS = {
     ],
 }
 
+const secTop = 383
+const secLeft = 0
+const width = 1920
+const height = 1151
+const sectWidth = width / 5
 const SECTOR_COORDS = [
-    {
-        a: {top: 383, left: 0, width: 0, height: 0, visible: false},
-        b: {top: 383, left: 0, width: 1920, height: 1151, visible: true}
+    { // 0-5
+        a: {top: secTop, left: secLeft, width: 0, height: 0, visible: false},
+        b: {top: secTop, left: secLeft, width: width, height: height, visible: true}
     },
-    {
-        a: {top: 383, left: 0, width: 386, height: 1151, visible: true},
-        b: {top: 383, left: 1920 - 1536, width: 1538, height: 1151, visible: true}
+    { // 1-4
+        a: {top: secTop, left: secLeft, width: sectWidth, height: height, visible: true},
+        b: {top: secTop, left: secLeft + width - sectWidth*4, width: sectWidth*4, height: height, visible: true}
     },
-    {
-        a: {top: 383, left: 0, width: 769, height: 1151, visible: true},
-        b: {top: 383, left: 1920 - 1151, width: 1151, height: 1151, visible: true}
+    { // 2-3
+        a: {top: secTop, left: secLeft, width: sectWidth*2, height: height, visible: true},
+        b: {top: secTop, left: secLeft + width - sectWidth*3, width: sectWidth*3, height: height, visible: true}
     },
-    {
-        a: {top: 383, left: 0, width: 769, height: 1151, visible: true},
-        b: {top: 383, left: 1920 - 769, width: 769, height: 1151, visible: true}
+    { // 2-2
+        a: {top: secTop, left: secLeft, width: sectWidth*2, height: height, visible: true},
+        b: {top: secTop, left: secLeft + width - sectWidth*2, width: sectWidth*2, height: height, visible: true}
     },
-    {
-        a: {top: 383, left: 0, width: 1151, height: 1151, visible: true},
-        b: {top: 383, left: 1920 - 769, width: 769, height: 1151, visible: true}
+    { // 3-2
+        a: {top: secTop, left: secLeft, width: sectWidth*3, height: height, visible: true},
+        b: {top: secTop, left: secLeft + width - sectWidth*2, width: sectWidth*2, height: height, visible: true}
     },
-    {
-        a: {top: 383, left: 0, width: 1536, height: 1151, visible: true},
-        b: {top: 383, left: 1920 - 386, width: 386, height: 1151, visible: true}
+    { // 4-1
+        a: {top: secTop, left: secLeft, width: sectWidth*4, height: height, visible: true},
+        b: {top: secTop, left: secLeft + width - sectWidth, width: sectWidth, height: height, visible: true}
     },
-    {
-        a: {top: 383, left: 0, width: 1920, height: 1151, visible: true},
-        b: {top: 383, left: 0, width: 0, height: 0, visible: false}
+    { // 5-0
+        a: {top: secTop, left: secLeft, width: width, height: height, visible: true},
+        b: {top: secTop, left: secLeft, width: 0, height: 0, visible: false}
+    }
+];
+
+const skTop = 288
+const skLeft = 288
+const skWidth = 1344
+const skSectWidth = skWidth / 5
+const SKIRMISH_SECTOR_COORDS = [
+    { // 0-5
+        a: {top: skTop, left: skLeft, width: 0, height: 0, visible: false},
+        b: {top: skTop, left: skLeft, width: skWidth, height: skWidth, visible: true}
+    },
+    { // 1-4
+        a: {top: skTop, left: skLeft, width: skSectWidth, height: skWidth, visible: true},
+        b: {top: skTop, left: skLeft + skWidth - skSectWidth*4, width: skSectWidth*4, height: skWidth, visible: true}
+    },
+    { // 2-3
+        a: {top: skTop, left: skLeft, width: skSectWidth*2, height: skWidth, visible: true},
+        b: {top: skTop, left: skLeft + skWidth - skSectWidth*3, width: skSectWidth*3, height: skWidth, visible: true}
+    },
+    { // 2-2
+        a: {top: skTop, left: skLeft, width: skSectWidth*2, height: skWidth, visible: true},
+        b: {top: skTop, left: skLeft + skWidth - skSectWidth*2, width: skSectWidth*2, height: skWidth, visible: true}
+    },
+    { // 3-2
+        a: {top: skTop, left: skLeft, width: skSectWidth*3, height: skWidth, visible: true},
+        b: {top: skTop, left: skLeft + skWidth - skSectWidth*2, width: skSectWidth*2, height: skWidth, visible: true}
+    },
+    { // 4-1
+        a: {top: skTop, left: skLeft, width: skSectWidth*4, height: skWidth, visible: true},
+        b: {top: skTop, left: skLeft + skWidth - skSectWidth, width: skSectWidth, height: skWidth, visible: true}
+    },
+    { // 5-0
+        a: {top: skTop, left: skLeft, width: skWidth, height: skWidth, visible: true},
+        b: {top: skTop, left: skLeft, width: 0, height: 0, visible: false}
     }
 ];
 
