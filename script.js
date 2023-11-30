@@ -54,10 +54,87 @@ const mll = (function () {
     let placed = [];
     let drawings = [];
     let resetSelectedPoints = false;
+    let copiedObject;
     let selectedElement;
     let loaded_defaults = [];
     let selectedSlide;
     let slides = [];
+
+    const offset = 25;
+    let t;
+    $(document).keydown(e => {
+        if (e.ctrlKey && e.which === 67) {
+            if (selectedElement) {
+                copiedObject = selectedElement
+
+                console.log('Copy', copiedObject)
+            }
+        }
+        if (e.ctrlKey && e.which === 86) {
+            if (t && new Date() - t < 400) {
+                return
+            }
+            if (copiedObject) {
+                t = new Date()
+                if (copiedObject.type.type === "measure-line") {
+                    console.warn('Measure line not supported to copy/paste right now')
+                    return
+                }
+
+                if (copiedObject.type.type === "drawing") {
+                    copiedObject.clone(clone => {
+                        clone.set({
+                            top: clone.top + offset,
+                            left: clone.left + offset,
+                        })
+                        clone.type.id = uuidv4()
+                        clone.setCoords()
+
+                        copiedObject = clone;
+                        console.log('Paste', clone)
+
+                        drawings.push(clone);
+
+                        controls.fabricCanvas.orderByZindex();
+                        controls.exportCanvas.add(clone);
+
+                        fixElementSelectBoxes();
+                        changeZIndexBySize();
+                        roomEditorUpdateDrawings();
+                    })
+                    return
+                }
+
+                copiedObject.clone(clone => {
+                    if (clone.type.type === "polygon") {
+                        for (let i = 0; i < clone.points.length; i++) {
+                            clone.points[i].x += offset
+                            clone.points[i].y += offset
+                        }
+                        clone.set({angle: copiedObject.angle})
+                    } else {
+                        clone.set({
+                            top: clone.top + offset,
+                            left: clone.left + offset,
+                        })
+                        if (clone.type.originalEvent) {
+                            clone.type.originalEvent.absolutePointer.x = clone.left
+                            clone.type.originalEvent.absolutePointer.y = clone.top
+                        }
+                    }
+
+                    copiedObject = clone;
+                    console.log('Paste', clone)
+
+                    addMapElement(clone.type.originalEvent, clone.type.type, clone.type.modifier, true, null, clone);
+
+                    changeZIndexBySize();
+                    fixElementSelectBoxes();
+                    internal.updateStatesAndRender()
+                })
+            }
+        }
+    })
 
     function updateZoomScale() {
         const zoom = controls.fabricCanvas.getZoom();
@@ -1363,9 +1440,12 @@ const mll = (function () {
             toAdd = rect;
         } else if (type === "polygon") {
             const polygon = new fabric.Polygon(otherObject.points, {
-                type: otherObject.type,
+                type: $.extend(otherObject.type, {
+                    id: uuid ? uuid : uuidv4(),
+                }),
                 opacity: otherObject.opacity,
                 fill: otherObject.fill,
+                angle: otherObject.angle,
                 perPixelTargetFind: true,
                 zIndex: 10,
                 hasBorders: false,
