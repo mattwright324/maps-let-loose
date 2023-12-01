@@ -150,9 +150,9 @@ const SECTOR_COORDS = [
     }
 ];
 
-const skTop = 288
-const skLeft = 288
-const skWidth = 1344
+const skTop = 383
+const skLeft = 383
+const skWidth = 1148
 const skSectWidth = skWidth / 5
 const SKIRMISH_SECTOR_COORDS = [
     { // 0-5
