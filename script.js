@@ -2839,7 +2839,7 @@ const mll = (function () {
                 img.set({
                     selectable: false,
                     evented: false,
-                    zIndex: zIndex.map
+                    zIndex: zIndex.map,
                 });
 
                 addAndOrder(img);
@@ -3764,13 +3764,13 @@ const mll = (function () {
                 console.log("Loading %s", filePrefix)
 
                 addDefaultMapElements(DEFAULT_ELEMENTS[filePrefix], false)
-                elements.map.setSrc('./assets/no-grid/' + filePrefix + '_NoGrid.png?build=' + build, internal.render);
+                elements.map.setSrc('./assets/no-grid/' + filePrefix + '_NoGrid.webp?build=' + build, internal.render);
                 let artySuffix = controls.checkArtyFlip.is(":checked") ? 2 : 1;
                 elements.arty.setSrc('./assets/arty/' + filePrefix + '_Arty' + artySuffix + '.png?build=' + build, internal.render);
                 elements.inaccessible.setSrc('./assets/accessibility/' + filePrefix + "_Accessible.png?build=" + build, internal.render);
                 elements.eggs.setSrc('./assets/eggs/' + filePrefix + "_Eggs.png?build=" + build, internal.render);
                 elements.special.setSrc('./assets/special/' + filePrefix + "_Special.png?build=" + build, internal.render);
-                elements.spImage.src = './assets/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png?build=' + build;
+                elements.spImage.src = './assets/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? '' : 2) + '.png?build=' + build;
             }
 
             internal.roomsLoadMapAndSP = function (filePrefix, selectedSp, spCallback) {
@@ -3785,7 +3785,7 @@ const mll = (function () {
 
                 const promises = [
                     new Promise(function (resolve) {
-                        const imgSrc = './assets/no-grid/' + filePrefix + '_NoGrid.png?build=' + build;
+                        const imgSrc = './assets/no-grid/' + filePrefix + '_NoGrid.webp?build=' + build;
                         if (elements.map.src !== imgSrc) {
                             elements.map.setSrc(imgSrc, resolve);
                         } else {
@@ -3830,7 +3830,7 @@ const mll = (function () {
 
                 elements.spImage.spCallback = spCallback;
                 elements.spImage.roomsSelectedSp = selectedSp;
-                elements.spImage.src = './assets/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png?build=' + build;
+                elements.spImage.src = './assets/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? '' : 2) + '.png?build=' + build;
             }
 
             controls.comboMapSelect.change(function () {
@@ -3848,7 +3848,7 @@ const mll = (function () {
                     return;
                 }
                 const filePrefix = controls.comboMapSelect.val();
-                elements.spImage.src = './assets/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? 3 : 2) + '.png';
+                elements.spImage.src = './assets/points/' + filePrefix + '_SP_NoMap' + (controls.checkSpResource.is(":checked") ? '' : 2) + '.png';
             })
             if (!roomsMode) {
                 controls.comboMapSelect.trigger('change');
@@ -4322,6 +4322,23 @@ const mll = (function () {
             changeZIndexBySize();
             updateZoomScale();
             controls.fabricCanvas.renderAll();
+
+            const targetSize = 1920;
+            const overlays = [elements.map, elements.grid];
+            let anotherRender = false;
+            for (let i = 0; i < overlays.length; i++) {
+                const overlay = overlays[i];
+                if (overlay.width && overlay.width !== targetSize) {
+                    overlay.set({
+                        scaleX: targetSize / overlay.width,
+                        scaleY: targetSize / overlay.height,
+                    })
+                    anotherRender = true
+                }
+            }
+            if (anotherRender) {
+                controls.fabricCanvas.renderAll();
+            }
         }
     }
 
