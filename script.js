@@ -736,6 +736,21 @@ const mll = (function () {
             zoomScale: true,
             customScale: 0.5,
         },
+        forward: {
+            resolveImg: function (object) {
+                const radiusHidden = controls.checkHideRadius.is(":checked");
+                return './assets/forward-' + (radiusHidden ? 'plain' : 'radius') + '.png'
+            },
+            zoomScaleWhen: function () {
+                return controls.checkHideRadius.is(":checked")
+            },
+            customScaleWhen: function () {
+                return controls.checkHideRadius.is(":checked")
+            },
+            zoomScale: true,
+            customizable: "asset",
+            filterRotation: -0.45,
+        },
         node: {
             resolveImg: function (object) {
                 if (object.type.modifier) {
@@ -2200,6 +2215,9 @@ const mll = (function () {
                 recon_op: function () {
                     mll.menuAdd("outpost", "recon")
                 },
+                forward: function () {
+                    mll.menuAdd("forward")
+                },
                 // Vehicle
                 tank_heavy: function () {
                     mll.menuAdd("tank", "heavy")
@@ -2595,7 +2613,8 @@ const mll = (function () {
                         airhead: {name: "Airhead", icon: "bi bi-triangle-fill"},
                         halftrack: {name: "Halftrack", icon: "bi bi-truck"},
                         outpost: {name: "Outpost", icon: "bi bi-triangle"},
-                        recon_op: {name: "Recon Outpost", icon: "bi bi-triangle-half"}
+                        recon_op: {name: "Recon Outpost", icon: "bi bi-triangle-half"},
+                        forward: {name: "Forward Position", icon: "bi bi-triangle"}
                     }
                 },
                 vehicle: {
