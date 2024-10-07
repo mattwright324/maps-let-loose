@@ -1898,7 +1898,7 @@ const mll = (function () {
 
                 console.log("Rooms Mode");
                 // socket = io('localhost:3000');
-                socket = io('https://maps-let-loose-websocket.herokuapp.com/');
+                socket = io('https://mll-socket.apps.mattw.io/');
             } else {
                 roomsMode = false;
                 console.log("Solo Mode");
