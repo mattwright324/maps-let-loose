@@ -1897,8 +1897,8 @@ const mll = (function () {
                 roomsMode = true;
 
                 console.log("Rooms Mode");
-                // socket = io('localhost:3000');
                 socket = io('https://mll-socket.apps.mattw.io/');
+                // socket = io('localhost:3000');
             } else {
                 roomsMode = false;
                 console.log("Solo Mode");
