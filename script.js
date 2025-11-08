@@ -1456,7 +1456,7 @@ const mll = (function () {
                 fontSize: 18,
                 backgroundColor: "rgb(34,34,34)",
                 fill: "rgb(255,255,255)",
-                zIndex: 10,
+                zIndex: 999,
                 opacity: 0.8,
             });
             line.set({
